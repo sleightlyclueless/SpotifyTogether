@@ -1,54 +1,41 @@
-import { object, string } from 'yup';
+import {object, string} from 'yup';
 
-import { Collection, Entity, OneToMany, Property } from '@mikro-orm/core';
+import {Collection, Entity, OneToMany, Property} from '@mikro-orm/core';
 
-import { BaseEntity } from './BaseEntity';
-import { DiaryEntry, DiaryEntryTag } from './index';
+import {BaseEntity} from './BaseEntity';
+import {Event} from './Event'
+
+//User:EventList[Event],name,UserID
 
 @Entity()
 export class User extends BaseEntity {
-  @Property()
-  email: string;
+    @Property({nullable: false, unique: true})
+    UserID: string;
 
-  @Property({ hidden: true })
-  password: string;
+    @OneToMany(() => Event, (Event) => Event.EventID)
+    EventList = new Collection<Event>(this);
 
-  @Property()
-  firstName: string;
+    @Property()
+    SpotifyToken: string;
 
-  @Property()
-  lastName: string;
+    @Property()
+    SpotifyRefreshToken: string;
 
-  @OneToMany(() => DiaryEntry, (e) => e.creator)
-  diaryEntries = new Collection<DiaryEntry>(this);
+    @Property()
+    SpotifyTokenSalt: string;
 
-  @OneToMany(() => DiaryEntryTag, (e) => e.creator)
-  tags = new Collection<DiaryEntryTag>(this);
-
-  constructor({ lastName, firstName, email, password }: RegisterUserDTO) {
-    super();
-    this.email = email;
-    this.password = password;
-    this.firstName = firstName;
-    this.lastName = lastName;
-  }
+    constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string, SpotifyTokenSalt: string) {
+        super();
+        this.UserID = userID;
+        this.SpotifyToken = spotifyToken;
+        this.SpotifyRefreshToken = SpotifyRefreshToken;
+        this.SpotifyTokenSalt = SpotifyTokenSalt;
+    }
 }
 
-export const RegisterUserSchema = object({
-  email: string().required(),
-  password: string().required(),
-  firstName: string().required(),
-  lastName: string().required(),
-});
 
-export type RegisterUserDTO = {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-};
 
 export const LoginSchema = object({
-  email: string().required(),
-  password: string().required(),
+    email: string().required(),
+    password: string().required(),
 });
