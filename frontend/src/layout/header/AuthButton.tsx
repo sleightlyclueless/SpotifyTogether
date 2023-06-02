@@ -17,7 +17,7 @@ export const AuthButton = () => {
         variant="ghost"
         rightIcon={<ChevronDownIcon />}
       >
-        Hallo {user.firstName} {user.lastName}
+        Hello {user.firstName} {user.lastName}
       </MenuButton>
       <MenuList>
         <MenuItem onClick={logout}>Logout</MenuItem>

@@ -1,6 +1,6 @@
 import * as React from "react";
 import axios from "axios";
-import { Configuration, DefaultApi } from "../adapter/api/__generated";
+import { Configuration, DefaultApi } from "../adapter/api/__generated/index.ts";
 import { useAuth } from "../provider/AuthProvider.tsx";
 
 export function useApiClient() {

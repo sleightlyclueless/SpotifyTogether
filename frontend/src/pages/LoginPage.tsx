@@ -1,3 +1,4 @@
+// Login page, directly used as route
 import { AppLayout } from "../layout/AppLayout.tsx";
 import { Box, Button, Heading, Link, VStack } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
@@ -5,7 +6,7 @@ import { AuthCard } from "../components/AuthCard.tsx";
 import { Form, Formik } from "formik";
 import { InputControl } from "formik-chakra-ui";
 import * as Yup from "yup";
-import { LoginData, useAuth } from "../provider/AuthProvider.tsx";
+import { LoginSchema, useAuth } from "../provider/AuthProvider.tsx";
 
 const loginSchema = Yup.object({
   password: Yup.string().required(),
@@ -20,7 +21,7 @@ export const LoginPage = () => {
     <AppLayout>
       <AuthCard>
         <Heading>Login</Heading>
-        <Formik<LoginData>
+        <Formik<LoginSchema>
           validationSchema={loginSchema}
           initialValues={{ email: "", password: "" }}
           onSubmit={login}
@@ -28,7 +29,7 @@ export const LoginPage = () => {
           <VStack as={Form} alignItems="flex-start" spacing={4}>
             <InputControl name="email" label={"E-Mail"} />
             <InputControl
-              label={"Passwort"}
+              label={"Password"}
               inputProps={{
                 type: "password",
               }}
@@ -36,9 +37,9 @@ export const LoginPage = () => {
             />
             <Button type={"submit"}>Login</Button>
             <Box>
-              Neu hier?{" "}
+              New here?{" "}
               <Link as={RouterLink} to={"/auth/register"}>
-                Registrieren
+                Register Account
               </Link>
             </Box>
           </VStack>

@@ -8,7 +8,7 @@ const HeaderMenu: React.FC = () => {
   return (
     <>
       <NavItem>
-        <NavLink>Home</NavLink>
+        <NavLink>Schpoddifai</NavLink>
       </NavItem>
     </>
   );

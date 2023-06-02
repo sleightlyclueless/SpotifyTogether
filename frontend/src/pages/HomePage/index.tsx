@@ -1,6 +1,6 @@
 import { AppLayout } from "../../layout/AppLayout.tsx";
 import { Heading } from "@chakra-ui/react";
-import { useApiClient } from "../../hooks/useApiClient.ts";
+import { useApiClient } from "../../hooks/_useApiClient.ts";
 import { useEffect, useState } from "react";
 import { DiaryEntryTable } from "./DiaryEntryTable.tsx";
 import { DiaryEntry } from "../../adapter/api/__generated";

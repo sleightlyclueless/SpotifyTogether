@@ -2,8 +2,9 @@ import React, { createContext } from "react";
 import invariant from "tiny-invariant";
 import { useToast, Text } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { useLocalStorage } from "../hooks/useLocalStorage.ts";
+import { useLocalStorage } from "../hooks/useLocalStorage.tsx";
 
+// Define custom User type
 export type User = {
   email: string;
   firstName: string;
@@ -14,36 +15,41 @@ export type User = {
   iss: string;
 };
 
-export type LoginData = {
+// Schema for login
+export type LoginSchema = {
   email: string;
   password: string;
 };
-export type RegisterData = {
+// Schema for register
+export type RegisterSchema = {
   email: string;
-  vorname: string;
-  nachname: string;
+  fName: string;
+  lName: string;
   password: string;
 };
+
+// Object type for context including neccessary types and functions to know if a valid user is logged in or not.
 type AuthContext = {
   user: User | null;
   token: string | null;
   isLoggedIn: boolean;
   actions: {
-    login: (loginData: LoginData) => void;
+    login: (loginData: LoginSchema) => void;
     logout: () => void;
-    register: (userData: RegisterData) => void;
+    register: (userData: RegisterSchema) => void;
   };
 };
-
 const authContext = createContext<AuthContext | null>(null);
 
+// Check if the user is logged in and has a valid JWT through local storage.
 export type AuthProviderProps = {
   children: React.ReactNode;
 };
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  // Global data
   const [token, setToken] = useLocalStorage<User | null>("accessToken", null);
   const [user, setUser] = useLocalStorage<User | null>("user", null);
-  const toast = useToast();
+  const toast = useToast(); // Use toast messages to display errors
   const navigate = useNavigate();
   const errorToast = (errors: string[]) => {
     toast({
@@ -61,17 +67,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
   };
 
-  const login = async (values: LoginData) => {
-    console.log("login called", values);
+  // Login function
+  const login = async (values: LoginSchema) => {
+    // POST: With email and password call the api at localhost:3000/auth/login and receive a JWT
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
+      // Send the content of the form as JSON (Form and Fieldnames defined at src\pages\LoginPage.tsx)
       body: JSON.stringify({ email: values.email, password: values.password }),
     });
-
     const data = await res.json();
+
+    // Check the result of the request - if the request was successful, set the JWT and user data.
     if (res.ok) {
       setToken(data.accessToken);
       setUser(JSON.parse(atob(data.accessToken.split(".")[1])));
@@ -80,11 +89,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       errorToast(data.errors);
     }
   };
+
+  // Logout function
   const logout = () => {
     setToken(null);
     setUser(null);
   };
-  const register = async (values: RegisterData) => {
+
+  // Register function
+  const register = async (values: RegisterSchema) => {
+    // POST: With email, password, first name and last name call the api at localhost:3000/auth/register
     const res = await fetch("/api/auth/register", {
       method: "POST",
       body: JSON.stringify(values),
@@ -104,7 +118,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       errorToast(resBody.errors);
     }
   };
-  console.log(user);
+
+  // Return user object out of context
   return (
     <authContext.Provider
       value={{

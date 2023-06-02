@@ -13,6 +13,7 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.0.19",
     "@chakra-ui/react": "^2.6.0",
+    "@tanstack/react-query": "^4.29.12",
     "axios": "^1.4.0",
     "formik": "^2.2.9",
     "formik-chakra-ui": "^1.6.1",

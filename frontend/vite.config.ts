@@ -12,5 +12,8 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
+    cors: true,
+    open: true,
+    origin: 'https://accounts.spotify.com/api/token'
   },
 });

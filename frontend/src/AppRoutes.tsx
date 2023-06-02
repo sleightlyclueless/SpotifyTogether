@@ -1,23 +1,25 @@
 import { Navigate, Route, RouteProps, Routes } from "react-router-dom";
-import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage.tsx";
-import { AuthRequired } from "./AuthRequired.tsx";
 import { RegisterPage } from "./pages/RegisterPage.tsx";
+import { OverviewPage } from "./pages/index.tsx";
+import { AuthRequired } from "./AuthRequired.tsx";
+import { SpotifySuccess } from "./pages/SpotifySucess.tsx";
 
 export type RouteConfig = RouteProps & {
   path: string;
   isPrivate?: boolean;
 };
+
 export const routes: RouteConfig[] = [
   {
     isPrivate: false,
     path: "/",
-    element: <Navigate to="/home" replace />,
+    element: <Navigate to="/overview" replace />,
   },
   {
     isPrivate: true,
-    path: "/home",
-    element: <HomePage />,
+    path: "/overview",
+    element: <OverviewPage />,
   },
   {
     path: "/auth/login",
@@ -27,13 +29,13 @@ export const routes: RouteConfig[] = [
     path: "/auth/register",
     element: <RegisterPage />,
   },
+  {
+    path: "/success",
+    element: <SpotifySuccess />,
+  },
 ];
 
-export function renderRouteMap({
-  isPrivate,
-  element,
-  ...restRoute
-}: RouteConfig) {
+function renderRouteMap({ isPrivate, element, ...restRoute }: RouteConfig) {
   const authRequiredElement = isPrivate ? (
     <AuthRequired>{element}</AuthRequired>
   ) : (
