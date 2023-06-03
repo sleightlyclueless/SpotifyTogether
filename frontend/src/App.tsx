@@ -9,6 +9,8 @@ import { AppRoutes } from "./AppRoutes.tsx";
 import { AuthProvider } from "./provider/AuthProvider.tsx";
 
 export const App = () => {
+  // TODO: App is rendered twice, why?
+  // console.log("App.tsx");
   return (
     <ChakraProvider>
       <QueryClientProvider client={new QueryClient()}>

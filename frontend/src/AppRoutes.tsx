@@ -3,7 +3,7 @@ import { LoginPage } from "./pages/LoginPage.tsx";
 import { RegisterPage } from "./pages/RegisterPage.tsx";
 import { OverviewPage } from "./pages/index.tsx";
 import { AuthRequired } from "./AuthRequired.tsx";
-import { SpotifySuccess } from "./pages/SpotifySucess.tsx";
+import { SpotifyPage } from "./pages/SpotifyPage.tsx";
 
 export type RouteConfig = RouteProps & {
   path: string;
@@ -30,8 +30,8 @@ export const routes: RouteConfig[] = [
     element: <RegisterPage />,
   },
   {
-    path: "/success",
-    element: <SpotifySuccess />,
+    path: "/spotify",
+    element: <SpotifyPage />,
   },
 ];
 
