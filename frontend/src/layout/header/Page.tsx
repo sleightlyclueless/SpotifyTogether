@@ -9,9 +9,6 @@ export const Page = ({ children, ...boxProps }: PageProps) => (
     overflowX="hidden"
     display="flex"
     flexDirection="column"
-    ml="auto"
-    mr="auto"
-    maxWidth="90rem"
     width="100%"
     {...boxProps}
   >
