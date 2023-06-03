@@ -1,6 +1,6 @@
 import { AppLayout } from "../layout/AppLayout.tsx";
 import React, { useEffect, useState } from "react";
-import { ChakraProvider, Box, Button } from "@chakra-ui/react";
+import { ChakraProvider, Box, Button, Text } from "@chakra-ui/react";
 
 export const SpotifyPage: React.FC = () => {
   const [devices, setDevices] = useState<{ id: string; name: string }[]>([]);
@@ -30,6 +30,7 @@ export const SpotifyPage: React.FC = () => {
   // 1. Request Authorization with clientId, response_type, redirect_uri, state and scope
   // User will be redirected to spotify, login and grant acces, then to redirect_uri with code and state
   const requestAuthorization = () => {
+    console.log("1. Requesting authorization");
     const scope =
       "user-read-private user-read-email playlist-read-private user-read-playback-state user-modify-playback-state";
     const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${encodeURIComponent(
@@ -42,13 +43,17 @@ export const SpotifyPage: React.FC = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
-    console.log("1. Code:", code);
-    if (!localStorage.getItem("access_token") && code) {
+    if (
+      (!localStorage.getItem("access_token") ||
+        localStorage.getItem("access_token") == "undefined") &&
+      code
+    ) {
       fetchAccessToken(code);
     }
   }, []);
 
   const fetchAccessToken = (code: string) => {
+    console.log("2. Fetching access token");
     const body = {
       grant_type: "authorization_code",
       code: code,
@@ -66,10 +71,15 @@ export const SpotifyPage: React.FC = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("2. Access token data:");
-        console.log(data);
         const { access_token, refresh_token } = data;
-        localStorage.setItem("access_token", access_token);
+        if (access_token) {
+            console.log("Access token fetched!");
+            console.log(access_token);
+          localStorage.setItem("access_token", access_token);
+        } else {
+            console.log("Error!");
+            console.log(data);
+        }
       });
   };
 
@@ -182,6 +192,50 @@ export const SpotifyPage: React.FC = () => {
             <Box className="row">
               <Box className="col d-flex justify-content-center">
                 <p className="error-message">{fetchError}</p>
+              </Box>
+            </Box>
+          )}
+
+          {/* Display playlists */}
+          {playlists.length > 0 && (
+            <Box className="row" margin="0 0 0 20px">
+              <Box className="col">
+                <Text fontSize="xl" fontWeight="bold" mb={2}>
+                  Playlists
+                </Text>
+                <ul>
+                  {playlists.map((playlist) => (
+                    <li key={playlist.id}>{playlist.name}</li>
+                  ))}
+                </ul>
+              </Box>
+            </Box>
+          )}
+
+          {/* Display devices */}
+          {devices.length > 0 && (
+            <Box className="row" margin="20px 0 0 20px">
+              <Box className="col">
+                <Text fontSize="xl" fontWeight="bold" mb={2}>
+                  Devices
+                </Text>
+                <ul>
+                  {devices.map((device) => (
+                    <li key={device.id}>{device.name}</li>
+                  ))}
+                </ul>
+              </Box>
+            </Box>
+          )}
+
+          {/* Display currently playing */}
+          {currentTrack && (
+            <Box className="row" margin="20px 0 0 20px">
+              <Box className="col">
+                <Text fontSize="xl" fontWeight="bold" mb={2}>
+                  Currently Playing
+                </Text>
+                <Text>{currentTrack}</Text>
               </Box>
             </Box>
           )}
