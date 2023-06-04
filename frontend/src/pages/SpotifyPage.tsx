@@ -10,56 +10,22 @@ import {
   Grid,
   GridItem,
 } from "@chakra-ui/react";
-
-interface Device {
-  id: string;
-  name: string;
-}
-
-interface Playlist {
-  id: string;
-  name: string;
-  href: string;
-}
-
-interface DevicesMap {
-  [key: string]: Device[];
-}
-
-interface PlaylistsMap {
-  [key: string]: Playlist[];
-}
-
-interface Playlist {
-  href: string;
-}
-
-interface Track {
-  id: string;
-  track: Song;
-}
-
-interface Data {
-  tracks: {
-    items: Track[];
-  };
-}
-
-interface Song {
-  id: string;
-  href: string;
-  name: string;
-  duration_ms: number;
-  artists: Artist[];
-}
-
-interface Artist {
-  name: string;
-}
-
-interface CurrentTracksMap {
-  [key: string]: string[];
-}
+import {
+  DevicesMap,
+  PlaylistsMap,
+  Track,
+  Data,
+  Song,
+  CurrentTracksMap,
+} from "../spotify/entities/spotifyEntities.tsx";
+import {
+  requestAuthorization,
+  fetchAccessToken,
+} from "../spotify/authorization/spotifyAuthorization.tsx";
+import { fetchDevices } from "../spotify/fetch/fetchDevices.tsx";
+import { fetchPlaylists } from "../spotify/fetch/fetchPlaylists.tsx";
+import { fetchCurrentlyPlaying } from "../spotify/fetch/fetchCurrentlyPlaying.tsx";
+import { fetchUserName } from "../spotify/fetch/fetchUserName.tsx";
 
 export const SpotifyPage: React.FC = () => {
   const [devices, setDevices] = useState<DevicesMap>({});
@@ -71,47 +37,6 @@ export const SpotifyPage: React.FC = () => {
   >({});
   const [commonSongs, setCommonSongs] = useState<Song[]>([]);
 
-  const redirectUri = "http://localhost:5173/spotify";
-  const clientId = "b241ae6416a3481dad98e6899b7be0b4";
-  const clientSecret = "4807da9be0f144b9bbab888217e5e969";
-
-  const authEndpoint = "https://accounts.spotify.com/authorize";
-  const tokenEndpoint = "https://accounts.spotify.com/api/token";
-  const meEndpoint = "https://api.spotify.com/v1/me";
-  const playlistsEndpoint = "https://api.spotify.com/v1/me/playlists";
-  const devicesEndpoint = "https://api.spotify.com/v1/me/player/devices";
-  const currentlyPlayingEndpoint =
-    "https://api.spotify.com/v1/me/player/currently-playing";
-
-  // Utility functions
-  const getCurrentUserIdentifier = (): string => {
-    const storedUsers = Object.keys(localStorage).filter((key) =>
-      key.startsWith("access_token_")
-    );
-    const existingUserNumbers = storedUsers.map((key) => {
-      const userIdentifier = key.split("_")[2];
-      return parseInt(userIdentifier.replace("user", ""));
-    });
-    const maxUserNumber =
-      existingUserNumbers.length > 0 ? Math.max(...existingUserNumbers) : 0;
-    return `user${maxUserNumber + 1}`;
-  };
-
-  // 1. Request Authorization with clientId, response_type, redirect_uri, state and scope
-  // User will be redirected to Spotify, login and grant access, then to redirect_uri with code and state
-  // NOTE: Before a user can access the api their name and email have to be added to https://developer.spotify.com/ project by admin
-  const requestAuthorization = () => {
-    console.log("1. Requesting authorization");
-
-    const scope =
-      "user-read-private user-read-email playlist-read-private user-read-playback-state user-modify-playback-state";
-    const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${encodeURIComponent(
-      scope
-    )}&response_type=code`;
-    window.location.href = authUrl;
-  };
-
-  // 2. If we have an access code in the URL, we can fetch the access token
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
@@ -124,70 +49,6 @@ export const SpotifyPage: React.FC = () => {
     }
   }, []);
 
-  // TODO - better way to logout?
-  const logout = () => {
-    const logoutUrl = "https://www.spotify.com/logout/";
-    const logoutWindow = window.open(logoutUrl, "_blank");
-
-    // Close the logout window after a short delay
-    if (logoutWindow) {
-      setTimeout(() => {
-        logoutWindow.close();
-      }, 500);
-    }
-  };
-
-  const fetchAccessToken = () => {
-    console.log("2. Fetching access token");
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code")!;
-    const userIdentifier = getCurrentUserIdentifier();
-
-    if (code) {
-      const body = {
-        grant_type: "authorization_code",
-        code: code,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: clientSecret,
-      };
-
-      fetch(tokenEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams(body).toString(),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          const { access_token, refresh_token } = data;
-          if (access_token) {
-            localStorage.setItem(
-              `access_token_${userIdentifier}`,
-              access_token
-            );
-            localStorage.setItem(
-              `refresh_token_${userIdentifier}`,
-              refresh_token
-            );
-
-            // Logout the user from Spotify
-            logout();
-          } else {
-            console.log("Error fetching access token:" + data);
-          }
-        })
-        .catch((error) => {
-          console.log("Error fetching access token:", error);
-        });
-    } else {
-      console.log(
-        "No access code provided in URL, request authorization first"
-      );
-    }
-  };
-
   // Fetch stuff
   const fetchAll = () => {
     setFetchError(null);
@@ -195,106 +56,35 @@ export const SpotifyPage: React.FC = () => {
       key.startsWith("access_token_")
     );
 
-    storedUsers.forEach((key) => {
+    storedUsers.forEach(async (key) => {
       const userIdentifier = key.split("_")[2];
-      fetchUserDisplayName(userIdentifier);
-      fetchDevices(userIdentifier);
-      fetchPlaylists(userIdentifier);
-      fetchCurrentlyPlaying(userIdentifier);
+
+      const fetchedUserName = await fetchUserName(userIdentifier);
+      setUserDisplayName((prevState) => ({
+        ...prevState,
+        [userIdentifier]: fetchedUserName,
+      }));
+
+      const fetchedDevices = await fetchDevices(userIdentifier);
+      setDevices((prevState) => ({
+        ...prevState,
+        [userIdentifier]: fetchedDevices,
+      }));
+
+      const fetchedPlaylists = await fetchPlaylists(userIdentifier);
+      setPlaylists((prevState) => ({
+        ...prevState,
+        [userIdentifier]: fetchedPlaylists,
+      }));
+
+      const fetchedCurrentlyPlaying = await fetchCurrentlyPlaying(
+        userIdentifier
+      );
+      setCurrentTracks((prevState) => ({
+        ...prevState,
+        [userIdentifier]: fetchedCurrentlyPlaying,
+      }));
     });
-  };
-
-  // Fetch name
-  const fetchUserDisplayName = (userIdentifier: string) => {
-    const accessToken = localStorage.getItem(`access_token_${userIdentifier}`);
-
-    fetch(meEndpoint, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("User profile response:", data);
-        const { display_name } = data;
-        if (display_name) {
-          setUserDisplayName((prevState) => ({
-            ...prevState,
-            [userIdentifier]: display_name,
-          }));
-        } else {
-          console.log("No display name for user " + userIdentifier + " found");
-          setUserDisplayName((prevState) => ({
-            ...prevState,
-            [userIdentifier]: "Unknown",
-          }));
-        }
-      })
-      .catch((error) => {
-        console.log("Error fetching user profile:", error);
-      });
-  };
-
-  // Fetch devices
-  const fetchDevices = (userIdentifier: string) => {
-    const accessToken = localStorage.getItem(`access_token_${userIdentifier}`);
-
-    fetch(devicesEndpoint, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Devices response:", data);
-        const { devices } = data;
-        if (devices) {
-          setDevices((prevState) => ({
-            ...prevState,
-            [userIdentifier]: devices,
-          }));
-        } else {
-          console.log("No devices for user " + userIdentifier + " found!");
-          setDevices((prevState) => ({
-            ...prevState,
-            [userIdentifier]: [],
-          }));
-        }
-      })
-      .catch((error) => {
-        console.log("Error fetching devices:", error);
-      });
-  };
-
-  // 4. Fetch playlists
-  const fetchPlaylists = (userIdentifier: string) => {
-    const accessToken = localStorage.getItem(`access_token_${userIdentifier}`);
-
-    fetch(playlistsEndpoint, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Playlists response:", data);
-        const { items } = data;
-        if (items) {
-          setPlaylists((prevState) => ({
-            ...prevState,
-            [userIdentifier]: items,
-          }));
-        } else {
-          console.log("No playlists for user " + userIdentifier + " found");
-          setPlaylists((prevState) => ({
-            ...prevState,
-            [userIdentifier]: [],
-          }));
-        }
-      })
-      .catch((error) => {
-        console.log("Error fetching playlists:", error);
-      });
   };
 
   const findCommonSongs = () => {
@@ -345,39 +135,6 @@ export const SpotifyPage: React.FC = () => {
           });
       });
     });
-  };
-
-  // 5. Fetch currently playing
-  const fetchCurrentlyPlaying = (userIdentifier: string) => {
-    const accessToken = localStorage.getItem(`access_token_${userIdentifier}`);
-
-    fetch(currentlyPlayingEndpoint, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Currently playing response:", data);
-        const { item } = data;
-        if (item) {
-          setCurrentTracks((prevState) => ({
-            ...prevState,
-            [userIdentifier]: [item.name],
-          }));
-        } else {
-          console.log(
-            "No currently playing for user " + userIdentifier + " found"
-          );
-          setCurrentTracks((prevState) => ({
-            ...prevState,
-            [userIdentifier]: [],
-          }));
-        }
-      })
-      .catch((error) => {
-        console.log("Error fetching currently playing:", error);
-      });
   };
 
   return (
