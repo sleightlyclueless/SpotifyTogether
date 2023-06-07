@@ -1,8 +1,6 @@
-
-import {Collection, Entity, ManyToOne, OneToMany, Property} from "@mikro-orm/core";
+import {Entity, ManyToOne, Property} from "@mikro-orm/core";
 
 import {BaseEntity} from './BaseEntity';
-import {date, object, string} from "yup";
 import {User} from './User'
 import {Event} from './Event'
 
@@ -21,15 +19,17 @@ export class EventUser extends BaseEntity {
     @Property()
     Role!: UserStatus;
 
-    @ManyToOne(() => User)
-    User = User;
+    @ManyToOne({entity: () => User, primary: true})
+    User: User;
 
-    @ManyToOne(() => Event)
-    Event = Event;
+    @ManyToOne({entity: () => Event, primary: true})
+    Event: Event;
 
 
-    constructor(role: UserStatus) {
-        super()
-        this.Role = role
+    constructor(role: UserStatus, user: User, event: Event) {
+        super();
+        this.Role = role;
+        this.User = user;
+        this.Event = event;
     }
 }

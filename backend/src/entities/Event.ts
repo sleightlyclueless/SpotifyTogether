@@ -1,9 +1,8 @@
-import {Collection, Entity, OneToMany, Property,OneToOne} from "@mikro-orm/core";
+import {Collection, Entity, OneToMany, OneToOne, Property} from "@mikro-orm/core";
 
 import {BaseEntity} from './BaseEntity';
-import {date, object, string} from "yup";
+import {object, string} from "yup";
 import {SpotifyTrack} from './SpotifyTrack'
-import {SpotifyPlaylist} from "./SpotifyPlaylist";
 import {User} from "./User";
 
 //Event:
@@ -17,18 +16,18 @@ import {User} from "./User";
 @Entity()
 export class Event extends BaseEntity {
     @Property({nullable: false, unique: true})
-    EventID!: number;
+    EventID: number;
 
     @Property()
     duration: number;
 
-    @OneToMany(()=> User, (User) => User.UserID)
+    @OneToMany(() => User, (User) => User.UserID)
     UserList = new Collection<User>(this);
 
     @OneToMany(() => SpotifyTrack, (SpotifyTrack) => SpotifyTrack.TrackID)
     TrackList = new Collection<SpotifyTrack>(this);
 
-    @OneToOne(()=> User)
+    @OneToOne(() => User)
     Owner = User;
 
     constructor(EventID: number, duration: number) {

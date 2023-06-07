@@ -9,6 +9,7 @@ import {TagController} from './controller/deprecated/tag.controller';
 import {DiaryEntry, DiaryEntryTag, User} from './entities/deprecated';
 import {Auth} from './middleware/auth.middleware';
 import {EventController} from "./controller/event.controller";
+import {EventUser} from "./entities/EventUser";
 
 const PORT = 4000;
 const app = express();
@@ -20,6 +21,7 @@ export const DI = {} as {
     diaryEntryRepository: EntityRepository<DiaryEntry>;
     diaryEntryTagRepository: EntityRepository<DiaryEntryTag>;
     userRepository: EntityRepository<User>;
+    eventUserRepository: EntityRepository<EventUser>;
 };
 
 export const initializeServer = async () => {
@@ -29,6 +31,7 @@ export const initializeServer = async () => {
     // TODO: DI.diaryEntryRepository = DI.orm.em.getRepository(DiaryEntry);
     // TODO: DI.diaryEntryTagRepository = DI.orm.em.getRepository(DiaryEntryTag);
     // TODO: DI.userRepository = DI.orm.em.getRepository(User);
+    DI.eventUserRepository = DI.orm.em.getRepository(EventUser);
 
     // example middleware
     app.use((req, res, next) => {
