@@ -1,8 +1,6 @@
-import {Collection, Entity, OneToMany, OneToOne, Property} from "@mikro-orm/core";
+import {Collection, Entity, OneToMany, OneToOne, PrimaryKey, Property} from "@mikro-orm/core";
 
-import {BaseEntity} from './BaseEntity';
 import {object, string} from "yup";
-import {SpotifyTrack} from './SpotifyTrack'
 import {User} from "./User";
 
 //Event:

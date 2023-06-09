@@ -1,10 +1,8 @@
 
 
-import {Collection, Entity, ManyToOne, OneToMany, Property} from "@mikro-orm/core";
+import {Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
 
-import {BaseEntity} from './BaseEntity';
 import {date, object, string} from "yup";
-import {SpotifyTrack} from './SpotifyTrack'
 import {Event} from './Event'
 
 //Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
@@ -28,9 +26,11 @@ export class EventTrack extends BaseEntity {
     @ManyToOne(() => Event)
     Event = Event;
 
+    @Property()
+    Role!: TrackStatus;
 
     constructor(role: TrackStatus) {
         super()
         this.Role = role
-    }
+    }*/
 }

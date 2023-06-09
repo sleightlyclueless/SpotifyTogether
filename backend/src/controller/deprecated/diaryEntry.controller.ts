@@ -3,11 +3,10 @@ import {Router} from 'express';
 import {wrap} from '@mikro-orm/core';
 
 import {DI} from '../../index';
-import {CreateDiaryEntryDTO, CreateDiaryEntryDTOTag, CreateDiaryEntrySchema, DiaryEntry} from '../../entities/deprecated';
 
 const router = Router({mergeParams: true});
 
-router.get('/', async (req, res) => {
+/*router.get('/', async (req, res) => {
     const diaryEntries = await DI.diaryEntryRepository.find(
         {
             creator: req.user,
@@ -102,4 +101,4 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-export const DiaryController = router;
+export const DiaryController = router;*/

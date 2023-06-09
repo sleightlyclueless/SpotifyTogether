@@ -1,6 +1,5 @@
-import {Entity, ManyToOne, Property} from "@mikro-orm/core";
+import {Entity, ManyToOne, PrimaryKey, Property} from "@mikro-orm/core";
 
-import {BaseEntity} from './BaseEntity';
 import {User} from './User'
 import {Event} from './Event'
 
@@ -19,12 +18,12 @@ export class EventUser extends BaseEntity {
     @Property()
     Role!: UserStatus;
 
-    @ManyToOne({entity: () => User, primary: true})
-    User: User;
+    @PrimaryKey({nullable: false, unique: true})
+    id: string = v4();
 
     @ManyToOne({entity: () => Event, primary: true})
+    @PrimaryKey()
     Event: Event;
-
 
     constructor(role: UserStatus, user: User, event: Event) {
         super();

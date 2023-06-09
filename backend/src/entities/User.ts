@@ -2,7 +2,6 @@ import {object, string} from 'yup';
 
 import {Collection, Entity, OneToMany, Property} from '@mikro-orm/core';
 
-import {BaseEntity} from './BaseEntity';
 import {Event} from './Event'
 
 //User:EventList[Event],name,UserID
@@ -32,7 +31,6 @@ export class User extends BaseEntity {
         this.SpotifyTokenSalt = SpotifyTokenSalt;
     }
 }
-
 
 
 export const LoginSchema = object({

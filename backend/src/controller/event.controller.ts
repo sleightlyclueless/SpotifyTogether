@@ -5,11 +5,20 @@ import {UserStatus} from "../entities/EventUser";
 
 const router = Router({mergeParams: true});
 
-router.use("/edit", Authge, handler)
+//router.use("/edit", Authge, handler)
 
-router.get('/:eventId', async (req, res) => {
-    res.status(200).send("Hello World !"); // returns all information for one event
-});
+/*router.get('/:eventId', async (req, res) => {
+
+        DI.EventRepository.find({
+            Event: {"EventID": Number(req.params.id)},
+        }).then(Event => {
+            return res.status(200).json(Event);
+        }).catch(reason => {
+            return res.status(400).json({message: reason});
+
+    });
+
+});*/
 
 router.post('/:eventId/join/:spotifyToken', async (req, res) => {
     res.status(200).send("Hello World !"); // returns all information for one event
@@ -19,13 +28,13 @@ router.post('/:eventId/leave/:spotifyToken', async (req, res) => {
     res.status(200).send("Hello World !"); // returns all information for one event
 });
 
-router.post('/:spotifyToken/create', Auth.optionalAuthenticate, async (req, res) => {
+/*router.post('/:spotifyToken/create', Auth.optionalAuthenticate, async (req, res) => {
     res.status(200).send("Hello World !");
 });
 
 router.post('/:eventId/delete/:spotifyToken', Auth.optionalAuthenticate, async (req, res) => {
     res.status(200).send("Hello World !");
-});
+});*/
 
 router.get('/:spotifyToken/list', async (req, res) => {
     res.status(200).send("Hello World !"); // returns list of events
@@ -94,6 +103,6 @@ router.put('/events/:userToken/:eventToken/settings/participants/:targetUserToke
     }).catch(reason => {
         return res.status(400).json({message: reason});
     });
-});
+});*/
 
 export const EventController = router;

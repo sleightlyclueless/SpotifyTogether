@@ -44,7 +44,7 @@ const prepareAuthentication = async (req: Request, _res: Response, next: NextFun
     if (authHeader) {
         try {
             const token = verifyToken(authHeader);
-            req.user = await DI.userRepository.findOne(token.id);
+            //req.user = await DI.userRepository.findOne(token.id);
             req.token = token;
         } catch (e) {
             console.error(e);

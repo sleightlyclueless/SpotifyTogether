@@ -1,8 +1,7 @@
 import {Collection, Entity, OneToMany, Property} from "@mikro-orm/core";
 
-import {BaseEntity} from './BaseEntity';
 import {date, object, string} from "yup";
-import {SpotifyTrack} from './SpotifyTrack'
+import {v4} from "uuid";
 
 //Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
 

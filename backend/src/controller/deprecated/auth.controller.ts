@@ -1,6 +1,6 @@
 import {Router} from 'express';
 
-import {DI} from '../../index';
+/*import {DI} from '../../index';
 import {LoginSchema, RegisterUserDTO, RegisterUserSchema, User} from '../../entities/deprecated';
 import {Auth} from '../../middleware/auth.middleware';
 
@@ -60,4 +60,4 @@ router.post('/login', async (req, res) => {
     res.status(200).send({accessToken: jwt});
 });
 
-export const AuthController = router;
+export const AuthController = router;*/
