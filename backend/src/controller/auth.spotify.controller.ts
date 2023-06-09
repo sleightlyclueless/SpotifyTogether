@@ -105,7 +105,11 @@ router.get('/spotifyUserId/:spotifyToken', SpotifyAuth.verifyAccess, async (req,
 
 router.put('/logout', SpotifyAuth.verifyAccess, async (req, res) => {
     // reset token ?
-    return res.status(201).send("ok");
+    const user: User = req.user;
+    user.spotifyRefreshToken = "";
+    user.spotifyAccessToken  = "";
+    DI.em.persistAndFlush(user);
+    return res.status(204).send("logout sucsessful"); // TODO: rework error
 });
 
 export const SpotifyAuthController = router;
