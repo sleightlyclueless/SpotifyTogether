@@ -1,18 +1,18 @@
 import {object, string} from 'yup';
 
-import {Collection, Entity, OneToMany, Property} from '@mikro-orm/core';
+import {Entity, PrimaryKey, Property} from '@mikro-orm/core';
 
 import {Event} from './Event'
 
 //User:EventList[Event],name,UserID
 
 @Entity()
-export class User extends BaseEntity {
-    @Property({nullable: false, unique: true})
-    UserID: string;
+export class User {
+    @PrimaryKey({nullable: false, unique: true})
+    spotifyId: string;
 
-    @OneToMany(() => Event, (Event) => Event.EventID)
-    EventList = new Collection<Event>(this);
+    //@OneToMany(() => Event, (Event) => Event.EventID)
+    //EventList = new Collection<Event>(this);
 
     @Property()
     SpotifyToken: string;
@@ -24,8 +24,7 @@ export class User extends BaseEntity {
     SpotifyTokenSalt: string;
 
     constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string, SpotifyTokenSalt: string) {
-        super();
-        this.UserID = userID;
+        this.spotifyId = userID;
         this.SpotifyToken = spotifyToken;
         this.SpotifyRefreshToken = SpotifyRefreshToken;
         this.SpotifyTokenSalt = SpotifyTokenSalt;

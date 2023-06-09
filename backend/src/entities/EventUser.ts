@@ -12,10 +12,10 @@ export enum UserStatus {
     guest = "Guest"
 }
 
-@Entity()
-export class EventUser extends BaseEntity {
+//@Entity()
+export class EventUser{
 
-    @Property()
+    /*@Property()
     Role!: UserStatus;
 
     @PrimaryKey({nullable: false, unique: true})
@@ -26,9 +26,9 @@ export class EventUser extends BaseEntity {
     Event: Event;
 
     constructor(role: UserStatus, user: User, event: Event) {
-        super();
+
         this.Role = role;
-        this.User = user;
-        this.Event = event;
-    }
+        //this.User = user;
+        //this.Event = event;
+    }*/
 }

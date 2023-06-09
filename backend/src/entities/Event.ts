@@ -2,6 +2,8 @@ import {Collection, Entity, OneToMany, OneToOne, PrimaryKey, Property} from "@mi
 
 import {object, string} from "yup";
 import {User} from "./User";
+import {EventUser} from "./EventUser";
+import {v4} from "uuid";
 
 //Event:
 // TrackList[Spotify-Track],
@@ -11,26 +13,24 @@ import {User} from "./User";
 // EventID: integer(?)UNIQUE,
 // Owner: User,
 
-@Entity()
-export class Event extends BaseEntity {
-    @Property({nullable: false, unique: true})
-    EventID: number;
+//@Entity()
+export class Event {
+    @PrimaryKey({nullable: false, unique: true})
+    id: string = v4();
 
     @Property()
     duration: number;
 
-    @OneToMany(() => User, (User) => User.UserID)
-    UserList = new Collection<User>(this);
+    /*@OneToMany(() => User, (EventUser) => EventUser.UserID)
+    UserList = new Collection<EventUser>(this);
 
     @OneToMany(() => SpotifyTrack, (SpotifyTrack) => SpotifyTrack.TrackID)
     TrackList = new Collection<SpotifyTrack>(this);
+    */
 
-    @OneToOne(() => User)
-    Owner = User;
+    constructor(EventID: string, duration: number) {
 
-    constructor(EventID: number, duration: number) {
-        super()
-        this.EventID = EventID
+        this.id = EventID
         this.duration = duration
     }
 }

@@ -14,16 +14,15 @@ export enum TrackStatus {
     denied = "denied"
 }
 
-@Entity()
-export class EventTrack extends BaseEntity {
+//@Entity()
+export class EventTrack{
 
-    @Property()
-    Role!: TrackStatus;
-
-    @ManyToOne(() => SpotifyTrack)
+    /*@ManyToOne(() => SpotifyTrack)
+    @PrimaryKey()
     Track = SpotifyTrack;
 
     @ManyToOne(() => Event)
+    @PrimaryKey()
     Event = Event;
 
     @Property()
