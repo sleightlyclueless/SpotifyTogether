@@ -4,6 +4,8 @@ import * as querystring from "querystring";
 import randomstring from "randomstring";
 
 import axios from "axios";
+import {User} from "../entities/User";
+import {SpotifyAuth} from "../middleware/auth.spotify.middleware";
 
 const router = Router({mergeParams: true});
 
@@ -32,14 +34,10 @@ router.get('/login_response', async (req, res) => {
 
     if (state === null) {
         // TODO: handle error
-        console.log("error");
-        res.redirect('/#' +
-            querystring.stringify({
-                error: 'state_mismatch'
-            }));
+        res.redirect('/#' + querystring.stringify({error: 'state_mismatch'}));
     } else {
         axios.post(
-            'https://accounts.spotify.com/api/token',
+            "https://accounts.spotify.com/api/token",
             {
                 code: code,
                 redirect_uri: DI.spotifyRedirectUri,
@@ -50,44 +48,62 @@ router.get('/login_response', async (req, res) => {
                     'Authorization': 'Basic ' + (Buffer.from(DI.spotifyClientId + ':' + DI.spotifyClientSecret).toString('base64')),
                     "Content-Type": "application/x-www-form-urlencoded",
                 }
-            }).then((response) => {
-            console.log("token callback");
-            console.log(response.data);
-
-            // fetch spotify user id
-            // create user if not existing
-            // otherwise update token
-
+            }).then((tokenResponse) => {
+            axios.get(
+                "https://api.spotify.com/v1/me",
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.data.access_token}`,
+                    },
+                }).then(async (userResponse) => {
+                let user = await DI.em.findOne(User, userResponse.data.id);
+                if (user) {
+                    // update user tokens
+                    user.spotifyAccessToken = tokenResponse.data.access_token;
+                    user.spotifyRefreshToken = tokenResponse.data.refresh_token;
+                } else {
+                    // create new user
+                    user = new User(userResponse.data.id, tokenResponse.data.access_token, tokenResponse.data.refresh_token);
+                    await DI.em.persistAndFlush(user);
+                }
+                return res.status(201).json({access_token: user.spotifyAccessToken});
+            }).catch(function (error: Error) {
+                return res.status(400).send(error); // TODO: rework error
+            });
         }).catch(function (error: Error) {
-            // TODO: handle error
-            console.log(error);
+            return res.status(400).send(error); // TODO: rework error
         });
     }
 });
 
-router.get('/refresh_login/:spotifyToken', async (req, res) => {
-    console.log("check spotify login with token");
-
-    // -> token ?
-
-    // case 1: token still valid -> do nothing, send back old token
-
-    // case 2: token invalid -> check refresh token
-    //  -> success: send back refreshed token
-    //  -> fail: send back error -> force client to make new login request ?
-
-    return res.status(201).send("ok token");
+router.put('/refresh_token', SpotifyAuth.verifyAccess, async (req, res) => {
+    const user: User = req.user;
+    axios.post(
+        'https://accounts.spotify.com/api/token',
+        {
+            grant_type: 'refresh_token',
+            refresh_token: user.spotifyRefreshToken
+        },
+        {
+            headers: {
+                'Authorization': 'Basic ' + (Buffer.from(DI.spotifyClientId + ':' + DI.spotifyClientSecret).toString('base64')),
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        }).then((tokenResponse) => {
+        user.spotifyAccessToken = tokenResponse.data.access_token;
+        DI.em.persistAndFlush(user);
+        return res.status(200).send("alles cool bro"); // TODO: rework error
+    }).catch(function (error: Error) {
+        return res.status(400).send(error); // TODO: rework error
+    });
 });
 
-router.get('/spotifyUserId/:spotifyToken', async (req, res) => {
-    console.log("check spotify login with token");
-
-    // fetch spotify user id from token ?
-
-    return res.status(201).send("ok token");
+router.get('/spotifyUserId/:spotifyToken', SpotifyAuth.verifyAccess, async (req, res) => {
+    const user: User = req.user;
+    return res.status(201).json({spotifyUserId: user.spotifyId});
 });
 
-router.get('/logout', async (req, res) => {
+router.put('/logout', SpotifyAuth.verifyAccess, async (req, res) => {
     // reset token ?
     return res.status(201).send("ok");
 });

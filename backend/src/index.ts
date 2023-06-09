@@ -38,6 +38,9 @@ export const initializeServer = async () => {
     // TODO: DI.diaryEntryTagRepository = DI.orm.em.getRepository(DiaryEntryTag);
     // TODO: DI.userRepository = DI.orm.em.getRepository(User);
     //DI.eventUserRepository = DI.orm.em.getRepository(EventUser);
+    DI.spotifyClientId = SPOTIFY_CLIENT_ID;
+    DI.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
+    DI.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
 
     // example middleware
     app.use((req, res, next) => {
@@ -49,20 +52,14 @@ export const initializeServer = async () => {
     app.use(express.json());
     app.use((req, res, next) => RequestContext.create(DI.orm.em, next));
 
-    DI.spotifyClientId = SPOTIFY_CLIENT_ID;
-    DI.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
-    DI.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
+
 
     //app.use(Auth.prepareAuthentication);
     app.use(SpotifyAuth.prepareAuthentication);
 
     // routes
     app.use('/account', SpotifyAuthController);
-
-
-    app.use('/events/:userToken', SpotifyAuth.verifyAccess, EventController);
-
-    app.use('/tags', Auth.verifyAccess, TagController);
+    app.use('/events', SpotifyAuth.verifyAccess, EventController);
 
     DI.server = app.listen(PORT, () => {
         console.log(`Server started on port ${PORT}`);

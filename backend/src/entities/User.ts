@@ -1,6 +1,6 @@
 import {object, string} from 'yup';
 
-import {Entity, PrimaryKey, Property} from '@mikro-orm/core';
+import {Entity, PrimaryKey, Property, types} from '@mikro-orm/core';
 
 import {Event} from './Event'
 
@@ -8,26 +8,25 @@ import {Event} from './Event'
 
 @Entity()
 export class User {
-    @PrimaryKey({nullable: false, unique: true})
+    @PrimaryKey({nullable: false})
     spotifyId: string;
+
+    @Property({type: types.text})
+    spotifyAccessToken: string;
+
+    @Property({type: types.text})
+    spotifyRefreshToken: string;
+
+    //@Property({type: types.text})
+    //spotifyTokenSalt: string; // TODO: encrypt tokens to safely store them
 
     //@OneToMany(() => Event, (Event) => Event.EventID)
     //EventList = new Collection<Event>(this);
 
-    @Property()
-    SpotifyToken: string;
-
-    @Property()
-    SpotifyRefreshToken: string;
-
-    @Property()
-    SpotifyTokenSalt: string;
-
-    constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string, SpotifyTokenSalt: string) {
+    constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string) {
         this.spotifyId = userID;
-        this.SpotifyToken = spotifyToken;
-        this.SpotifyRefreshToken = SpotifyRefreshToken;
-        this.SpotifyTokenSalt = SpotifyTokenSalt;
+        this.spotifyAccessToken = spotifyToken;
+        this.spotifyRefreshToken = SpotifyRefreshToken;
     }
 }
 

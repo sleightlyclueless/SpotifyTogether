@@ -1,50 +1,19 @@
 import {NextFunction, Request, RequestHandler, Response} from "express";
-
-
-
-
-
-
+import {DI} from "../index";
+import {User} from "../entities/User";
 
 const prepareAuthentication = async (req: Request, _res: Response, next: NextFunction) => {
-    console.log("Spotify Authentication");
-
-    const authHeader = req.get('Authorization');
-
-    if (authHeader) {
-        try {
-            // verify if spotify token is still valid
-            // case 1: valid -> next()
-            // case 2: invalid -> else
-
-
-
-
-
-        } catch (e) {
-            console.error(e);
-        }
-    } else {
-        req.user = null;
-        req.token = null;
-    }
-
+    const spotifyToken = req.get('Authorization');
+    if (spotifyToken) req.user = await DI.em.findOne(User, {spotifyAccessToken: spotifyToken});
+    else req.user = null;
     next();
 };
-
-
 
 const verifyAccess: RequestHandler = (req, res, next) => {
-    console.log("Check if spotify user logged in");
-    /*if (!req.user) {
-        return res.status(401).json({errors: [`You don't have access`]});
-    }*/
+    if (!req.user) return res.status(401).json({errors: [`You don't have access`]});
     next();
 };
 
-
-
-// exports
 export const SpotifyAuth = {
     prepareAuthentication,
     verifyAccess,
