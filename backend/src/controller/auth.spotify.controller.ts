@@ -66,10 +66,14 @@ router.get('/login_response', async (req, res) => {
                     // update user tokens
                     user.spotifyAccessToken = tokenResponse.data.access_token;
                     user.spotifyRefreshToken = tokenResponse.data.refresh_token;
+                    user.expiresInMs = tokenResponse.data.expires_in * 1000; // convert to ms
+                    user.issuedAt = Date.now(); // unix timestamp in ms
+                    await DI.em.persistAndFlush(user);
                     return res.status(200).json({access_token: user.spotifyAccessToken});
                 } else {
                     // create new user
-                    user = new User(userResponse.data.id, tokenResponse.data.access_token, tokenResponse.data.refresh_token);
+                    let currentDate = Date.now();
+                    user = new User(userResponse.data.id, tokenResponse.data.access_token, tokenResponse.data.refresh_token,currentDate,tokenResponse.data.expiresIn );
                     await DI.em.persistAndFlush(user);
                     return res.status(201).json({access_token: user.spotifyAccessToken});
                 }
@@ -83,11 +87,6 @@ router.get('/login_response', async (req, res) => {
 });
 
 router.put('/refresh_token', SpotifyAuth.verifyAccess, async (req, res) => {
-    // TODO: if old access_token is expired for example 5 days you can still use it to acquire a new token
-    //  -> big no no
-    //  solution? -> only currently valid tokens can be refreshed, frontend should request a new one once the current is
-    //               about to expire
-
     const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
     if (user) {
         axios.post(

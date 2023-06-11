@@ -1,4 +1,4 @@
-import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
+import {Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
 import {date, object, string} from "yup";
 import {v4} from "uuid";
 import {SpotifyTrack} from "./SpotifyTrack";
@@ -14,7 +14,7 @@ export class SpotifyPlaylist {
     @Property()
     duration: number;
 
-    @OneToMany(() => SpotifyTrack, (SpotifyTrack) => SpotifyTrack.id)
+    @ManyToOne({entity: () => SpotifyTrack, primary: true})
     TrackList = new Collection<SpotifyTrack>(this);
 
     constructor(playListID: string, duration: number) {
