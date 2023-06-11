@@ -35,21 +35,21 @@ Note: The spotify authentication middleware might return a 401 if the access_tok
 
 Note: The spotify authentication middleware might return a 401 if the access_token is invalid.
 
-| method | route            | codes | description                                        |
-|--------|------------------|-------|----------------------------------------------------|
-| GET    | /events          | -     | returns all events of this user                    |
-| POST   | /events          |       | create new event with the user as owner            |
-| GET    | /events/:eventId |       | returns one event and adds the user as participant |
+| method | route            | codes    | description                                        |
+|--------|------------------|----------|----------------------------------------------------|
+| GET    | /events          | 200, 404 | returns all events of this user                    |
+| POST   | /events          | 201, 404 | create new event with the user as owner            |
+| GET    | /events/:eventId | 200, 404 | returns one event and adds the user as participant |
 
 Note: The role authorization middleware might return a 401 if the user lacks required participant or higher
 permissions.
 
-| method | route            | codes | description                                    |
-|--------|------------------|-------|------------------------------------------------|
-| PUT    | /events/:eventId |       | removes the user (except owner) from the event |
-| DELETE | /events/:eventId |       | the owner can delete this event                |
+| method | route            | codes         | description                                    |
+|--------|------------------|---------------|------------------------------------------------|
+| PUT    | /events/:eventId | 200, 400, 404 | removes the user (except owner) from the event |
+| DELETE | /events/:eventId | 200, 401, 404 | the owner can delete this event                |
 
-- POST /events/:eventToken/add/:SpotifyTrack [response-json: ]                    # Add Spotify-Track to Event
+- POST /events/:eventToken/propose/:SpotifyTrack [response-json: ] # Add Spotify-Track to Event
 
 ### Event Settings
 
@@ -57,10 +57,10 @@ Note 1: The spotify authorization middleware might return a 401 if the access_to
 
 Note 2: The role authorization middleware might return a 401 if the user lacks required admin or higher permissions.
 
-| method | route                                                         | codes | description                        |
-|--------|---------------------------------------------------------------|-------|------------------------------------|
-| GET    | /events/:eventId/settings/participants                        |       | show users of event                |
-| PUT    | /events/:eventId/settings/participants/:spotifyUserId         |       | kicks a participant (except owner) |
-| PUT    | /events/:eventId/settings/participants/:spotifyUserId/:roleId |       | change user role                   |
+| method | route                                                         | codes         | description                        |
+|--------|---------------------------------------------------------------|---------------|------------------------------------|
+| GET    | /events/:eventId/settings/participants                        | 200, 400      | show users of event                |
+| PUT    | /events/:eventId/settings/participants/:spotifyUserId         | 204, 403, 404 | kicks a participant (except owner) |
+| PUT    | /events/:eventId/settings/participants/:spotifyUserId/:roleId | 204, 403, 404 | change user role                   |
 
 ## Frontend Routes

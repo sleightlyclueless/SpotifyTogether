@@ -1,7 +1,7 @@
 import {Router} from "express";
 import {DI} from '../index';
 import {EventUser, UserStatus} from "../entities/EventUser";
-import {EventSettingsController} from "./settings.controller";
+import {EventSettingsController} from "./events.settings.controller";
 import {EventRoleAuth} from "../middleware/auth.role.middleware";
 import {Event} from "../entities/Event";
 import randomstring from "randomstring";
@@ -19,7 +19,7 @@ router.use("/:eventId/settings", EventRoleAuth.verifyAdminAccess, EventSettingsC
 /*
 * Get All events
 * */
-router.get('/', EventRoleAuth.verifyParticipantAccess, async (req, res) => {
+router.get('/', async (req, res) => {
     // Get All Available Events
     const allEvents = await DI.em.find(Event,{});
     console.log(allEvents)
@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
 /**
  * Returns all data of an event.
  * **/
-router.get('/:eventId', EventRoleAuth.verifyParticipantAccess, async (req, res) => {
+router.get('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
     // TODO: add user to event
     const event = await DI.em.find(Event, {id: req.params.eventId});
     //TODO: currently all fields are returned.....
@@ -72,7 +72,7 @@ router.get('/:eventId', EventRoleAuth.verifyParticipantAccess, async (req, res) 
  * Removes the user form the event.
  * Owner can not leave event. He should delete instead.
  * **/
-router.put('/:eventId', EventRoleAuth.verifyParticipantAccess, async (req, res) => {
+router.put('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
     const eventUser = await DI.em.findOne(EventUser,
         {
             event: {id: req.params.eventId},
@@ -80,7 +80,10 @@ router.put('/:eventId', EventRoleAuth.verifyParticipantAccess, async (req, res) 
         }
     );
     if (eventUser) {
-        if (eventUser.role != UserStatus.OWNER) await DI.em.removeAndFlush(eventUser);
+        if (eventUser.role != UserStatus.OWNER) {
+            await DI.em.removeAndFlush(eventUser);
+            res.status(200).json("todo data");
+        }
         else res.status(400).send("Owner cant leave event, delete event instead.");
     } else res.status(404).send("User not part of event.");
 });
@@ -88,7 +91,7 @@ router.put('/:eventId', EventRoleAuth.verifyParticipantAccess, async (req, res) 
 /**
  * Delete event.
  * **/
-router.delete('/:eventId', EventRoleAuth.verifyParticipantAccess, async (req, res) => {
+router.delete('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
     const eventUser = await DI.em.findOne(EventUser,
         {
             event: {id: req.params.eventId},

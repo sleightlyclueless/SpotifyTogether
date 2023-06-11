@@ -49,6 +49,11 @@ router.get('/login_response', async (req, res) => {
                     "Content-Type": "application/x-www-form-urlencoded",
                 }
             }).then((tokenResponse) => {
+
+                tokenResponse.data.expires_in //-> sekunde
+
+
+
             axios.get(
                 "https://api.spotify.com/v1/me",
                 {

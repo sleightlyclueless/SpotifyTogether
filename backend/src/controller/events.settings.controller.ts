@@ -33,7 +33,6 @@ router.get('/participants', async (req: EventRequest, res) => {
         // event was not found
         return res.status(400).json({error: "Did not find EventUsers"});// TODO: rework error
     }
-    res.end();
 });
 
 

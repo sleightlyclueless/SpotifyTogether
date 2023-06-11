@@ -5,7 +5,7 @@ import {SpotifyTrack} from "./SpotifyTrack";
 
 //Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
 
-//@Entity()
+@Entity()
 export class SpotifyPlaylist {
 
     @PrimaryKey({nullable: false, unique: true})

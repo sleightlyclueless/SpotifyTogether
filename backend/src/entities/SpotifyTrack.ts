@@ -7,7 +7,7 @@ import {EventUser} from "./EventUser";
 import {EventTrack} from "./EventTrack";
 //Spotify-Track: Genre, duration, Artist,isInPlaylist[PlaylistID],TrackID,isInEvent[EventID]
 
-//@Entity()
+@Entity()
 export class SpotifyTrack {
     @PrimaryKey({nullable: false, unique: true})
     id: string = v4();
@@ -24,7 +24,7 @@ export class SpotifyTrack {
     @OneToMany(() => EventTrack, (EventTrack) => EventTrack.track)
     EventList = new Collection<EventUser>(this);
 
-    @OneToMany(() => SpotifyPlaylist, (SpotifyPlaylist) => SpotifyPlaylist.id)
+    @OneToMany(() => SpotifyPlaylist, (SpotifyPlaylist) => SpotifyPlaylist.TrackList)
     IsInPlaylist = new Collection<SpotifyPlaylist>(this);
     /*
     @OneToMany(() => Event, (Event) => Event.id)
