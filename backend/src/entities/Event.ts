@@ -4,6 +4,8 @@ import {object, string} from "yup";
 import {User} from "./User";
 import {EventUser} from "./EventUser";
 import {v4} from "uuid";
+import {SpotifyTrack} from "./SpotifyTrack";
+import {EventTrack} from "./EventTrack";
 
 //Event:
 // TrackList[Spotify-Track],
@@ -21,12 +23,11 @@ export class Event {
     @Property()
     duration: number = 0;
 
-    /*@OneToMany(() => User, (EventUser) => EventUser.UserID)
+    @OneToMany(() => EventUser, (EventUser) => EventUser.event)
     UserList = new Collection<EventUser>(this);
 
-    @OneToMany(() => SpotifyTrack, (SpotifyTrack) => SpotifyTrack.TrackID)
-    TrackList = new Collection<SpotifyTrack>(this);
-    */
+    @OneToMany(() => EventTrack, (EventTrack) => EventTrack.event)
+    TrackList = new Collection<EventTrack>(this);
 
     constructor(EventID: string) {
         this.id = EventID;

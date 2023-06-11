@@ -1,5 +1,4 @@
 import {Entity, ManyToOne, PrimaryKey, Property} from "@mikro-orm/core";
-
 import {User} from './User'
 import {Event} from './Event'
 
@@ -15,14 +14,18 @@ export enum UserStatus {
 @Entity()
 export class EventUser {
 
-    @ManyToOne({entity: () => Event, primary: true})
-    @PrimaryKey()
-    Event: Event;
+    @ManyToOne({entity: () => Event, primary: true })
+    event!: Event;
+
+    @ManyToOne({entity: () => User, primary: true})
+    user!: User;
+
+    @Property()
+    role!: UserStatus;
 
     constructor(role: UserStatus, user: User, event: Event) {
-
-        this.Role = role;
-        //this.User = user;
-        //this.Event = event;
-    }*/
+        this.role = role;
+        this.user = user;
+        this.event = event;
+    }
 }

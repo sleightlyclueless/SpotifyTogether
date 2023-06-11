@@ -85,67 +85,25 @@ router.put('/:eventId', EventRoleAuth.verifyParticipantAccess, async (req, res) 
     } else res.status(404).send("User not part of event.");
 });
 
-router.post('/:eventId/leave/:spotifyToken', async (req, res) => {
-    // find User with :spotify-token
-    /* const existingUser = await DI.UserRepository.find({
-         User: {"SpotifyToken": req.params.spotifyToken},
-     });
-     if (!existingUser) {
-         return res.status(403).json({errors: [`Didnt find User with given SpotifyToken`]});
-     }
-     // find Event with :EventID
-     const existingEvent = await DI.EventRepository.find({
-         Event: {"id": req.params.eventId},
-     });
-     if (!existingEvent) {
-         return res.status(403).json({errors: [`Didnt find Event with given EventID`]});
-     }
-
-     // wäre geil wenn das funktionieren würde
-     await DI.EventRepository.existingEvent.UserList.remove(existingUser).flush();
-
-     res.status(200).send("removed User from Event !");
-     */
-});
-
-/*router.post('/:spotifyToken/create', Auth.optionalAuthenticate, async (req, res) => {
-    res.status(200).send("Hello World !");
-});
-
-router.post('/:eventId/delete/:spotifyToken', Auth.optionalAuthenticate, async (req, res) => {
-    res.status(200).send("Hello World !");
-});*/
-
-router.get('/:spotifyToken/list', async (req, res) => {
-    /*
-    // Entry laden
-    const existingEntry = await DI.UserRepository.find({
-        User: req.params.spotifyToken
-    });
-    if (!existingEntry) {
-        return res.status(403).json({errors: [`No User with Token found`]});
-    }
-    await DI.UserRepository.populate(User, { populate: ['User.EventList'] });
-    return res.status(200).json(existingEntry); //returns User with Populated EventList
-      */
-});
-
-
-
-router.get('/:eventId/settings/', async (req, res) => {
-    res.status(200).send("Hello World !"); // returns list of events
-});
-
-router.get('/:eventId/settings/', async (req, res) => {
-    res.status(200).send("Hello World !"); // returns list of events
-});
-
-router.get('/:eventId/settings/suggestions/', async (req, res) => {
-    res.status(200).send("Hello World !"); // returns list of events
-});
-
-router.get('/:eventId/settings/participants/', async (req, res) => {
-    res.status(200).send("Hello World !"); // returns list of events
+/**
+ * Delete event.
+ * **/
+router.delete('/:eventId', EventRoleAuth.verifyParticipantAccess, async (req, res) => {
+    const eventUser = await DI.em.findOne(EventUser,
+        {
+            event: {id: req.params.eventId},
+            user: {spotifyAccessToken: req.userSpotifyAccessToken}
+        }
+    );
+    if (eventUser) {
+        if(eventUser.role === UserStatus.OWNER) {
+            const event = await DI.em.find(Event, {id: req.params.eventId});
+            if (event) {
+                await DI.em.removeAndFlush(event);
+                return res.status(200).end();
+            } else return res.status(404).json("Event not found.");
+        } else return res.status(401).json("You are not the owner of this event.");
+    } else return res.status(404).json("User is not part of this event");
 });
 
 /*

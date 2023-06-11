@@ -2,6 +2,9 @@ import {Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property} from "@m
 
 import {date, object, string} from "yup";
 import {Event} from './Event'
+import {User} from "./User";
+import {SpotifyTrack} from "./SpotifyTrack";
+import {UserStatus} from "./EventUser";
 
 //Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
 
@@ -12,22 +15,20 @@ export enum TrackStatus {
     denied = "denied"
 }
 
-//@Entity()
-export class EventTrack{
+@Entity()
+export class EventTrack {
+    @ManyToOne({entity: () => SpotifyTrack, primary: true})
+    track: SpotifyTrack;
 
-    /*@ManyToOne(() => SpotifyTrack)
-    @PrimaryKey()
-    Track = SpotifyTrack;
-
-    @ManyToOne(() => Event)
-    @PrimaryKey()
-    Event = Event;
+    @ManyToOne({entity: () => Event, primary: true})
+    event: Event;
 
     @Property()
-    Role!: TrackStatus;
+    role!: TrackStatus;
 
-    constructor(role: TrackStatus) {
-        super()
-        this.Role = role
-    }*/
+    constructor(role: TrackStatus, track: SpotifyTrack, event: Event) {
+        this.role = role;
+        this.track = track;
+        this.event = event;
+    }
 }

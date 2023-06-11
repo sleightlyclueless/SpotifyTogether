@@ -1,6 +1,6 @@
 import {object, string} from 'yup';
 
-import {Entity, PrimaryKey, Property, types} from '@mikro-orm/core';
+import {Collection, Entity, OneToMany, PrimaryKey, Property, types} from '@mikro-orm/core';
 
 import {Event} from './Event'
 import {EventUser} from "./EventUser";
@@ -27,8 +27,8 @@ export class User {
     //@Property({type: types.text})
     //spotifyTokenSalt: string; // TODO: encrypt tokens to safely store them
 
-    //@OneToMany(() => Event, (Event) => Event.EventID)
-    //EventList = new Collection<Event>(this);
+    @OneToMany(() => EventUser, (EventUser) => EventUser.user)
+    EventList = new Collection<EventUser>(this);
 
     constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string) {
         this.spotifyId = userID;

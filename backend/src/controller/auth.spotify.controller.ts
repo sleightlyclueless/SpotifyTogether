@@ -78,30 +78,38 @@ router.get('/login_response', async (req, res) => {
 });
 
 router.put('/refresh_token', SpotifyAuth.verifyAccess, async (req, res) => {
-    const user: User = req.user;
-    axios.post(
-        'https://accounts.spotify.com/api/token',
-        {
-            grant_type: 'refresh_token',
-            refresh_token: user.spotifyRefreshToken
-        },
-        {
-            headers: {
-                'Authorization': 'Basic ' + (Buffer.from(DI.spotifyClientId + ':' + DI.spotifyClientSecret).toString('base64')),
-                "Content-Type": "application/x-www-form-urlencoded",
+    // TODO: if old access_token is expired for example 5 days you can still use it to acquire a new token
+    //  -> big no no
+    //  solution? -> only currently valid tokens can be refreshed, frontend should request a new one once the current is
+    //               about to expire
+
+    const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
+    if (user) {
+        axios.post(
+            'https://accounts.spotify.com/api/token',
+            {
+                grant_type: 'refresh_token',
+                refresh_token: user.spotifyRefreshToken
             },
-        }).then((tokenResponse) => {
-        user.spotifyAccessToken = tokenResponse.data.access_token;
-        DI.em.persistAndFlush(user);
-        return res.status(200).send("alles cool bro"); // TODO: rework error
-    }).catch(function (error: Error) {
-        return res.status(400).send(error); // TODO: rework error
-    });
+            {
+                headers: {
+                    'Authorization': 'Basic ' + (Buffer.from(DI.spotifyClientId + ':' + DI.spotifyClientSecret).toString('base64')),
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }).then((tokenResponse) => {
+            user.spotifyAccessToken = tokenResponse.data.access_token;
+            DI.em.persistAndFlush(user);
+            return res.status(200).send("alles cool bro"); // TODO: rework error
+        }).catch(function (error: Error) {
+            return res.status(400).send(error); // TODO: rework error
+        });
+    } else return res.status(404).send("User not found.");
 });
 
 router.get('/spotifyUserId/:spotifyToken', SpotifyAuth.verifyAccess, async (req, res) => {
-    const user: User = req.user;
-    return res.status(201).json({spotifyUserId: user.spotifyId});
+    const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
+    if (user) return res.status(201).json({spotifyUserId: user.spotifyId});
+    else return res.status(404).send("User not found.");
 });
 
 router.put('/logout', SpotifyAuth.verifyAccess, async (req, res) => {

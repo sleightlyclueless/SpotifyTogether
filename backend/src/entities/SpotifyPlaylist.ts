@@ -1,7 +1,7 @@
 import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
-
 import {date, object, string} from "yup";
 import {v4} from "uuid";
+import {SpotifyTrack} from "./SpotifyTrack";
 
 //Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
 
@@ -14,11 +14,10 @@ export class SpotifyPlaylist {
     @Property()
     duration: number;
 
-    /*@OneToMany(() => SpotifyTrack, (SpotifyTrack) => SpotifyTrack.TrackID)
+    @OneToMany(() => SpotifyTrack, (SpotifyTrack) => SpotifyTrack.id)
     TrackList = new Collection<SpotifyTrack>(this);
-    */
-    constructor(playListID: string, duration: number) {
 
+    constructor(playListID: string, duration: number) {
         this.id = playListID
         this.duration = duration
     }

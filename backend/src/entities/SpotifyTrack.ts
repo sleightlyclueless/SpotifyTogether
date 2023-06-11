@@ -1,9 +1,10 @@
 import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
-
 import {object, string} from "yup";
 import {SpotifyPlaylist} from "./SpotifyPlaylist";
 import { Event } from "./Event"
 import {v4} from "uuid";
+import {EventUser} from "./EventUser";
+import {EventTrack} from "./EventTrack";
 //Spotify-Track: Genre, duration, Artist,isInPlaylist[PlaylistID],TrackID,isInEvent[EventID]
 
 //@Entity()
@@ -12,27 +13,29 @@ export class SpotifyTrack {
     id: string = v4();
 
     @Property()
-    Genre: string;
+    genre: string;
 
     @Property()
-    Duration: number;
+    duration: number;
 
     @Property()
-    Artist: string;
+    artist: string;
 
-    /*
-    @OneToMany(() => SpotifyPlaylist, (SpotifyPlaylist) => SpotifyPlaylist.PlayListID)
+    @OneToMany(() => EventTrack, (EventTrack) => EventTrack.track)
+    EventList = new Collection<EventUser>(this);
+
+    @OneToMany(() => SpotifyPlaylist, (SpotifyPlaylist) => SpotifyPlaylist.id)
     IsInPlaylist = new Collection<SpotifyPlaylist>(this);
-
-    @OneToMany(() => Event, (Event) => Event.EventID)
-    IsInEvent = new Collection<Event>(this);*/
-
+    /*
+    @OneToMany(() => Event, (Event) => Event.id)
+    IsInEvent = new Collection<Event>(this);
+    */
     constructor(trackID: string,duration: number, genre: string, artist:string, ) {
 
         this.id = trackID
-        this.Duration = duration
-        this.Genre = genre
-        this.Artist = artist
+        this.duration = duration
+        this.genre = genre
+        this.artist = artist
     }
 }
 

@@ -8,6 +8,7 @@ import {EventController} from "./controller/event.controller";
 import {SpotifyAuthController} from "./controller/auth.spotify.controller";
 import {SpotifyAuth} from "./middleware/auth.spotify.middleware";
 
+
 const PORT = 4000;
 const app = express();
 
@@ -36,7 +37,7 @@ export const initializeServer = async () => {
     // TODO: DI.diaryEntryRepository = DI.orm.em.getRepository(DiaryEntry);
     // TODO: DI.diaryEntryTagRepository = DI.orm.em.getRepository(DiaryEntryTag);
     // TODO: DI.userRepository = DI.orm.em.getRepository(User);
-    //DI.eventUserRepository = DI.orm.em.getRepository(EventUser);
+    //DI.eventRepository = DI.orm.em.getRepository(Event);
     DI.spotifyClientId = SPOTIFY_CLIENT_ID;
     DI.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
     DI.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
