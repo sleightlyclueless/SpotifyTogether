@@ -61,12 +61,13 @@ router.get('/login_response', async (req, res) => {
                     // update user tokens
                     user.spotifyAccessToken = tokenResponse.data.access_token;
                     user.spotifyRefreshToken = tokenResponse.data.refresh_token;
+                    return res.status(200).json({access_token: user.spotifyAccessToken});
                 } else {
                     // create new user
                     user = new User(userResponse.data.id, tokenResponse.data.access_token, tokenResponse.data.refresh_token);
                     await DI.em.persistAndFlush(user);
+                    return res.status(201).json({access_token: user.spotifyAccessToken});
                 }
-                return res.status(201).json({access_token: user.spotifyAccessToken});
             }).catch(function (error: Error) {
                 return res.status(400).send(error); // TODO: rework error
             });
@@ -104,12 +105,14 @@ router.get('/spotifyUserId/:spotifyToken', SpotifyAuth.verifyAccess, async (req,
 });
 
 router.put('/logout', SpotifyAuth.verifyAccess, async (req, res) => {
-    // reset token ?
-    const user: User = req.user;
-    user.spotifyRefreshToken = "";
-    user.spotifyAccessToken  = "";
-    DI.em.persistAndFlush(user);
-    return res.status(204).send("logout sucsessful"); // TODO: rework error
+    // TODO: reset token ?
+    const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
+    if (user) {
+        user.spotifyRefreshToken = "";
+        user.spotifyAccessToken = "";
+        await DI.em.persistAndFlush(user);
+        return res.status(204).send("logout sucsessful"); // TODO: rework error
+    } else return res.status(404).send("User not found.");
 });
 
 export const SpotifyAuthController = router;

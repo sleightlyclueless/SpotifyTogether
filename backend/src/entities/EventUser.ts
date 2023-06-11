@@ -6,20 +6,14 @@ import {Event} from './Event'
 //Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
 
 export enum UserStatus {
-    admin = "admin",
-    moderator = "moderator",
-    user = "user",
-    guest = "Guest"
+    OWNER = "owner",
+    ADMIN = "admin",
+    PARTICIPANT = "participant",
+    GUEST = "guest"
 }
 
-//@Entity()
-export class EventUser{
-
-    /*@Property()
-    Role!: UserStatus;
-
-    @PrimaryKey({nullable: false, unique: true})
-    id: string = v4();
+@Entity()
+export class EventUser {
 
     @ManyToOne({entity: () => Event, primary: true})
     @PrimaryKey()

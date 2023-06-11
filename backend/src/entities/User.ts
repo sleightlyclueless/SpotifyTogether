@@ -3,13 +3,20 @@ import {object, string} from 'yup';
 import {Entity, PrimaryKey, Property, types} from '@mikro-orm/core';
 
 import {Event} from './Event'
+import {EventUser} from "./EventUser";
 
 //User:EventList[Event],name,UserID
 
 @Entity()
 export class User {
-    @PrimaryKey({nullable: false})
+    @PrimaryKey()
     spotifyId: string;
+
+    // TODO: additional user profile info
+    //@Property({type: types.text})
+    //display_name: string;
+    //@Property({type: types.text})
+    //image_url: string;
 
     @Property({type: types.text})
     spotifyAccessToken: string;

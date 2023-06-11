@@ -4,7 +4,6 @@ import http from 'http';
 import {EntityManager, EntityRepository, MikroORM, RequestContext} from '@mikro-orm/core';
 
 import {TagController} from './controller/deprecated/tag.controller';
-import {Auth} from './middleware/auth.middleware';
 import {EventController} from "./controller/event.controller";
 import {SpotifyAuthController} from "./controller/auth.spotify.controller";
 import {SpotifyAuth} from "./middleware/auth.spotify.middleware";
@@ -51,7 +50,6 @@ export const initializeServer = async () => {
     // global middleware
     app.use(express.json());
     app.use((req, res, next) => RequestContext.create(DI.orm.em, next));
-
 
 
     //app.use(Auth.prepareAuthentication);

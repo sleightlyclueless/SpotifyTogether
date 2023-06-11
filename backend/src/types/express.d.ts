@@ -1,9 +1,9 @@
-import {User} from '../entities/deprecated';
+import {User} from "../entities/User";
 
 declare global {
     namespace Express {
         interface Request {
-            user: User | null;
+            userSpotifyAccessToken: string | null,
         }
     }
 }

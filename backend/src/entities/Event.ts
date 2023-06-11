@@ -13,13 +13,13 @@ import {v4} from "uuid";
 // EventID: integer(?)UNIQUE,
 // Owner: User,
 
-//@Entity()
+@Entity()
 export class Event {
     @PrimaryKey({nullable: false, unique: true})
-    id: string = v4();
+    id: string;
 
     @Property()
-    duration: number;
+    duration: number = 0;
 
     /*@OneToMany(() => User, (EventUser) => EventUser.UserID)
     UserList = new Collection<EventUser>(this);
@@ -28,10 +28,8 @@ export class Event {
     TrackList = new Collection<SpotifyTrack>(this);
     */
 
-    constructor(EventID: string, duration: number) {
-
-        this.id = EventID
-        this.duration = duration
+    constructor(EventID: string) {
+        this.id = EventID;
     }
 }
 

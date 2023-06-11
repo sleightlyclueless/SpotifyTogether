@@ -1,21 +1,66 @@
 # Backend - Routes
-- GET /account/login                    # redirects the user to the spotify login screen
-- GET /account/login_response           # called by the spotify api after the user grants or denies permission
 
-All following routes require the header "Authorization" field to be set with a valid token.
-- GET /account/refresh_token          # uses the refresh_token to create a new pair of tokens
-- GET /account/spotifyUserId       # returns the spotify user id of this the set token
-- GET /account/logout             # todo
+## Backend - Routes
 
-- GET       /events [response-json: ]                                                    # show all events
-- GET       /events/:eventToken [response-json: ]                                        # show specific event or add user to event
-- PUT       /events/:eventToken [response-json: ]                                        # leave specific event
-- POST      /events [response-json: {eventToken: "xxxxxxx"}]                             # create new event
-- DELETE    /events/:eventToken                                                          # delete event by its id
+For almost all routes it is required to set the header field "Authorization" with a valid access_token.
 
-- GET       /events/:eventToken/settings/participants [response-json: ]                           # show users of event
-- PUT       /events/:eventToken/settings/participants/:targetUserToken [response-json: ]          # kick user (blacklist later, lol)
-- PUT       /events/:eventToken/settings/participants/:targetUserToken/:roleId [response-json: ]  # change user role
-  # /settings -> middleware for other settings, such as /settings/changeTime, ...
+The access_token must be a currently valid one issued by the spotify api through this backend and is valid for a maximum
+of one hour.
 
-- GET /spotifyToken/:userToken                                                                      # get the spotify access token from userToken / DB
+While the access_token is valid a new access_token can be request by calling /account/refresh_token route which provides
+a new access token.
+
+Once the token is expired it cant be used anymore to make any requests and a new login is required.
+
+### Spotify Authentication
+
+The following two routes are the only ones which don't require a spotify token to set as header Authorization field.
+
+| method | route                   | codes | description                             |
+|--------|-------------------------|-------|-----------------------------------------|
+| GET    | /account/login          | -     | redirects the user to the spotify login |       
+| GET    | /account/login_response | tbd   | callback from spotify, redirects user   |
+
+The following account routes require a valid access_token.
+
+Note: The spotify authentication middleware might return a 401 if the access_token is invalid.
+
+| method | route                  | codes         | description                                     |
+|--------|------------------------|---------------|-------------------------------------------------|
+| GET    | /account/refresh_token | 200, 201, 400 | trades the refresh_token for a new access_token |       
+| GET    | /account/spotifyUserId | 200, 400      | returns the spotify user id of this token       |       
+| GET    | /account/logout        | tbd           | todo                                            |
+
+### Event
+
+Note: The spotify authentication middleware might return a 401 if the access_token is invalid.
+
+| method | route            | codes | description                                        |
+|--------|------------------|-------|----------------------------------------------------|
+| GET    | /events          | -     | returns all events of this user                    |
+| POST   | /events          |       | create new event with the user as owner            |
+| GET    | /events/:eventId |       | returns one event and adds the user as participant |
+
+Note: The role authorization middleware might return a 401 if the user lacks required participant or higher
+permissions.
+
+| method | route            | codes | description                                    |
+|--------|------------------|-------|------------------------------------------------|
+| PUT    | /events/:eventId |       | removes the user (except owner) from the event |
+| DELETE | /events/:eventId |       | the owner can delete this event                |
+
+- POST /events/:eventToken/add/:SpotifyTrack [response-json: ]                    # Add Spotify-Track to Event
+
+### Event Settings
+
+Note 1: The spotify authorization middleware might return a 401 if the access_token is invalid.
+
+Note 2: The role authorization middleware might return a 401 if the user lacks required admin or higher permissions.
+
+| method | route                                                         | codes | description                        |
+|--------|---------------------------------------------------------------|-------|------------------------------------|
+| GET    | /events/:eventId/settings/participants                        |       | show users of event                |
+| PUT    | /events/:eventId/settings/participants/:spotifyUserId         |       | kicks a participant (except owner) |
+| PUT    | /events/:eventId/settings/participants/:spotifyUserId/:roleId |       | change user role                   |
+
+## Frontend Routes
