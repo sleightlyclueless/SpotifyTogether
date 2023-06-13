@@ -1,27 +1,13 @@
-import { AppLayout } from "../layout/AppLayout.tsx";
 import React, { useEffect, useState } from "react";
 import {
-  ChakraProvider,
-  Box,
-  Button,
-  Text,
-  Center,
-  VStack,
-  Grid,
-  GridItem,
-} from "@chakra-ui/react";
-import {
+  CurrentTracksMap,
+  Data,
   DevicesMap,
   PlaylistsMap,
-  Track,
-  Data,
   Song,
-  CurrentTracksMap,
+  Track,
 } from "../spotify/entities/spotifyEntities.tsx";
-import {
-  requestAuthorization,
-  fetchAccessToken,
-} from "../spotify/authorization/spotifyAuthorization.tsx";
+import { fetchAccessToken } from "../spotify/authorization/spotifyAuthorization.tsx";
 import { fetchDevices } from "../spotify/fetch/fetchDevices.tsx";
 import { fetchPlaylists } from "../spotify/fetch/fetchPlaylists.tsx";
 import { fetchCurrentlyPlaying } from "../spotify/fetch/fetchCurrentlyPlaying.tsx";
@@ -89,7 +75,7 @@ export const SpotifyPage: React.FC = () => {
 
   const findCommonSongs = () => {
     const songsUserArray: { [userIdentifier: string]: Song[] } = {};
-    var commonSongs: Song[] = [];
+    let commonSongs: Song[] = [];
 
     // Loop through each user's playlists
     Object.keys(playlists).forEach((userIdentifier) => {
@@ -138,109 +124,80 @@ export const SpotifyPage: React.FC = () => {
   };
 
   return (
-    <ChakraProvider>
-      <AppLayout>
-        <Box>
-          <Text fontSize="xl" mb={4}>
-            Spotify Page
-          </Text>
+    <>
+      <div>Spotify Page</div>
+      {fetchError && <div>{fetchError}</div>}
 
-          {fetchError && <Text color="red.500">{fetchError}</Text>}
+      <div>
+        {Object.keys(localStorage)
+          .filter((key) => key.startsWith("access_token_"))
+          .map((key) => {
+            const userIdentifier = key.split("_")[2];
+            const userDevices = devices[userIdentifier] || [];
+            const userPlaylists = playlists[userIdentifier] || [];
+            const userCurrentTracks = currentTracks[userIdentifier] || [];
+            const displayName =
+              userDisplayName[userIdentifier] || userIdentifier;
 
-          <Grid templateColumns="repeat(2, 1fr)" gap={8}>
-            {Object.keys(localStorage)
-              .filter((key) => key.startsWith("access_token_"))
-              .map((key) => {
-                const userIdentifier = key.split("_")[2];
-                const userDevices = devices[userIdentifier] || [];
-                const userPlaylists = playlists[userIdentifier] || [];
-                const userCurrentTracks = currentTracks[userIdentifier] || [];
-                const displayName =
-                  userDisplayName[userIdentifier] || userIdentifier;
+            return (
+              <div key={userIdentifier}>
+                <div>
+                  <div>User: {displayName}</div>
+                  <div>Devices:</div>
+                  <ul>
+                    {userDevices.length > 0 ? (
+                      userDevices.map((device) => (
+                        <li key={device.id}>{device.name}</li>
+                      ))
+                    ) : (
+                      <li>No devices registered</li>
+                    )}
+                  </ul>
 
-                return (
-                  <GridItem key={userIdentifier}>
-                    <Box borderWidth="1px" borderRadius="md" p={4}>
-                      <Text mb={2} fontWeight="bold">
-                        User: {displayName}
-                      </Text>
-                      <Text mb={2} fontWeight="bold">
-                        Devices:
-                      </Text>
-                      <ul>
-                        {userDevices.length > 0 ? (
-                          userDevices.map((device) => (
-                            <li key={device.id}>{device.name}</li>
-                          ))
-                        ) : (
-                          <li>No devices registered</li>
-                        )}
-                      </ul>
+                  <div>Playlists:</div>
+                  <ul>
+                    {userPlaylists.length > 0 ? (
+                      userPlaylists.map((playlist) => (
+                        <li key={playlist.id}>{playlist.name}</li>
+                      ))
+                    ) : (
+                      <li>No playlists registered</li>
+                    )}
+                  </ul>
 
-                      <Text mt={4} mb={2} fontWeight="bold">
-                        Playlists:
-                      </Text>
-                      <ul>
-                        {userPlaylists.length > 0 ? (
-                          userPlaylists.map((playlist) => (
-                            <li key={playlist.id}>{playlist.name}</li>
-                          ))
-                        ) : (
-                          <li>No playlists registered</li>
-                        )}
-                      </ul>
+                  <div>Currently Playing:</div>
+                  <ul>
+                    {userCurrentTracks.length > 0 ? (
+                      userCurrentTracks.map((track) => (
+                        <li key={track}>{track}</li>
+                      ))
+                    ) : (
+                      <li>No currently playing track</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            );
+          })}
+      </div>
+      <button>Request Authorization</button>
+      <button onClick={fetchAll}>Fetch All Data</button>
 
-                      <Text mt={4} mb={2} fontWeight="bold">
-                        Currently Playing:
-                      </Text>
-                      <ul>
-                        {userCurrentTracks.length > 0 ? (
-                          userCurrentTracks.map((track) => (
-                            <li key={track}>{track}</li>
-                          ))
-                        ) : (
-                          <li>No currently playing track</li>
-                        )}
-                      </ul>
-                    </Box>
-                  </GridItem>
-                );
-              })}
-          </Grid>
+      <button onClick={findCommonSongs}>Find common songs</button>
 
-          <VStack mt={4} spacing={4}>
-            <Center>
-              <Button colorScheme="blue" onClick={requestAuthorization}>
-                Request Authorization
-              </Button>
-            </Center>
-            <Center>
-              <Button colorScheme="blue" onClick={fetchAll}>
-                Fetch All Data
-              </Button>
-            </Center>
-            <Center>
-              <Button colorScheme="blue" onClick={findCommonSongs}>
-                Find common songs
-              </Button>
-            </Center>
-          </VStack>
-
-          {commonSongs.length > 0 && (
-            <Box mt={4}>
-              <Text fontWeight="bold">Common Songs:</Text>
-              <ul>
-                {commonSongs.map((song) => (
-                  <li key={song.id}>
-                    {song.name} by {song.artists[0].name}
-                  </li>
-                ))}
-              </ul>
-            </Box>
-          )}
-        </Box>
-      </AppLayout>
-    </ChakraProvider>
+      {commonSongs.length > 0 && (
+        <div>
+          <div>Common Songs:</div>
+          <ul>
+            {commonSongs.map((song) => (
+              <li key={song.id}>
+                {song.name} by {song.artists[0].name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
   );
 };
 

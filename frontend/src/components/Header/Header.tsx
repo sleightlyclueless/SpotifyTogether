@@ -1,0 +1,79 @@
+import styled from "styled-components";
+import { FunctionComponent } from "react";
+import { IoPlayBackOutline } from "react-icons/io5";
+import { CiHeadphones } from "react-icons/ci";
+import { IonModal } from "@ionic/react";
+import { UserSettings } from "../UserSettings";
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  position: sticky;
+  top: 16px;
+  padding: 0 16px 32px 24px;
+`;
+
+const Placeholder = styled.div`
+  width: 32px;
+  height: 32px;
+`;
+
+const BackButton = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const PageName = styled.div`
+  font-size: 18px;
+`;
+
+const User = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+`;
+
+const StyledIonModal = styled(IonModal)`
+  --backdrop-opacity: 0.5;
+  --background: #12001a;
+`;
+
+type HeaderProps = {
+  title: string;
+};
+
+export const Header: FunctionComponent<HeaderProps> = ({ title }) => {
+  return (
+    <Container>
+      {title === "Home" ? (
+        <Placeholder></Placeholder>
+      ) : (
+        <BackButton>
+          <IoPlayBackOutline />
+        </BackButton>
+      )}
+      <PageName>{title}</PageName>
+      <User id="open-modal">
+        <CiHeadphones style={{ width: "24px", height: "24px" }} />
+      </User>
+      <StyledIonModal
+        trigger="open-modal"
+        mode={"ios"}
+        initialBreakpoint={0.8}
+        breakpoints={[0.0, 0.8]}
+        handleBehavior={"cycle"}
+      >
+        <UserSettings />
+      </StyledIonModal>
+    </Container>
+  );
+};

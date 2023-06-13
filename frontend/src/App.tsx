@@ -1,25 +1,22 @@
-// Chakra UI components and styling in your application.
-import { ChakraProvider } from "@chakra-ui/react";
-// React Query for data fetching and caching.
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-// React Router components and hooks in your application. -> See 1-AppRoutes.tsx
-import { BrowserRouter } from "react-router-dom";
-import { AppRoutes } from "./AppRoutes.tsx";
-// Handle authentication in your application with User Table and JWT. -> See provider/AuthProvider.tsx
-import { AuthProvider } from "./provider/AuthProvider.tsx";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HOME, SPOTIFY } from "./constants";
+import { HomePage, SpotifyPage } from "./pages";
+import "./globalCSS.css";
+import { IonApp, setupIonicReact } from "@ionic/react";
+import "@ionic/react/css/core.css";
+
+setupIonicReact();
 
 export const App = () => {
-  // TODO: App is rendered twice, why?
-  // console.log("App.tsx");
   return (
-    <ChakraProvider>
-      <QueryClientProvider client={new QueryClient()}>
-        <BrowserRouter>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </ChakraProvider>
+    <IonApp>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/"></Route>
+          <Route path={HOME} element={<HomePage />}></Route>
+          <Route path={SPOTIFY} element={<SpotifyPage />}></Route>
+        </Routes>
+      </BrowserRouter>
+    </IonApp>
   );
 };
