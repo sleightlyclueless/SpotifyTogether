@@ -19,10 +19,10 @@ export class User {
     //image_url: string;
 
     @Property({type: types.text})
-    spotifyAccessToken: string;
+    spotifyAccessToken: string | null;
 
     @Property({type: types.text})
-    spotifyRefreshToken: string;
+    spotifyRefreshToken: string | null;
 
     @Property()
     expiresInMs: number;

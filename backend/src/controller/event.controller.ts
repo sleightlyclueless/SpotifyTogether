@@ -4,15 +4,15 @@ import {EventUser, Permission} from "../entities/EventUser";
 import {EventSettingsController} from "./events.settings.controller";
 import {Event} from "../entities/Event";
 import randomstring from "randomstring";
-import axios from "axios";
-import {EventTrack, TrackStatus} from "../entities/EventTrack";
-import {SpotifyTrack} from "../entities/SpotifyTrack";
-import {User} from "../entities/User";
 import {Auth} from "../middleware/auth.middleware";
+import {PlaylistController} from "./playlist.spotify.controller";
 
 const EVENT_ID_LENGTH: number = 6;
+const MAX_EVENT_ID_GENERATION_RETRIES: number = 100;
 
 const router = Router({mergeParams: true});
+
+router.use(Auth.prepareEventAuthentication);
 
 router.use("/:eventId/settings", Auth.verifyAdminAccess, EventSettingsController);
 router.use("/:eventId/playlist", Auth.verifyParticipantAccess, PlaylistController);
@@ -26,44 +26,40 @@ router.get('/', async (req, res) => {
     //else return res.status(404).json("No Events were found");
 });
 
-    //Return all Events
-    if (allEvents) return res.status(200).json(allEvents);
-    else return res.status(404).json("No Events were found");
-});
-
-/**
- * Creates a new event.
- * **/
+// create a new event
 router.post('/', async (req, res) => {
-    const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
+    // generate random string as eventId
+    let newEventId;
+    let event = null;
+    let retries = 0;
+    do {
+        retries++;
+        newEventId = randomstring.generate(EVENT_ID_LENGTH);
+        event = await DI.em.findOne(Event, {id: newEventId});
+    } while (event != null || retries >= MAX_EVENT_ID_GENERATION_RETRIES);
 
-    
+    // Failed to generate unique id, return internal server error
+    if(retries >= MAX_EVENT_ID_GENERATION_RETRIES && event != null) res.status(500).end();
 
-    if (user) {
-        let newEventId;
-        let event = null;
-        do {
-            newEventId = randomstring.generate(EVENT_ID_LENGTH);
-            event = await DI.em.findOne(Event, {id: newEventId});
-        } while (event != null);
-        event = new Event(newEventId);
-        const eventUser = new EventUser(Permission.OWNER, user, event);
-        await DI.em.persist(event);
-        await DI.em.persist(eventUser);
-        await DI.em.flush();
-        res.status(201).json("TODO FORMAT NEW EVENT DATA");// TODO:
-    } else res.status(404).send("TODO FORMAT NEW EVENT DATA");// TODO:
+    // create event & add user as owner
+    event = new Event(newEventId);
+    const eventUser = new EventUser(Permission.OWNER, req.user!, event);
+    await DI.em.persist(event).persist(eventUser).flush();
+    // TODO: return formatted event data
+    res.status(201).json("data");
 });
 
-/**
- * Returns all data of an event.
- * **/
-router.get('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
-    // TODO: add user to event
-    const event = await DI.em.find(Event, {id: req.params.eventId});
-    //TODO: currently all fields are returned.....
-    if (event) return res.status(200).json(Event);
-    else return res.status(404).json("");
+// fetch all data from one event
+router.get('/:eventId', async (req, res) => {
+    const event = await DI.em.findOne(Event, {id: req.params.eventId});
+    if(event) {
+        // add user if not already existing
+        if(req.eventUser == null) await DI.em.persistAndFlush(new EventUser(Permission.PARTICIPANT, req.user!, event));
+
+        // fetch event data
+        // TODO: return formatted event data
+        return res.status(200).json(event);
+    } else return res.status(404).send("Event not found");
 });
 
 // leave event (except owner)

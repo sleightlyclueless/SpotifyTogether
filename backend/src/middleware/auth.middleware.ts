@@ -2,10 +2,9 @@ import {NextFunction, Request, RequestHandler, Response} from "express";
 import {DI} from "../index";
 import {User} from "../entities/User";
 import {EventUser, Permission} from "../entities/EventUser";
-import {bool} from "yup";
 
-// checks for existing user with valid spotify access_token
-const prepareAuthentication = async (req: Request, _res: Response, next: NextFunction) => {
+// prepare check for existing user with valid spotify access_token
+const prepareUserAuthentication = async (req: Request, _res: Response, next: NextFunction) => {
     const spotifyToken = req.get('Authorization');
     if (spotifyToken) {
         const user = await DI.em.findOne(User, {spotifyAccessToken: spotifyToken});
@@ -15,8 +14,20 @@ const prepareAuthentication = async (req: Request, _res: Response, next: NextFun
     next();
 };
 
-const verifySpotifyAccess: RequestHandler = (req, res, next) => {
-    if (req.user === null) return res.status(401).json({errors: [`You don't have access`]});
+// prepare check if user is part of event
+const prepareEventAuthentication = async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    if (req.params.eventId != undefined) {
+        const eventUser = await DI.em.findOne(EventUser,
+            {
+                event: {id: req.params.eventId},
+                user: {spotifyAccessToken: req.user.spotifyAccessToken}
+            }
+        );
+        if (eventUser) req.eventUser = eventUser;
+        else req.eventUser = null;
+    }
     next();
 };
 
@@ -34,6 +45,7 @@ const verifyEventAccess: RequestHandler = (req, res, next) => {
     next();
 };
 
+
 const verifyParticipantAccess: RequestHandler = async (req, res, next) => {
     if(req.eventUser == null)
         return res.status(403).json({errors: ["You don't have access"]});
@@ -50,10 +62,20 @@ const verifyAdminAccess: RequestHandler = async (req, res, next) => {
     next();
 };
 
+const verifyOwnerAccess: RequestHandler = async (req, res, next) => {
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    if(req.eventUser.permission >= Permission.OWNER)
+        return res.status(403).json({errors: ["You must be at least a participant."]});
+    next();
+};
+
 export const Auth = {
-    prepareAuthentication,
+    prepareUserAuthentication,
+    prepareEventAuthentication,
     verifySpotifyAccess,
-    verifyGuestAccess,
+    verifyEventAccess,
     verifyParticipantAccess,
     verifyAdminAccess,
+    verifyOwnerAccess,
 };

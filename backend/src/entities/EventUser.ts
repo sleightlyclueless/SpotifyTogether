@@ -6,7 +6,6 @@ import {Event} from './Event'
 
 // hierarchical order, top to bottom, every level has all rights of all levels above
 export enum Permission {
-    GUEST = "guest",
     PARTICIPANT = "participant",
     ADMIN = "admin",
     OWNER = "owner",
