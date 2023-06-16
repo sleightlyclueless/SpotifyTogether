@@ -21,7 +21,7 @@ router.use("/:eventId/settings", Auth.verifyAdminAccess, EventSettingsController
 * */
 router.get('/', async (req, res) => {
     // Get All Available Events
-    const allEvents = await DI.em.find(Event,{});
+    const allEvents = await DI.em.find(Event, {});
     console.log(allEvents)
 
     for (const event of allEvents) {
@@ -86,8 +86,7 @@ router.put('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
         if (eventUser.permission != Permission.OWNER) {
             await DI.em.removeAndFlush(eventUser);
             res.status(200).json("todo data");
-        }
-        else res.status(400).send("Owner cant leave event, delete event instead.");
+        } else res.status(400).send("Owner cant leave event, delete event instead.");
     } else res.status(404).send("User not part of event.");
 });
 
@@ -102,7 +101,7 @@ router.delete('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
         }
     );
     if (eventUser) {
-        if(eventUser.permission === Permission.OWNER) {
+        if (eventUser.permission === Permission.OWNER) {
             const event = await DI.em.find(Event, {id: req.params.eventId});
             if (event) {
                 await DI.em.removeAndFlush(event);
