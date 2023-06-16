@@ -6,7 +6,7 @@ import {EntityManager, EntityRepository, MikroORM, RequestContext} from '@mikro-
 import {TagController} from './controller/deprecated/tag.controller';
 import {EventController} from "./controller/event.controller";
 import {SpotifyAuthController} from "./controller/auth.spotify.controller";
-import {SpotifyAuth} from "./middleware/auth.spotify.middleware";
+import {Auth} from "./middleware/auth.middleware";
 
 
 const PORT = 4000;

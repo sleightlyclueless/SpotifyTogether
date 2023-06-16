@@ -2,7 +2,6 @@ import {Router} from "express";
 import {DI} from '../index';
 import {EventUser, Permission} from "../entities/EventUser";
 import {EventSettingsController} from "./events.settings.controller";
-import {EventRoleAuth} from "../middleware/auth.role.middleware";
 import {Event} from "../entities/Event";
 import randomstring from "randomstring";
 import axios from "axios";

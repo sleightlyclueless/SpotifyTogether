@@ -1,7 +1,6 @@
 import express, {Router} from "express";
 import {DI} from "../index";
 import {EventUser, Permission} from "../entities/EventUser";
-import {EventRoleAuth} from "../middleware/auth.role.middleware";
 
 type EventRequest= express.Request<{ eventId: string }>;
 

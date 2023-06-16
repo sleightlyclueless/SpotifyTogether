@@ -5,7 +5,7 @@ import randomstring from "randomstring";
 
 import axios from "axios";
 import {User} from "../entities/User";
-import {SpotifyAuth} from "../middleware/auth.spotify.middleware";
+import {Auth} from "../middleware/auth.middleware";
 
 const router = Router({mergeParams: true});
 
