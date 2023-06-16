@@ -4,7 +4,7 @@ import {date, object, string} from "yup";
 import {Event} from './Event'
 import {User} from "./User";
 import {SpotifyTrack} from "./SpotifyTrack";
-import {UserStatus} from "./EventUser";
+import {Permission} from "./EventUser";
 
 //Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
 

@@ -27,7 +27,7 @@ export class User {
     @Property()
     expiresInMs: number;
 
-    @Property({type: types.date})
+    @Property({type: types.bigint})
     issuedAt: number;
 
 

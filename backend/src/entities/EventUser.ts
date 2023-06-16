@@ -4,27 +4,28 @@ import {Event} from './Event'
 
 //Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
 
-export enum UserStatus {
-    OWNER = "owner",
-    ADMIN = "admin",
+// hierarchical order, top to bottom, every level has all rights of all levels above
+export enum Permission {
+    GUEST = "guest",
     PARTICIPANT = "participant",
-    GUEST = "guest"
+    ADMIN = "admin",
+    OWNER = "owner",
 }
 
 @Entity()
 export class EventUser {
 
-    @ManyToOne({entity: () => Event, primary: true })
+    @ManyToOne({entity: () => Event, primary: true})
     event!: Event;
 
     @ManyToOne({entity: () => User, primary: true})
     user!: User;
 
     @Property()
-    role!: UserStatus;
+    permission!: Permission;
 
-    constructor(role: UserStatus, user: User, event: Event) {
-        this.role = role;
+    constructor(permission: Permission, user: User, event: Event) {
+        this.permission = permission;
         this.user = user;
         this.event = event;
     }

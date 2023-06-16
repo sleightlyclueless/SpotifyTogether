@@ -50,10 +50,6 @@ router.get('/login_response', async (req, res) => {
                 }
             }).then((tokenResponse) => {
 
-                tokenResponse.data.expires_in //-> sekunde
-
-
-
             axios.get(
                 "https://api.spotify.com/v1/me",
                 {
@@ -73,14 +69,22 @@ router.get('/login_response', async (req, res) => {
                 } else {
                     // create new user
                     let currentDate = Date.now();
-                    user = new User(userResponse.data.id, tokenResponse.data.access_token, tokenResponse.data.refresh_token,currentDate,tokenResponse.data.expiresIn );
+                    user = new User(
+                        userResponse.data.id,
+                        tokenResponse.data.access_token,
+                        tokenResponse.data.refresh_token,
+                        tokenResponse.data.expires_in * 1000,
+                        currentDate);
                     await DI.em.persistAndFlush(user);
                     return res.status(201).json({access_token: user.spotifyAccessToken});
                 }
             }).catch(function (error: Error) {
+                console.log("spotify user not found");
+                console.log(error.message);
                 return res.status(400).send(error); // TODO: rework error
             });
         }).catch(function (error: Error) {
+            console.log("token request failed");
             return res.status(400).send(error); // TODO: rework error
         });
     }
