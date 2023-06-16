@@ -1,9 +1,9 @@
 import express, {Router} from "express";
 import {DI} from "../index";
-import {EventUser, UserStatus} from "../entities/EventUser";
+import {EventUser, Permission} from "../entities/EventUser";
 import {EventRoleAuth} from "../middleware/auth.role.middleware";
 
-type EventRequest = express.Request<{ eventId: string }>;
+type EventRequest= express.Request<{ eventId: string }>;
 
 const router = Router({mergeParams: true});
 
@@ -24,7 +24,7 @@ router.get('/participants', async (req: EventRequest, res) => {
         //event was found
         for (const user of allUsers) {
             console.log(user.user.spotifyId);
-            console.log(user.role);
+            console.log(user.permission);
             // TODO: name, img
         }
         console.log("EventUsers found");
@@ -51,8 +51,8 @@ router.put('/participants/:spotifyUserId', async (req: express.Request<{
             event: {id: req.params.eventId}
         });
         if (targetUser) {
-            if (targetUser.role == UserStatus.OWNER) return res.status(403).json({errors: "Owner cant be kicked."});
-            if (targetUser.role == UserStatus.ADMIN && requestingUser.role == UserStatus.ADMIN)
+            if (targetUser.permission == Permission.OWNER) return res.status(403).json({errors: "Owner cant be kicked."});
+            if (targetUser.permission == Permission.ADMIN && requestingUser.permission == Permission.ADMIN)
                 return res.status(403).json({errors: "Admins cant be kicked."});
             await DI.em.removeAndFlush(targetUser);
             return res.status(204).send({errors: "User successfully Removed."});
@@ -61,10 +61,10 @@ router.put('/participants/:spotifyUserId', async (req: express.Request<{
 });
 
 // Change user role
-router.put('/participants/:spotifyUserId/:roleId', async (req: express.Request<{
+router.put('/participants/:spotifyUserId/:permissions', async (req: express.Request<{
     eventId: string,
     spotifyUserId: string,
-    roleId: UserStatus
+    permissions: Permission
 }>, res) => {
 
     const requestingUser = await DI.em.findOne(EventUser, {
@@ -77,10 +77,11 @@ router.put('/participants/:spotifyUserId/:roleId', async (req: express.Request<{
             event: {id: req.params.eventId}
         });
         if (targetUser) {
-            if (targetUser.role == UserStatus.OWNER) return res.status(403).json({errors: "Owner cant be modified."});
-            if (targetUser.role == UserStatus.ADMIN && requestingUser.role == UserStatus.ADMIN)
+            if (targetUser.permission == Permission.OWNER) return res.status(403).json({errors: "Owner cant be modified."});
+            if (targetUser.permission == Permission.ADMIN && requestingUser.permission == Permission.ADMIN)
                 return res.status(403).json({errors: "Admins cant be updated by other Admins."});
-            targetUser.role = req.params.roleId;
+            // TODO: how about some type checking ??? permissions can be any string lol
+            targetUser.permission = req.params.permissions;
             await DI.em.persistAndFlush(targetUser);
             return res.status(204).send({errors: "User successfully updated."});
         } else return res.status(404).json({errors: "The target user was not found."});

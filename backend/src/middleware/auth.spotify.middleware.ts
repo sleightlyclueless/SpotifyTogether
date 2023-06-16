@@ -6,6 +6,7 @@ const prepareAuthentication = async (req: Request, _res: Response, next: NextFun
     const spotifyToken = req.get('Authorization');
     if (spotifyToken) {
         const user = await DI.em.findOne(User, {spotifyAccessToken: spotifyToken});
+        if(user) req.user = user;
         if (user && Date.now() <= user.issuedAt + user.expiresInMs) req.userSpotifyAccessToken = spotifyToken;
         else req.userSpotifyAccessToken = null;
     } else req.userSpotifyAccessToken = null;

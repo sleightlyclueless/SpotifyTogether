@@ -1,6 +1,6 @@
 import {Router} from "express";
 import {DI} from '../index';
-import {EventUser, UserStatus} from "../entities/EventUser";
+import {EventUser, Permission} from "../entities/EventUser";
 import {EventSettingsController} from "./events.settings.controller";
 import {EventRoleAuth} from "../middleware/auth.role.middleware";
 import {Event} from "../entities/Event";
@@ -49,7 +49,7 @@ router.post('/', async (req, res) => {
             event = await DI.em.findOne(Event, {id: newEventId});
         } while (event != null);
         event = new Event(newEventId);
-        const eventUser = new EventUser(UserStatus.OWNER, user, event);
+        const eventUser = new EventUser(Permission.OWNER, user, event);
         await DI.em.persist(event);
         await DI.em.persist(eventUser);
         await DI.em.flush();
@@ -80,7 +80,7 @@ router.put('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
         }
     );
     if (eventUser) {
-        if (eventUser.role != UserStatus.OWNER) {
+        if (eventUser.permission != Permission.OWNER) {
             await DI.em.removeAndFlush(eventUser);
             res.status(200).json("todo data");
         }
@@ -99,7 +99,7 @@ router.delete('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => 
         }
     );
     if (eventUser) {
-        if(eventUser.role === UserStatus.OWNER) {
+        if(eventUser.permission === Permission.OWNER) {
             const event = await DI.em.find(Event, {id: req.params.eventId});
             if (event) {
                 await DI.em.removeAndFlush(event);
