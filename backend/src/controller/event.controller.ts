@@ -8,12 +8,13 @@ import axios from "axios";
 import {EventTrack, TrackStatus} from "../entities/EventTrack";
 import {SpotifyTrack} from "../entities/SpotifyTrack";
 import {User} from "../entities/User";
+import {Auth} from "../middleware/auth.middleware";
 
 const EVENT_ID_LENGTH: number = 6;
 
 const router = Router({mergeParams: true});
 
-router.use("/:eventId/settings", EventRoleAuth.verifyAdminAccess, EventSettingsController);
+router.use("/:eventId/settings", Auth.verifyAdminAccess, EventSettingsController);
 
 /*
 * Get All events
@@ -40,6 +41,9 @@ router.get('/', async (req, res) => {
  * **/
 router.post('/', async (req, res) => {
     const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
+
+    
+
     if (user) {
         let newEventId;
         let event = null;
@@ -59,7 +63,7 @@ router.post('/', async (req, res) => {
 /**
  * Returns all data of an event.
  * **/
-router.get('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
+router.get('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
     // TODO: add user to event
     const event = await DI.em.find(Event, {id: req.params.eventId});
     //TODO: currently all fields are returned.....
@@ -71,7 +75,7 @@ router.get('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
  * Removes the user form the event.
  * Owner can not leave event. He should delete instead.
  * **/
-router.put('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
+router.put('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
     const eventUser = await DI.em.findOne(EventUser,
         {
             event: {id: req.params.eventId},
@@ -90,7 +94,7 @@ router.put('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
 /**
  * Delete event.
  * **/
-router.delete('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => {
+router.delete('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
     const eventUser = await DI.em.findOne(EventUser,
         {
             event: {id: req.params.eventId},
@@ -111,7 +115,7 @@ router.delete('/:eventId', EventRoleAuth.verifyGuestAccess, async (req, res) => 
 /*
 * Add Spotify Track to Event
 * */
-router.get('/:eventId/suggest/:trackId', EventRoleAuth.verifyParticipantAccess, async (req, res) => {
+router.get('/:eventId/suggest/:trackId', Auth.verifyParticipantAccess, async (req, res) => {
     axios.get(
         "https://api.spotify.com/v1/tracks" + req.params.trackId,
         {

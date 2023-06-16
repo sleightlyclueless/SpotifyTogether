@@ -90,7 +90,7 @@ router.get('/login_response', async (req, res) => {
     }
 });
 
-router.put('/refresh_token', SpotifyAuth.verifyAccess, async (req, res) => {
+router.put('/refresh_token', Auth.verifySpotifyAccess, async (req, res) => {
     const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
     if (user) {
         axios.post(
@@ -114,13 +114,13 @@ router.put('/refresh_token', SpotifyAuth.verifyAccess, async (req, res) => {
     } else return res.status(404).send("User not found.");
 });
 
-router.get('/spotifyUserId/:spotifyToken', SpotifyAuth.verifyAccess, async (req, res) => {
+router.get('/spotifyUserId/:spotifyToken', Auth.verifySpotifyAccess, async (req, res) => {
     const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
     if (user) return res.status(201).json({spotifyUserId: user.spotifyId});
     else return res.status(404).send("User not found.");
 });
 
-router.put('/logout', SpotifyAuth.verifyAccess, async (req, res) => {
+router.put('/logout', Auth.verifySpotifyAccess, async (req, res) => {
     // TODO: reset token ?
     const user = await DI.em.findOne(User, {spotifyAccessToken: req.userSpotifyAccessToken});
     if (user) {

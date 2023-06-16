@@ -44,9 +44,7 @@ const verifyParticipantAccess: RequestHandler = async (req, res, next) => {
             }
         );
         if (eventUser) {
-            if (eventUser.permission == Permission.OWNER
-                || eventUser.permission == Permission.ADMIN
-                || eventUser.permission == Permission.PARTICIPANT) next();
+            if (eventUser.permission >= Permission.OWNER) next();
             else return res.status(403).send("User not authorized.");
         } else return res.status(401).send("User is not part of this event.");
     }

@@ -54,11 +54,11 @@ export const initializeServer = async () => {
 
 
     //app.use(Auth.prepareAuthentication);
-    app.use(SpotifyAuth.prepareAuthentication);
+    app.use(Auth.prepareAuthentication);
 
     // routes
     app.use('/account', SpotifyAuthController);
-    app.use('/events', SpotifyAuth.verifyAccess, EventController);
+    app.use('/events', Auth.verifyGuestAccess, EventController);
 
     DI.server = app.listen(PORT, () => {
         console.log(`Server started on port ${PORT}`);
