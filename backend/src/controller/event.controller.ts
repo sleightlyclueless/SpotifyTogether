@@ -83,42 +83,4 @@ router.delete('/:eventId', Auth.verifyOwnerAccess, async (req, res) => {
     } else return res.status(404).json("Event not found.");
 });
 
-/*
-* Add Spotify Track to Event
-* */
-router.get('/:eventId/suggest/:trackId', Auth.verifyParticipantAccess, async (req, res) => {
-    axios.get(
-        "https://api.spotify.com/v1/tracks" + req.params.trackId,
-        {
-            headers: {
-                Authorization: `Bearer ${req.userSpotifyAccessToken}`,
-            },
-        }).then(async (trackResponse) => {
-        let track = await DI.em.findOne(SpotifyTrack, trackResponse.data.id);
-        if (track) {
-            //track was found in list
-            console.log("track is already in Database");
-        } else {
-            // insert track to Database
-            track = new SpotifyTrack(trackResponse.data.id, trackResponse.data.genre, trackResponse.data.genre, trackResponse.data.artist);
-            await DI.em.persistAndFlush(track);
-        }
-        //push track to Eventlist
-        //let track2 = await DI.em.findOne(SpotifyTrack, req.params.trackId);
-        let event = await DI.em.findOne(Event, req.params.eventId);
-        if (event) {
-            //write Track to EventTrack list
-            const insertEventTrack = new EventTrack(TrackStatus.proposed, track, event);
-            await DI.em.persistAndFlush(insertEventTrack);
-            console.log("track was added to EventList");
-        } else {
-            // event was not found
-            return res.status(400).json({error: "Did not find Event"});// TODO: rework error
-        }
-        return res.status(201).json({information: "Track was added to Playlist"});
-    }).catch(function (error: Error) {
-        return res.status(400).send(error); // TODO: rework error
-    });
-});
-
 export const EventController = router;

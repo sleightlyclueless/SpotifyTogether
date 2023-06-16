@@ -43,18 +43,11 @@ const verifyParticipantAccess: RequestHandler = async (req, res, next) => {
 };
 
 const verifyAdminAccess: RequestHandler = async (req, res, next) => {
-    if (req.params.eventId != undefined) {
-        const eventUser = await DI.em.findOne(EventUser,
-            {
-                event: {id: req.params.eventId},
-                user: {spotifyAccessToken: req.userSpotifyAccessToken}
-            }
-        );
-        if (eventUser) {
-            if (eventUser.permission == Permission.OWNER || eventUser.permission == Permission.ADMIN) next();
-            else return res.status(403).send("User not authorized.");
-        } else return res.status(401).send("User is not part of this event.");
-    }
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    if(req.eventUser.permission >= Permission.ADMIN)
+        return res.status(403).json({errors: ["You must be at least a participant."]});
+    next();
 };
 
 export const Auth = {

@@ -17,7 +17,7 @@ router.get('/participants', async (req: EventRequest, res) => {
     const allUsers = await DI.em.find(EventUser,
         {
             event: {id: req.params.eventId},
-            user: {spotifyAccessToken: req.userSpotifyAccessToken}
+            user: {spotifyAccessToken: req.user!.spotifyAccessToken}
         });
     if (allUsers) {
         //event was found
@@ -41,7 +41,7 @@ router.put('/participants/:spotifyUserId', async (req: express.Request<{
     spotifyUserId: string
 }>, res) => {
     const requestingUser = await DI.em.findOne(EventUser, {
-        user: {spotifyAccessToken: req.userSpotifyAccessToken},
+        user: {spotifyAccessToken: req.user!.spotifyAccessToken},
         event: {id: req.params.eventId}
     });
     if (requestingUser) {
@@ -67,7 +67,7 @@ router.put('/participants/:spotifyUserId/:permissions', async (req: express.Requ
 }>, res) => {
 
     const requestingUser = await DI.em.findOne(EventUser, {
-        user: {spotifyAccessToken: req.userSpotifyAccessToken},
+        user: {spotifyAccessToken: req.user!.spotifyAccessToken},
         event: {id: req.params.eventId}
     });
     if (requestingUser) {
