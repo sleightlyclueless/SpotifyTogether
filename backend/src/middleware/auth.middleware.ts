@@ -20,34 +20,26 @@ const verifySpotifyAccess: RequestHandler = (req, res, next) => {
     next();
 };
 
-const verifyGuestAccess: RequestHandler = async (req, res, next) => {
-    if (req.params.eventId != undefined) {
-        const eventUser = await DI.em.findOne(EventUser,
-            {
-                event: {id: req.params.eventId},
-                user: {spotifyAccessToken: req.userSpotifyAccessToken}
-            }
-        );
-        if (eventUser) {
-            console.log(eventUser.permission >= Permission.PARTICIPANT);
-            next();
-        } else return res.status(401).send("User is not part of this event.");
-    }
+// checks if user is logged in with a valid spotify access_token
+const verifySpotifyAccess: RequestHandler = (req, res, next) => {
+    if (req.user == null)
+        return res.status(401).json({errors: ["You don't have access"]});
+    next();
+};
+
+// check whether if the user is part of this event
+const verifyEventAccess: RequestHandler = (req, res, next) => {
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    next();
 };
 
 const verifyParticipantAccess: RequestHandler = async (req, res, next) => {
-    if (req.params.eventId != undefined) {
-        const eventUser = await DI.em.findOne(EventUser,
-            {
-                event: {id: req.params.eventId},
-                user: {spotifyAccessToken: req.userSpotifyAccessToken}
-            }
-        );
-        if (eventUser) {
-            if (eventUser.permission >= Permission.OWNER) next();
-            else return res.status(403).send("User not authorized.");
-        } else return res.status(401).send("User is not part of this event.");
-    }
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    if(req.eventUser.permission >= Permission.PARTICIPANT)
+        return res.status(403).json({errors: ["You must be at least a participant."]});
+    next();
 };
 
 const verifyAdminAccess: RequestHandler = async (req, res, next) => {

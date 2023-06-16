@@ -15,21 +15,16 @@ const EVENT_ID_LENGTH: number = 6;
 const router = Router({mergeParams: true});
 
 router.use("/:eventId/settings", Auth.verifyAdminAccess, EventSettingsController);
+router.use("/:eventId/playlist", Auth.verifyParticipantAccess, PlaylistController);
 
-/*
-* Get All events
-* */
+// fetch all events of user
 router.get('/', async (req, res) => {
-    // Get All Available Events
-    const allEvents = await DI.em.find(Event, {});
-    console.log(allEvents)
+    // TODO: only return events specific to the user
 
-    for (const event of allEvents) {
-        console.log(event.id);
-        console.log(event.UserList)
-        console.log(event.duration)
-        console.log(event.TrackList)
-    }
+    //const allEvents = await DI.em.find(Event, {});
+    //if (allEvents) return res.status(200).json(allEvents);
+    //else return res.status(404).json("No Events were found");
+});
 
     //Return all Events
     if (allEvents) return res.status(200).json(allEvents);
@@ -71,44 +66,21 @@ router.get('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
     else return res.status(404).json("");
 });
 
-/**
- * Removes the user form the event.
- * Owner can not leave event. He should delete instead.
- * **/
-router.put('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
-    const eventUser = await DI.em.findOne(EventUser,
-        {
-            event: {id: req.params.eventId},
-            user: {spotifyAccessToken: req.userSpotifyAccessToken}
-        }
-    );
-    if (eventUser) {
-        if (eventUser.permission != Permission.OWNER) {
-            await DI.em.removeAndFlush(eventUser);
-            res.status(200).json("todo data");
-        } else res.status(400).send("Owner cant leave event, delete event instead.");
-    } else res.status(404).send("User not part of event.");
+// leave event (except owner)
+router.put('/:eventId', Auth.verifyEventAccess, async (req, res) => {
+    if (req.eventUser!.permission == Permission.OWNER)
+        return res.status(400).send("Owner cant leave event, delete event instead.");
+    await DI.em.removeAndFlush(req.eventUser);
+    res.status(200).end();
 });
 
-/**
- * Delete event.
- * **/
-router.delete('/:eventId', Auth.verifyGuestAccess, async (req, res) => {
-    const eventUser = await DI.em.findOne(EventUser,
-        {
-            event: {id: req.params.eventId},
-            user: {spotifyAccessToken: req.userSpotifyAccessToken}
-        }
-    );
-    if (eventUser) {
-        if (eventUser.permission === Permission.OWNER) {
-            const event = await DI.em.find(Event, {id: req.params.eventId});
-            if (event) {
-                await DI.em.removeAndFlush(event);
-                return res.status(200).end();
-            } else return res.status(404).json("Event not found.");
-        } else return res.status(401).json("You are not the owner of this event.");
-    } else return res.status(404).json("User is not part of this event");
+// delete one event
+router.delete('/:eventId', Auth.verifyOwnerAccess, async (req, res) => {
+    const event = await DI.em.find(Event, {id: req.params.eventId});
+    if (event) {
+        await DI.em.removeAndFlush(event);
+        return res.status(200).end();
+    } else return res.status(404).json("Event not found.");
 });
 
 /*
