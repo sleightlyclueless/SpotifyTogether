@@ -1,74 +1,80 @@
-import bcrypt from 'bcrypt';
-import { NextFunction, Request, RequestHandler, Response } from 'express';
-import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
+import {NextFunction, Request, RequestHandler, Response} from "express";
+import {DI} from "../index";
+import {User} from "../entities/User";
+import {EventUser, Permission} from "../entities/EventUser";
 
-import { DI } from '../index';
-
-const BCRYPT_SALT = 10;
-//!! This should load from env - not hardcoded!
-const JWT_SECRET = 'JWT_SECRET';
-const JWT_OPTIONS: SignOptions = {
-  expiresIn: 3600, // in seconds
-  issuer: 'http://fwe.auth',
+// prepare check for existing user with valid spotify access_token
+const prepareUserAuthentication = async (req: Request, _res: Response, next: NextFunction) => {
+    const spotifyToken = req.get('Authorization');
+    if (spotifyToken) {
+        const user = await DI.em.findOne(User, {spotifyAccessToken: spotifyToken});
+        if (user && Date.now() <= user.issuedAt + user.expiresInMs) req.user = user;
+        else req.user = null;
+    } else req.user = null;
+    next();
 };
 
-// password functionality
-const hashPassword = (password: string) => bcrypt.hash(password, BCRYPT_SALT);
-const comparePasswordWithHash = async (password: string, hash: string) => {
-  try {
-    return await bcrypt.compare(password, hash);
-  } catch {
-    return false;
-  }
-};
-
-// jwt functionality
-type JwtUserData = {
-  email: string;
-  firstName: string;
-  id: string;
-  lastName: string;
-};
-export type JWTToken = JwtUserData & JwtPayload;
-
-const generateToken = (payload: JwtUserData) => {
-  return jwt.sign(payload, JWT_SECRET, JWT_OPTIONS);
-};
-const verifyToken = (token: string) => {
-  return jwt.verify(token, JWT_SECRET) as JWTToken;
-};
-
-// middleware
-const prepareAuthentication = async (req: Request, _res: Response, next: NextFunction) => {
-  const authHeader = req.get('Authorization');
-  if (authHeader) {
-    try {
-      const token = verifyToken(authHeader);
-      req.user = await DI.userRepository.findOne(token.id);
-      req.token = token;
-    } catch (e) {
-      console.error(e);
+// prepare check if user is part of event
+const prepareEventAuthentication = async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user == null)
+        return res.status(401).json({errors: ["You don't have access"]});
+    if (req.params.eventId != undefined) {
+        const eventUser = await DI.em.findOne(EventUser,
+            {
+                event: {id: req.params.eventId},
+                user: {spotifyAccessToken: req.user.spotifyAccessToken}
+            }
+        );
+        if (eventUser) req.eventUser = eventUser;
+        else req.eventUser = null;
     }
-  } else {
-    req.user = null;
-    req.token = null;
-  }
-  next();
+    next();
 };
 
-const verifyAccess: RequestHandler = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ errors: [`You don't have access`] });
-  }
-  next();
+// checks if user is logged in with a valid spotify access_token
+const verifySpotifyAccess: RequestHandler = (req, res, next) => {
+    if (req.user == null)
+        return res.status(401).json({errors: ["You don't have access"]});
+    next();
 };
 
-// exports
+// check whether if the user is part of this event
+const verifyEventAccess: RequestHandler = (req, res, next) => {
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    next();
+};
+
+const verifyParticipantAccess: RequestHandler = async (req, res, next) => {
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    if(req.eventUser.permission >= Permission.PARTICIPANT)
+        return res.status(403).json({errors: ["You must be at least a participant."]});
+    next();
+};
+
+const verifyAdminAccess: RequestHandler = async (req, res, next) => {
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    if(req.eventUser.permission >= Permission.ADMIN)
+        return res.status(403).json({errors: ["You must be at least a participant."]});
+    next();
+};
+
+const verifyOwnerAccess: RequestHandler = async (req, res, next) => {
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["You don't have access"]});
+    if(req.eventUser.permission >= Permission.OWNER)
+        return res.status(403).json({errors: ["You must be at least a participant."]});
+    next();
+};
+
 export const Auth = {
-  comparePasswordWithHash,
-  generateToken,
-  hashPassword,
-  prepareAuthentication,
-  verifyAccess,
-  verifyToken,
+    prepareUserAuthentication,
+    prepareEventAuthentication,
+    verifySpotifyAccess,
+    verifyEventAccess,
+    verifyParticipantAccess,
+    verifyAdminAccess,
+    verifyOwnerAccess,
 };

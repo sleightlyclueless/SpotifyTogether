@@ -1,54 +1,46 @@
-import { object, string } from 'yup';
-
-import { Collection, Entity, OneToMany, Property } from '@mikro-orm/core';
-
-import { BaseEntity } from './BaseEntity';
-import { DiaryEntry, DiaryEntryTag } from './index';
+import {object, string} from 'yup';
+import {Collection, Entity, OneToMany, PrimaryKey, Property, types} from '@mikro-orm/core';
+import {EventUser} from "./EventUser";
 
 @Entity()
-export class User extends BaseEntity {
-  @Property()
-  email: string;
+export class User {
+    @PrimaryKey()
+    spotifyId: string;
 
-  @Property({ hidden: true })
-  password: string;
+    // TODO: additional user profile info
+    //@Property({type: types.text})
+    //display_name: string;
+    //@Property({type: types.text})
+    //image_url: string;
 
-  @Property()
-  firstName: string;
+    @Property({type: types.text})
+    spotifyAccessToken: string | null;
 
-  @Property()
-  lastName: string;
+    @Property({type: types.text})
+    spotifyRefreshToken: string | null;
 
-  @OneToMany(() => DiaryEntry, (e) => e.creator)
-  diaryEntries = new Collection<DiaryEntry>(this);
+    @Property()
+    expiresInMs: number;
 
-  @OneToMany(() => DiaryEntryTag, (e) => e.creator)
-  tags = new Collection<DiaryEntryTag>(this);
+    @Property({type: types.bigint})
+    issuedAt: number;
 
-  constructor({ lastName, firstName, email, password }: RegisterUserDTO) {
-    super();
-    this.email = email;
-    this.password = password;
-    this.firstName = firstName;
-    this.lastName = lastName;
-  }
+    //@Property({type: types.text})
+    //spotifyTokenSalt: string; // TODO: encrypt tokens to safely store them
+
+    @OneToMany(() => EventUser, (EventUser) => EventUser.user)
+    eventUsers = new Collection<EventUser>(this);
+
+    constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string, expires_in_ms: number, issued_at: number) {
+        this.spotifyId = userID;
+        this.spotifyAccessToken = spotifyToken;
+        this.spotifyRefreshToken = SpotifyRefreshToken;
+        this.expiresInMs = expires_in_ms;
+        this.issuedAt = issued_at;
+    }
 }
 
-export const RegisterUserSchema = object({
-  email: string().required(),
-  password: string().required(),
-  firstName: string().required(),
-  lastName: string().required(),
-});
-
-export type RegisterUserDTO = {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-};
-
 export const LoginSchema = object({
-  email: string().required(),
-  password: string().required(),
+    email: string().required(),
+    password: string().required(),
 });
