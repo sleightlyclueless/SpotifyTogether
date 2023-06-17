@@ -1,11 +1,6 @@
-import {date, object, string} from 'yup';
-
+import {object, string} from 'yup';
 import {Collection, Entity, OneToMany, PrimaryKey, Property, types} from '@mikro-orm/core';
-
-import {Event} from './Event'
 import {EventUser} from "./EventUser";
-
-//User:EventList[Event],name,UserID
 
 @Entity()
 export class User {
@@ -30,13 +25,11 @@ export class User {
     @Property({type: types.bigint})
     issuedAt: number;
 
-
-
     //@Property({type: types.text})
     //spotifyTokenSalt: string; // TODO: encrypt tokens to safely store them
 
     @OneToMany(() => EventUser, (EventUser) => EventUser.user)
-    EventList = new Collection<EventUser>(this);
+    eventUsers = new Collection<EventUser>(this);
 
     constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string, expires_in_ms: number, issued_at: number) {
         this.spotifyId = userID;
@@ -46,7 +39,6 @@ export class User {
         this.issuedAt = issued_at;
     }
 }
-
 
 export const LoginSchema = object({
     email: string().required(),

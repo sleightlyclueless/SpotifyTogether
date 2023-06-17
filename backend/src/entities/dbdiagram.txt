@@ -1,0 +1,51 @@
+// https://dbdiagram.io
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table User {
+  spotifyId varchar [primary key]
+  spotifyAccessToken varchar
+  spotifyRefreshToken varchar
+  expiresInMs bigint
+  issuedAt bigint
+}
+
+Table EventUser {
+  user User [primary key]
+  event Event [primary key]
+  permission Permission
+}
+
+Table Event {
+  id varchar [primary key]
+  duration integer
+}
+
+Table EventTrack {
+  event Event [primary key]
+  track SpotifyTrack [primary key]
+  status TrackStatus
+}
+
+Table SpotifyTrack {
+  id varchar [primary key]
+  genre varchar
+  duration integer
+  artist varchar
+}
+
+Table SpotifyPlaylist {
+  id varchar [primary key]
+  duration bigint
+  event Event
+  tracks EvenTrack
+}
+
+Ref: EventUser.user > User.spotifyId
+Ref: EventUser.event > Event.id
+
+Ref: EventTrack.event > Event.id
+Ref: EventTrack.event > SpotifyTrack.id
+
+Ref: SpotifyPlaylist.tracks > EventTrack.track
+//Ref: SpotifyPlaylist.event - Event.id

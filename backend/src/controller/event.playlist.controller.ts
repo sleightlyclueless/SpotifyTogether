@@ -1,19 +1,25 @@
 import {Router} from "express";
 import {DI} from '../index';
-import {EventUser, Permission} from "../entities/EventUser";
-import {EventSettingsController} from "./events.settings.controller";
 import {Event} from "../entities/Event";
-import randomstring from "randomstring";
 import axios from "axios";
 import {EventTrack, TrackStatus} from "../entities/EventTrack";
 import {SpotifyTrack} from "../entities/SpotifyTrack";
 import {SpotifyPlaylist} from "../entities/SpotifyPlaylist";
-import {User} from "../entities/User";
 import {Auth} from "../middleware/auth.middleware";
 
 const EVENT_ID_LENGTH: number = 6;
 
 const router = Router({mergeParams: true});
+
+// create a few random playlist & song samples to allow easier testing
+/*router.get('/create_samples', async (req, res) => {
+
+    const playlist1 = new SpotifyPlaylist("random_id");
+
+    playlist1.eventTracks.add(new SpotifyTrack("", 123, "", "Uhrensohn der II"));
+
+    return res.status(200).end();
+});*/
 
 /*
 * Get All Playlists
@@ -25,7 +31,7 @@ router.get('/', async (req, res) => {
 
     for (const list of allPlaylists) {
         console.log(list.id);
-        console.log(list.TrackList)
+        console.log(list.tracks)
         console.log(list.duration)
     }
 
@@ -37,6 +43,7 @@ router.get('/', async (req, res) => {
 /*
 * Add Spotify Track to Event
 * */
+// TODO: should be post ?
 router.get('/suggest/:trackId', Auth.verifyParticipantAccess, async (req, res) => {
     axios.get(
         "https://api.spotify.com/v1/tracks" + req.params.trackId,
@@ -72,10 +79,63 @@ router.get('/suggest/:trackId', Auth.verifyParticipantAccess, async (req, res) =
     });
 });
 
-/** TODO
+/**
  * Add Spotify Playlist to Event
  * **/
+// TODO: should be post ?
+router.get('/suggest/:playlistId', Auth.verifyParticipantAccess, async (req, res) => {
+    /* axios.get(
+         "https://api.spotify.com/v1/playlists" + req.params.trackId,
+         {
+             headers: {
+                 Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
+             },
+         }).then(async (playlistResponse) => {
+         let list = await DI.em.findOne(SpotifyPlaylist, playlistResponse.data.id);
+         if (list) {
+             //track was found in list
+             console.log("playlist is already in Database");
+         } else {
+             // insert playlist to Database
+             list = new SpotifyPlaylist(playlistResponse.data.id, 0);
+             //for each
+             for (const track of playlistResponse.data.tracks.items) {
 
+             }
+             //list.eventTracks = playlistResponse.data.TrackList;
+
+
+             await DI.em.persistAndFlush(list);
+         }
+         //push playlist to Eventlist
+         /*let event = await DI.em.findOne(Event, req.params.eventId);
+         let eventTracks = await DI.em.find(EventTrack, {event: event});
+         if (event) {
+             for (const track of list.eventTracks) {
+
+
+                 // sample code
+                 for (const eventTrack of event.eventTracks) {
+                     if (eventTrack.track.id == track.id) {
+                         const insertEventTrack = new EventTrack(TrackStatus.proposed, track, event);
+                         await DI.em.persist(insertEventTrack);
+                     }
+                 }
+
+
+             }
+             await DI.em.flush();
+             //write Track to EventTrack list
+             console.log("playlist was added to EventList");
+         } else {
+             // event was not found
+             return res.status(400).json({error: "Did not find Event"});// TODO: rework error
+         }
+         return res.status(201).json({information: "Track was added to Playlist"});
+     }).catch(function (error: Error) {
+         return res.status(400).send(error); // TODO: rework error
+     });*/
+});
 
 
 /**
@@ -83,7 +143,7 @@ router.get('/suggest/:trackId', Auth.verifyParticipantAccess, async (req, res) =
  * **/
 router.post('/:playlistId', async (req, res) => {
     axios.get(
-        "https://api.spotify.com/v1/playlist/"+req.params.playlistId,
+        "https://api.spotify.com/v1/playlist/" + req.params.playlistId,
         {
             headers: {
                 Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
@@ -92,7 +152,7 @@ router.post('/:playlistId', async (req, res) => {
         let playlist = await DI.em.findOne(SpotifyPlaylist, playlistResponse.data.id);
         if (playlist) {
             // update playlist
-            playlist.TrackList = playlistResponse.data.TrackList;
+            playlist.tracks = playlistResponse.data.eventTracks;
             playlist.duration = playlistResponse.data.duration;
             await DI.em.persistAndFlush(playlist);
             return res.status(200).json({error: "updated Playlist"});
@@ -102,9 +162,9 @@ router.post('/:playlistId', async (req, res) => {
                 playlistResponse.data.id,
                 playlistResponse.data.duration,
             );
-            playlist!.TrackList = playlistResponse.data.TrackList;
+            playlist!.tracks = playlistResponse.data.tracks;
             await DI.em.persistAndFlush(playlist);
-            return res.status(201).json({error:"created Playlist"});
+            return res.status(201).json({error: "created Playlist"});
         }
     }).catch(function (error: Error) {
         console.log("Spotify Playlist not found");
@@ -114,8 +174,9 @@ router.post('/:playlistId', async (req, res) => {
 });
 
 /**
- * Returns all data of an Playlist.
+ * Returns all data of a Playlist.
  * **/
+// TODO: spotify access makes no sense, user auth is already handled by middleware in front of /events route, /events/:eventId/playlist also checks for participant access
 router.get('/:playlistId', Auth.verifySpotifyAccess, async (req, res) => {
     const list = await DI.em.find(SpotifyPlaylist, {id: req.params.playlistId});
     if (list) return res.status(200).json(list);
@@ -125,25 +186,20 @@ router.get('/:playlistId', Auth.verifySpotifyAccess, async (req, res) => {
 /**
  * Delete Playlist.
  * **/
-/*router.delete('/:playlistId', Auth.verifySpotifyAccess, async (req, res) => {
-
+// TODO: spotify access makes no sense, user auth is already handled by middleware in front of /events route, /events/:eventId/playlist also checks for participant access
+router.delete('/:playlistId', Auth.verifySpotifyAccess, async (req, res) => {
     const playlist = await DI.em.findOne(SpotifyPlaylist,
-        {id: req.params.playlistId}
+        {id: req.params.playlistId}, {populate: ["tracks"]}
     );
-    const trackPlaylists = await DI.em.find(SpotifyTrack,
-        {
-    isInPlaylist{id:  req.params.playlistId}
-        }
-    )
     if (playlist) {
-        if (eventUser.permission === Permission.OWNER) {
-            const event = await DI.em.find(Event, {id: req.params.eventId});
-            if (event) {
-                await DI.em.removeAndFlush(event);
-                return res.status(200).end();
-            } else return res.status(404).json("Event not found.");
-        } else return res.status(401).json("You are not the owner of this event.");
-    } else return res.status(404).json("User is not part of this event");
-});*/
+        for (const track of playlist.tracks) {
+            // check if in event
+            if (track.eventTracks.length <= 1) await DI.em.remove(track);
+        }
+        await DI.em.removeAndFlush(playlist);
+        return res.status(200).end();
+    } else return res.status(404).json("Playlist not found.");
+
+});
 
 export const PlaylistController = router;

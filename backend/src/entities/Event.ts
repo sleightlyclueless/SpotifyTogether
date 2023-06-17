@@ -1,10 +1,7 @@
-import {Collection, Entity, OneToMany, OneToOne, PrimaryKey, Property} from "@mikro-orm/core";
+import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
 
 import {object, string} from "yup";
-import {User} from "./User";
 import {EventUser} from "./EventUser";
-import {v4} from "uuid";
-import {SpotifyTrack} from "./SpotifyTrack";
 import {EventTrack} from "./EventTrack";
 
 //Event:
@@ -24,10 +21,10 @@ export class Event {
     duration: number = 0;
 
     @OneToMany(() => EventUser, (EventUser) => EventUser.event)
-    UserList = new Collection<EventUser>(this);
+    users = new Collection<EventUser>(this);
 
     @OneToMany(() => EventTrack, (EventTrack) => EventTrack.event)
-    TrackList = new Collection<EventTrack>(this);
+    eventTracks = new Collection<EventTrack>(this);
 
     constructor(EventID: string) {
         this.id = EventID;
