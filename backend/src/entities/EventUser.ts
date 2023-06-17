@@ -1,8 +1,6 @@
-import {Entity, ManyToOne, PrimaryKey, Property} from "@mikro-orm/core";
+import {Entity, ManyToOne, Property} from "@mikro-orm/core";
 import {User} from './User'
 import {Event} from './Event'
-
-//Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
 
 // hierarchical order, top to bottom, every level has all rights of all levels above
 export enum Permission {

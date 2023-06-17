@@ -17,7 +17,7 @@ const prepareUserAuthentication = async (req: Request, _res: Response, next: Nex
 // prepare check if user is part of event
 const prepareEventAuthentication = async (req: Request, res: Response, next: NextFunction) => {
     if (req.user == null)
-        return res.status(403).json({errors: ["You don't have access"]});
+        return res.status(401).json({errors: ["You don't have access"]});
     if (req.params.eventId != undefined) {
         const eventUser = await DI.em.findOne(EventUser,
             {
@@ -44,7 +44,6 @@ const verifyEventAccess: RequestHandler = (req, res, next) => {
         return res.status(403).json({errors: ["You don't have access"]});
     next();
 };
-
 
 const verifyParticipantAccess: RequestHandler = async (req, res, next) => {
     if(req.eventUser == null)

@@ -1,23 +1,17 @@
 import express from 'express';
 import http from 'http';
-
-import {EntityManager, EntityRepository, MikroORM, RequestContext} from '@mikro-orm/core';
-
-import {TagController} from './controller/deprecated/tag.controller';
+import {EntityManager, MikroORM, RequestContext} from '@mikro-orm/core';
+import {Auth} from "./middleware/auth.middleware";
 import {EventController} from "./controller/event.controller";
 import {SpotifyAuthController} from "./controller/auth.spotify.controller";
-import {Auth} from "./middleware/auth.middleware";
 
-
-const PORT = 4000;
+const PORT = 4000;// TODO: move into env file
 const app = express();
 
-
+// TODO: move into env file
 const SPOTIFY_CLIENT_ID = "f24ef133eb1847d089085909d8891e07";
 const SPOTIFY_CLIENT_SECRET = "d1119429c435479bb4a4c969eea3748c";
 const SPOTIFY_REDIRECT_URI = "http://localhost:4000/account/login_response";
-// TODO: add spotify client app to DI
-
 
 export const DI = {} as {
     server: http.Server;
@@ -26,18 +20,12 @@ export const DI = {} as {
     spotifyClientId: string;
     spotifyClientSecret: string;
     spotifyRedirectUri: string,
-    //userRepository: EntityRepository<User>;
-    //eventUserRepository: EntityRepository<EventUser>;
 };
 
 export const initializeServer = async () => {
     // dependency injection setup
     DI.orm = await MikroORM.init();
     DI.em = DI.orm.em;
-    // TODO: DI.diaryEntryRepository = DI.orm.em.getRepository(DiaryEntry);
-    // TODO: DI.diaryEntryTagRepository = DI.orm.em.getRepository(DiaryEntryTag);
-    // TODO: DI.userRepository = DI.orm.em.getRepository(User);
-    //DI.eventRepository = DI.orm.em.getRepository(Event);
     DI.spotifyClientId = SPOTIFY_CLIENT_ID;
     DI.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
     DI.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
@@ -52,8 +40,7 @@ export const initializeServer = async () => {
     app.use(express.json());
     app.use((req, res, next) => RequestContext.create(DI.orm.em, next));
 
-
-    //app.use(Auth.prepareAuthentication);
+    // prepare user authentication
     app.use(Auth.prepareUserAuthentication);
 
     // routes
@@ -65,6 +52,7 @@ export const initializeServer = async () => {
     });
 };
 
+// TODO: create env file
 if (process.env.environment !== 'test') {
     initializeServer();
 }

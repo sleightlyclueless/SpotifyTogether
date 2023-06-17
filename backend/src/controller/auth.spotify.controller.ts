@@ -1,9 +1,8 @@
 import {Router} from "express";
-import {DI} from "../index";
 import * as querystring from "querystring";
 import randomstring from "randomstring";
-
 import axios from "axios";
+import {DI} from "../index";
 import {User} from "../entities/User";
 import {Auth} from "../middleware/auth.middleware";
 
@@ -107,15 +106,19 @@ router.put('/refresh_token', Auth.verifySpotifyAccess, async (req, res) => {
         }).then((tokenResponse) => {
         req.user!.spotifyAccessToken = tokenResponse.data.access_token;
         DI.em.persistAndFlush(req.user!);
-        return res.status(200).send("alles cool bro"); // TODO: rework error
+        return res.status(200).send("alles cool bro"); // TODO: rework
     }).catch(function (error: Error) {
         return res.status(400).send(error); // TODO: rework error
     });
-
 });
 
-router.get('/spotifyUserId/:spotifyToken', Auth.verifySpotifyAccess, async (req, res) => {
+router.get('/spotifyUserId', Auth.verifySpotifyAccess, async (req, res) => {
     return res.status(200).json({spotifyUserId: req.user!.spotifyId});
+});
+
+router.get('/remaining_expiry_time', Auth.verifySpotifyAccess, async (req, res) => {
+    const remainingTime = req.user!.expiresInMs - (Date.now() - req.user!.issuedAt);
+    return res.status(200).json({expires_in: remainingTime});
 });
 
 router.put('/logout', Auth.verifySpotifyAccess, async (req, res) => {
