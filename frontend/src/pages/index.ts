@@ -1,2 +1,3 @@
-export * from "./HomePage.tsx";
-export * from "./SpotifyPage.tsx";
+export * from "./HomePage";
+export * from "./SpotifyPage";
+export * from "./LoginPage";

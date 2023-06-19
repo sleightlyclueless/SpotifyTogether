@@ -14,6 +14,6 @@ export default defineConfig({
     },
     cors: true,
     open: true,
-    origin: 'https://accounts.spotify.com/api/token'
+    origin: "https://accounts.spotify.com/api/token",
   },
 });
