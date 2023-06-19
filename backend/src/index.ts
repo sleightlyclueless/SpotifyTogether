@@ -4,6 +4,7 @@ import {EntityManager, MikroORM, RequestContext} from '@mikro-orm/core';
 import {Auth} from "./middleware/auth.middleware";
 import {EventController} from "./controller/event.controller";
 import {SpotifyAuthController} from "./controller/auth.spotify.controller";
+import cors from "cors";
 
 const PORT = 4000;// TODO: move into env file
 const app = express();
@@ -29,6 +30,15 @@ export const initializeServer = async () => {
     DI.spotifyClientId = SPOTIFY_CLIENT_ID;
     DI.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
     DI.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
+
+    app.all('/*', function (req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "X-Requested-With");
+        next();
+    });
+    app.use(cors({
+        origin: '*', preflightContinue: true, optionsSuccessStatus: 200
+    }));
 
     // example middleware
     app.use((req, res, next) => {
