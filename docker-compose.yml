@@ -1,19 +1,49 @@
-version: '3.1'
+version: '3.7'
 
 services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: "backend"
+    depends_on:
+      - db
+    environment:
+      # Application Settings
+      MIKRO_ORM_HOST: db
+      MIKRO_ORM_PORT: 5432
+      MIKRO_ORM_DB_NAME: diaryDB
+      MIKRO_ORM_USER: diaryDBUser
+      MIKRO_ORM_PASSWORD: fweSS22
+    ports:
+      # <Port exposed> : <Node Port running inside container>
+      - '5000:4000'
+    networks:
+      - fwe_spotify_bridge
 
   db:
     image: postgres
     restart: always
     environment:
+      # Database Settings
       POSTGRES_DB: diaryDB
       POSTGRES_USER: diaryDBUser
       POSTGRES_PASSWORD: fweSS22
     ports:
-      - 5432:5432
+      # <Port exposed> : <Node Port running inside container>
+      - '5432:5432'
     volumes:
       - db-data:/var/lib/postgresql/data
+    networks:
+      - fwe_spotify_bridge
 
+# Names our volumes
 volumes:
   db-data:
     driver: local
+
+# Names our network
+networks:
+  fwe_spotify_bridge:
+    driver: bridge

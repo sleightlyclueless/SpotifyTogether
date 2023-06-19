@@ -1,43 +1,43 @@
-import {Collection, Entity, OneToMany, Property} from "@mikro-orm/core";
-
-import { BaseEntity } from './BaseEntity';
-import {object, string} from "yup";
+import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
 import {SpotifyPlaylist} from "./SpotifyPlaylist";
-import { Event } from "./Event"
-//Spotify-Track: Genre, duration, Artist,isInPlaylist[PlaylistID],TrackID,isInEvent[EventID]
+import {v4} from "uuid";
+import {EventTrack} from "./EventTrack";
 
 @Entity()
-export class SpotifyTrack extends BaseEntity {
-    @Property({nullable: false, unique: true})
-    TrackID!: number;
+export class SpotifyTrack {
+    @PrimaryKey({nullable: false, unique: true})
+    id: string = v4();
 
     @Property()
-    Genre: string;
+    genre: string;
 
     @Property()
-    Duration: number;
+    duration: number;
 
     @Property()
-    Artist: string;
+    artist: string;
 
-    @OneToMany(() => SpotifyPlaylist, (SpotifyPlaylist) => SpotifyPlaylist.PlayListID)
-    IsInPlaylist = new Collection<SpotifyPlaylist>(this);
+    @OneToMany(() => EventTrack, (EventTrack) => EventTrack.track)
+    eventTracks = new Collection<EventTrack>(this);
 
-    @OneToMany(() => Event, (Event) => Event.EventID)
+    @OneToMany(() => SpotifyPlaylist, (SpotifyPlaylist) => SpotifyPlaylist.tracks)
+    isInPlaylist = new Collection<SpotifyPlaylist>(this);
+
+    /*
+    @OneToMany(() => Event, (Event) => Event.id)
     IsInEvent = new Collection<Event>(this);
-
-    constructor(trackID: number,duration: number, genre: string, artist:string, ) {
-        super()
-        this.TrackID = trackID
-        this.Duration = duration
-        this.Genre = genre
-        this.Artist = artist
+    */
+    constructor(trackID: string, duration: number, genre: string, artist: string) {
+        this.id = trackID
+        this.duration = duration
+        this.genre = genre
+        this.artist = artist
     }
 }
 
-export const CreateSpotifyTrackSchema = object({
+/*export const CreateSpotifyTrackSchema = object({
     TrackID: string().required(),
     duration: string().required(),
     Genre: object().required(),
     Artist: object().required()
-});
+});*/

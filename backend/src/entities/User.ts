@@ -1,39 +1,44 @@
 import {object, string} from 'yup';
-
-import {Collection, Entity, OneToMany, Property} from '@mikro-orm/core';
-
-import {BaseEntity} from './BaseEntity';
-import {Event} from './Event'
-
-//User:EventList[Event],name,UserID
+import {Collection, Entity, OneToMany, PrimaryKey, Property, types} from '@mikro-orm/core';
+import {EventUser} from "./EventUser";
 
 @Entity()
-export class User extends BaseEntity {
-    @Property({nullable: false, unique: true})
-    UserID: string;
+export class User {
+    @PrimaryKey()
+    spotifyId: string;
 
-    @OneToMany(() => Event, (Event) => Event.EventID)
-    EventList = new Collection<Event>(this);
+    // TODO: additional user profile info
+    //@Property({type: types.text})
+    //display_name: string;
+    //@Property({type: types.text})
+    //image_url: string;
+
+    @Property({type: types.text})
+    spotifyAccessToken: string | null;
+
+    @Property({type: types.text})
+    spotifyRefreshToken: string | null;
 
     @Property()
-    SpotifyToken: string;
+    expiresInMs: number;
 
-    @Property()
-    SpotifyRefreshToken: string;
+    @Property({type: types.bigint})
+    issuedAt: number;
 
-    @Property()
-    SpotifyTokenSalt: string;
+    //@Property({type: types.text})
+    //spotifyTokenSalt: string; // TODO: encrypt tokens to safely store them
 
-    constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string, SpotifyTokenSalt: string) {
-        super();
-        this.UserID = userID;
-        this.SpotifyToken = spotifyToken;
-        this.SpotifyRefreshToken = SpotifyRefreshToken;
-        this.SpotifyTokenSalt = SpotifyTokenSalt;
+    @OneToMany(() => EventUser, (EventUser) => EventUser.user)
+    eventUsers = new Collection<EventUser>(this);
+
+    constructor(userID: string, spotifyToken: string, SpotifyRefreshToken: string, expires_in_ms: number, issued_at: number) {
+        this.spotifyId = userID;
+        this.spotifyAccessToken = spotifyToken;
+        this.spotifyRefreshToken = SpotifyRefreshToken;
+        this.expiresInMs = expires_in_ms;
+        this.issuedAt = issued_at;
     }
 }
-
-
 
 export const LoginSchema = object({
     email: string().required(),

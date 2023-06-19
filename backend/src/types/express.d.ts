@@ -1,11 +1,10 @@
-import {User} from '../entities/deprecated';
-import {JWTToken} from '../middleware/auth.middleware';
+import {User} from "../entities/User";
 
 declare global {
     namespace Express {
         interface Request {
-            token: JWTToken | null;
-            user: User | null;
+            user: User | null,
+            eventUser: EventUser | null,
         }
     }
 }

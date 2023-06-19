@@ -1,0 +1,32 @@
+cache:
+  paths:
+    - backend/node_modules/
+
+stages:
+  - build
+
+backend-build-npm:
+  image: node:latest
+  stage: build
+  script:
+    - cd backend
+    - npm install
+    - npm run build
+
+#backend-build-docker:
+#  # Use the official docker image.
+#  image: docker:latest
+#  stage: build
+#  services:
+#    - docker:dind
+#  script:
+#   - cd backend
+#    - |
+#      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+#        tag=""
+#        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+#      else
+#        tag=":$CI_COMMIT_REF_SLUG"
+#        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+#      fi
+#    - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" .

@@ -1,13 +1,6 @@
-
-
-import {Collection, Entity, ManyToOne, OneToMany, Property} from "@mikro-orm/core";
-
-import {BaseEntity} from './BaseEntity';
-import {date, object, string} from "yup";
-import {SpotifyTrack} from './SpotifyTrack'
+import {Entity, ManyToOne, Property} from "@mikro-orm/core";
 import {Event} from './Event'
-
-//Spotify-Playlist: TrackList[Spotify-Track],duration,PlaylistID
+import {SpotifyTrack} from "./SpotifyTrack";
 
 export enum TrackStatus {
     proposed = "proposed",
@@ -17,20 +10,19 @@ export enum TrackStatus {
 }
 
 @Entity()
-export class EventTrack extends BaseEntity {
+export class EventTrack {
+    @ManyToOne({entity: () => SpotifyTrack, primary: true})
+    track: SpotifyTrack;
+
+    @ManyToOne({entity: () => Event, primary: true})
+    event: Event;
 
     @Property()
-    Role!: TrackStatus;
+    status!: TrackStatus;
 
-    @ManyToOne(() => SpotifyTrack)
-    Track = SpotifyTrack;
-
-    @ManyToOne(() => Event)
-    Event = Event;
-
-
-    constructor(role: TrackStatus) {
-        super()
-        this.Role = role
+    constructor(status: TrackStatus, track: SpotifyTrack, event: Event) {
+        this.status = status;
+        this.track = track;
+        this.event = event;
     }
 }
