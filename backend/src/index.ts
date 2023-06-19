@@ -5,6 +5,7 @@ import {Auth} from "./middleware/auth.middleware";
 import {EventController} from "./controller/event.controller";
 import {SpotifyAuthController} from "./controller/auth.spotify.controller";
 import cors from "cors";
+import {SchemaGenerator} from "@mikro-orm/postgresql";
 
 const PORT = 4000;// TODO: move into env file
 const app = express();
@@ -18,6 +19,7 @@ export const DI = {} as {
     server: http.Server;
     orm: MikroORM;
     em: EntityManager;
+    generator: SchemaGenerator;
     spotifyClientId: string;
     spotifyClientSecret: string;
     spotifyRedirectUri: string,
@@ -27,10 +29,16 @@ export const initializeServer = async () => {
     // dependency injection setup
     DI.orm = await MikroORM.init();
     DI.em = DI.orm.em;
+    DI.generator = await <SchemaGenerator>DI.orm.getSchemaGenerator();
     DI.spotifyClientId = SPOTIFY_CLIENT_ID;
     DI.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
     DI.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
 
+    if (process.env.environment == 'test') {
+        await DI.generator.dropSchema();
+    }
+
+    await DI.generator.updateSchema();
     app.all('/*', function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "X-Requested-With");
