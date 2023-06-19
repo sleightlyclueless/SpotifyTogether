@@ -18,7 +18,7 @@ services:
       MIKRO_ORM_PASSWORD: fweSS22
     ports:
       # <Port exposed> : <Node Port running inside container>
-      - '5000:4000'
+      - '4000:4000'
     networks:
       - fwe_spotify_bridge
 
