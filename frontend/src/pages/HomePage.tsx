@@ -1,23 +1,27 @@
-import { FunctionComponent, useEffect } from "react";
+import { FunctionComponent, useState, useEffect } from "react";
 import { Header, PageContainer, PlaylistOverview } from "../components";
 import { NewPlaylistButton } from "../components/NewPlaylistButton";
 import axios from "axios";
 
 export const HomePage: FunctionComponent = () => {
+  const [spotifyUserId, setSpotifyUserId] = useState("");
   const urlParams = new URLSearchParams(window.location.search);
   const user = urlParams.get("user") || "";
 
   useEffect(() => {
-    fetchSpotifyUserId(user);
-  }, [user]);
+    fetchSpotifyUserId();
+  }, [user]); // Trigger the effect whenever the "user" parameter changes
 
-  const fetchSpotifyUserId = (user: string) => {
+  const fetchSpotifyUserId = () => {
+    console.log("Fetching Spotify User ID: ", user);
     axios
       .get(`http://localhost:4000/account/spotifyUserId`, {
-        params: { user: user },
+        headers: {
+          Authorization: user,
+        }
       })
       .then((res) => {
-        console.log("Response:", res.data);
+        setSpotifyUserId(res.data.spotifyUserId);
       })
       .catch((error) => {
         console.log("Error:", error);
@@ -29,6 +33,7 @@ export const HomePage: FunctionComponent = () => {
       <Header title={"Home"} />
       <PlaylistOverview />
       <NewPlaylistButton />
+      <div>Spotify User ID: {spotifyUserId}</div>
     </PageContainer>
   );
 };
