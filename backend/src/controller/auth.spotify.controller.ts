@@ -67,7 +67,7 @@ router.get('/login_response', async (req, res) => {
                     user.issuedAt = Date.now(); // unix timestamp in ms
                     await DI.em.persistAndFlush(user);
 
-                    res.redirect(`${DI.frontendUrl}/home?user=${user.spotifyAccessToken}`);
+                    res.redirect(`${DI.frontendUrl}/home?access_token=${user.spotifyAccessToken}`);
                     //return res.status(200).json({access_token: user.spotifyAccessToken});
                 } else {
                     // create new user
@@ -81,7 +81,7 @@ router.get('/login_response', async (req, res) => {
                     await DI.em.persistAndFlush(user);
                     console.log("new user created:", user);
 
-                    res.redirect(`${DI.frontendUrl}/home?user=${user.spotifyAccessToken}`);
+                    res.redirect(`${DI.frontendUrl}/home?access_token=${user.spotifyAccessToken}`);
                     //return res.status(201).json({access_token: user.spotifyAccessToken});
                 }
             }).catch(function (error: Error) {

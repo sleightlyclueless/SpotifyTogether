@@ -13,7 +13,6 @@ export const HomePage: FunctionComponent = () => {
   }, [user]); // Trigger the effect whenever the "user" parameter changes
 
   const fetchSpotifyUserId = () => {
-    console.log("Fetching Spotify User ID: ", user);
     axios
       .get(`http://localhost:4000/account/spotifyUserId`, {
         headers: {
@@ -22,6 +21,7 @@ export const HomePage: FunctionComponent = () => {
       })
       .then((res) => {
         setSpotifyUserId(res.data.spotifyUserId);
+        console.log("Spotify User ID: ", res.data.spotifyUserId);
       })
       .catch((error) => {
         console.log("Error:", error);
