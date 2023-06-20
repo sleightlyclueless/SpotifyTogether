@@ -33,6 +33,7 @@ const prepareEventAuthentication = async (req: Request, res: Response, next: Nex
 
 // checks if user is logged in with a valid spotify access_token
 const verifySpotifyAccess: RequestHandler = (req, res, next) => {
+    console.log("verifySpotifyAccess with user " + req.user?.spotifyId);
     if (req.user == null)
         return res.status(401).json({errors: ["You don't have access"]});
     next();

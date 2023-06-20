@@ -11,8 +11,8 @@ const PORT = 4000;// TODO: move into env file
 const app = express();
 
 // TODO: move into env file
-const SPOTIFY_CLIENT_ID = "f24ef133eb1847d089085909d8891e07";
-const SPOTIFY_CLIENT_SECRET = "d1119429c435479bb4a4c969eea3748c";
+const SPOTIFY_CLIENT_ID = "b241ae6416a3481dad98e6899b7be0b4";
+const SPOTIFY_CLIENT_SECRET = "4807da9be0f144b9bbab888217e5e969";
 const SPOTIFY_REDIRECT_URI = "http://localhost:4000/account/login_response";
 
 export const DI = {} as {
@@ -22,7 +22,8 @@ export const DI = {} as {
     generator: SchemaGenerator;
     spotifyClientId: string;
     spotifyClientSecret: string;
-    spotifyRedirectUri: string,
+    spotifyRedirectUri: string;
+    frontendUrl: string;
 };
 
 export const initializeServer = async () => {
@@ -33,6 +34,7 @@ export const initializeServer = async () => {
     DI.spotifyClientId = SPOTIFY_CLIENT_ID;
     DI.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
     DI.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
+    DI.frontendUrl = "http://localhost:5173";
 
     if (process.env.environment == 'test') {
         await DI.generator.dropSchema();

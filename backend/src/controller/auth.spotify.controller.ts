@@ -66,7 +66,9 @@ router.get('/login_response', async (req, res) => {
                     user.expiresInMs = tokenResponse.data.expires_in * 1000; // convert to ms
                     user.issuedAt = Date.now(); // unix timestamp in ms
                     await DI.em.persistAndFlush(user);
-                    return res.status(200).json({access_token: user.spotifyAccessToken});
+
+                    res.redirect(`${DI.frontendUrl}/home?user=${user.spotifyId}`);
+                    //return res.status(200).json({access_token: user.spotifyAccessToken});
                 } else {
                     // create new user
                     let currentDate = Date.now();
@@ -77,7 +79,10 @@ router.get('/login_response', async (req, res) => {
                         tokenResponse.data.expires_in * 1000,
                         currentDate);
                     await DI.em.persistAndFlush(user);
-                    return res.status(201).json({access_token: user.spotifyAccessToken});
+                    console.log("new user created:", user);
+
+                    res.redirect(`${DI.frontendUrl}/home?user=${user.spotifyId}`);
+                    //return res.status(201).json({access_token: user.spotifyAccessToken});
                 }
             }).catch(function (error: Error) {
                 console.log("spotify user not found");
