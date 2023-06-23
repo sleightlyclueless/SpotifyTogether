@@ -25,8 +25,13 @@ const prepareEventAuthentication = async (req: Request, res: Response, next: Nex
                 user: {spotifyAccessToken: req.user.spotifyAccessToken}
             }
         );
-        if (eventUser) req.eventUser = eventUser;
-        else req.eventUser = null;
+        if (eventUser) {
+            req.eventUser = eventUser;
+            req.event = eventUser.event;
+        } else {
+            req.eventUser = null;
+            req.event = null;
+        }
     }
     next();
 };

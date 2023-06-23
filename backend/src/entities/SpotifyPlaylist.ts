@@ -3,7 +3,7 @@ import {object, string} from "yup";
 import {v4} from "uuid";
 import {SpotifyTrack} from "./SpotifyTrack";
 
-@Entity()
+/*@Entity()
 export class SpotifyPlaylist {
 
     @PrimaryKey({nullable: false, unique: true})
@@ -25,4 +25,4 @@ export const CreateSpotifyPlaylistSchema = object({
     PlayListID: string().required(),
     duration: string().required(),
     TrackList: object().notRequired(),
-});
+});*/

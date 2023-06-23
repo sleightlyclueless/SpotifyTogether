@@ -65,15 +65,18 @@ TODO: /account/login_response redirect sollte mit frontend abgesprochen werden, 
 | PUT    | /:spotifyUserId              | 204, 400, 403, 404 | verifyAdminAccess | kicks user from event         |
 | PUT    | /:spotifyUserId/:permissions | 204, 400, 403, 404 | verifyAdminAccess | change user permissions       |
 
-### TODO: Event Playlist ( /events/:eventId/playlist )
-| method | route                | codes | Middleware | description |
-|--------|----------------------|-------|------------|-------------|
-| GET    | /                    | todo  | ?          | todo        |
-| PUT    | /suggest/:trackId    | todo  | ?          | todo        |
-| GET    | /suggest/:playlistId | todo  | ?          | todo        |
-| POST   | /:playlistId         | todo  | ?          | todo        |
-| GET    | /:playlistId         | todo  | ?          | todo        |
-| DELETE | /:playlistId         | todo  | ?          | todo        |
+### TODO: Event Playlist ( /events/:eventId/tracks )
+| method | route                      | codes         | Middleware              | description                         |
+|--------|----------------------------|---------------|-------------------------|-------------------------------------|
+| GET    | /                          | 200           | verifyEventAccess       | return all event tracks             |
+| GET    | /spotifyPlaylistIds        | 200           | verifyEventAccess       | return ids of all playlists         |
+| GET    | /:spotifyPlaylistId        | 200, 404      | verifyEventAccess       | returns list of all playlist tracks |
+| POST   | /:spotifyTrackId           | 201, 429      | verifyParticipantAccess | propose new event track             |
+| PUT    | /:spotifyTrackId/:status   | 200, 400, 404 | verifyAdminAccess       | change event track status           |
+| POST   | /:spotifyPlaylistId        | 201, 429      | verifyParticipantAccess | propose new playlist                |
+| PUT    | /:spotifyPlaylistId/accept | 200, 404      | verifyAdminAccess       | accept all songs from a playlist    |
+| PUT    | /:spotifyPlaylistId/remove | 404           | verifyAdminAccess       | remove all songs from a playlist    |
+Note: The status code 429 is returned by spotify if the app has exceeded its rate limits.
 
 ## Frontend
 - - -

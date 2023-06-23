@@ -1,8 +1,7 @@
 import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
-
-import {object, string} from "yup";
 import {EventUser} from "./EventUser";
 import {EventTrack} from "./EventTrack";
+import {Playlist} from "./Playlist";
 
 //Event:
 // TrackList[Spotify-Track],
@@ -26,13 +25,10 @@ export class Event {
     @OneToMany(() => EventTrack, (EventTrack) => EventTrack.event)
     eventTracks = new Collection<EventTrack>(this);
 
+    @OneToMany(() => Playlist, playlist => playlist.event)
+    playlists = new Collection<Playlist>(this);
+
     constructor(EventID: string) {
         this.id = EventID;
     }
 }
-
-export const CreateSpotifyPlaylistSchema = object({
-    PlayListID: string().required(),
-    duration: string().required(),
-    TrackList: object().notRequired(),
-});

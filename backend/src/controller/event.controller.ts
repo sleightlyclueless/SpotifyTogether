@@ -6,7 +6,7 @@ import {Event} from "../entities/Event";
 import {Auth} from "../middleware/auth.middleware";
 import {EventSettingsController} from "./event.settings.controller";
 import {EventParticipantsController} from "./event.participants.controller";
-import {PlaylistController} from "./event.playlist.controller";
+import {TracksController} from "./event.tracks.controller";
 
 const EVENT_ID_LENGTH: number = 6;
 const MAX_EVENT_ID_GENERATION_RETRIES: number = 100;
@@ -14,7 +14,7 @@ const MAX_EVENT_ID_GENERATION_RETRIES: number = 100;
 const router = Router({mergeParams: true});
 
 router.use(Auth.prepareEventAuthentication);
-router.use("/:eventId/playlist", Auth.verifyEventAccess, PlaylistController);
+router.use("/:eventId/tracks", Auth.verifyEventAccess, TracksController);
 router.use("/:eventId/participants", Auth.verifyAdminAccess, EventParticipantsController);
 router.use("/:eventId/settings", Auth.verifyAdminAccess, EventSettingsController);
 
@@ -64,7 +64,7 @@ router.get('/:eventId', async (req, res) => {
 router.put('/:eventId', Auth.verifyEventAccess, async (req, res) => {
     if (req.eventUser!.permission == Permission.OWNER)
         return res.status(400).send("Owner cant leave event, delete event instead.");
-    await DI.em.removeAndFlush(req.eventUser);
+    await DI.em.removeAndFlush(req.eventUser!);
     res.status(200).end();
 });
 
