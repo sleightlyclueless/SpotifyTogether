@@ -5,6 +5,7 @@ import {Auth} from "../middleware/auth.middleware";
 import {EventTrack, TrackStatus} from "../entities/EventTrack";
 import {SpotifyTrack} from "../entities/SpotifyTrack";
 import {Playlist} from "../entities/Playlist";
+import {EventUser} from "../entities/EventUser";
 
 const router = Router({mergeParams: true});
 
@@ -197,5 +198,7 @@ async function removePlaylist(spotifyPlaylistId: string, eventId: string) {
         return true;
     } else return false;
 }
+
+
 
 export const TracksController = router;
