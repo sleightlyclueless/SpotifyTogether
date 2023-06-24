@@ -173,7 +173,7 @@ async function removePlaylist(spotifyPlaylistId: string, eventId: string) {
                 if (eventTrack.playlists.length <= 1) {
                     // track is only in this playlist, remove if not in any other event
                     const eTrack = await DI.em.find(EventTrack, {track: {id: eventTrack.track.id}});
-                    if(eTrack && eTrack.length > 1) await DI.em.remove(eventTrack);
+                    if (eTrack && eTrack.length > 1) await DI.em.remove(eventTrack);
                 } else {
                     // track is proposed in multiple playlists (not accepted anywhere)
                     if (eventTrack.status == TrackStatus.PROPOSED) continue;
