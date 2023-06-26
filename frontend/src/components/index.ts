@@ -1,3 +1,3 @@
 export * from "./Header";
 export * from "./PlaylistOverview";
-export * from "./shared.tsx";
+export * from "./shared";

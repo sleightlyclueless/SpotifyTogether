@@ -1,7 +1,7 @@
 import { useCountdown } from "../../hooks";
 import { FunctionComponent } from "react";
-import { ExpiredNotice } from "./ExpiredNotice.tsx";
-import { ShowCounter } from "./ShowCounter.tsx";
+import { ExpiredNotice } from "./ExpiredNotice";
+import { ShowCounter } from "./ShowCounter";
 
 type CountDownTimerProps = {
   targetDate: Date;

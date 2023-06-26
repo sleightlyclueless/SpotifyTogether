@@ -1,6 +1,8 @@
 import { FunctionComponent } from "react";
 import styled from "styled-components";
 import { CountdownTimer } from "../CountDownTimer";
+import { useGetUserEvents } from "../../hooks";
+import { EventType } from "../../constants/types";
 
 const Container = styled.div`
   display: flex;
@@ -34,42 +36,17 @@ const Timer = styled.div`
 `;
 
 export const PlaylistOverview: FunctionComponent = () => {
-  const parties = [
-    {
-      id: 1,
-      name: "Party 1",
-      start: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
-    },
-    {
-      id: 2,
-      name: "Party 2",
-      start: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2),
-    },
-    {
-      id: 3,
-      name: "Party 3",
-      start: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    },
-    {
-      id: 4,
-      name: "Party 4",
-      start: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    },
-    {
-      id: 5,
-      name: "Party 5",
-      start: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    },
-  ];
+  const events: EventType[] = useGetUserEvents();
+  console.log(events);
 
   return (
     <Container>
-      {parties.map((party) => {
+      {events.map((event) => {
         return (
-          <SinglePlaylist key={party.id}>
-            <PartyName>{party.name}</PartyName>
+          <SinglePlaylist key={event.name}>
+            <PartyName>{event.name}</PartyName>
             <Timer>
-              <CountdownTimer targetDate={party.start} />
+              <CountdownTimer targetDate={new Date(event.date)} />
             </Timer>
           </SinglePlaylist>
         );

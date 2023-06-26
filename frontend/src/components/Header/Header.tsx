@@ -17,7 +17,7 @@ const Container = styled.div`
 `;
 
 const Placeholder = styled.div`
-  width: 32px;
+  width: 80px;
   height: 32px;
 `;
 
@@ -39,19 +39,21 @@ const User = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
+  width: 80px;
+  gap: 4px;
 `;
 
-const StyledIonModal = styled(IonModal)`
+export const StyledIonModal = styled(IonModal)`
   --backdrop-opacity: 0.5;
   --background: #12001a;
 `;
 
 type HeaderProps = {
   title: string;
+  userName?: string;
 };
 
-export const Header: FunctionComponent<HeaderProps> = ({ title }) => {
+export const Header: FunctionComponent<HeaderProps> = ({ title, userName }) => {
   return (
     <Container>
       {title === "Home" ? (
@@ -63,6 +65,7 @@ export const Header: FunctionComponent<HeaderProps> = ({ title }) => {
       )}
       <PageName>{title}</PageName>
       <User id="open-modal">
+        {userName && <div>{userName}</div>}
         <CiHeadphones style={{ width: "24px", height: "24px" }} />
       </User>
       <StyledIonModal

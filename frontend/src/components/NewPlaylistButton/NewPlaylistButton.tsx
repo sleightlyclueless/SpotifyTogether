@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { RiPlayListAddLine } from "react-icons/ri";
+import { FunctionComponent } from "react";
 
 const Container = styled.div`
   display: flex;
@@ -15,10 +16,16 @@ const Container = styled.div`
   right: calc(50% - 40px);
 `;
 
-export const NewPlaylistButton = () => {
+type NewPlaylistButtonProps = {
+  onClick: () => void;
+};
+
+export const NewPlaylistButton: FunctionComponent<NewPlaylistButtonProps> = ({
+  onClick,
+}) => {
   return (
     <Container>
-      <RiPlayListAddLine />
+      <RiPlayListAddLine onClick={onClick} />
     </Container>
   );
 };

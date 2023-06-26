@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
     if (retries >= MAX_EVENT_ID_GENERATION_RETRIES && event != null) res.status(500).end();
 
     // create event & add user as owner
-    event = new Event(newEventId);
+    event = new Event(newEventId, req.body.name , req.body.date);
     const eventUser = new EventUser(Permission.OWNER, req.user!, event);
     await DI.em.persist(event).persist(eventUser).flush();
     // TODO: return formatted event data
