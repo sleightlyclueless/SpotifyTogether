@@ -17,7 +17,10 @@ export class Event {
     id: string;
 
     @Property()
-    duration: number = 0;
+    name: string;
+
+    @Property()
+    date: Date;
 
     @OneToMany(() => EventUser, (EventUser) => EventUser.event)
     users = new Collection<EventUser>(this);
@@ -28,7 +31,9 @@ export class Event {
     @OneToMany(() => Playlist, playlist => playlist.event)
     playlists = new Collection<Playlist>(this);
 
-    constructor(EventID: string) {
+    constructor(EventID: string, EventName: string, EventDate: Date) {
         this.id = EventID;
+        this.name = EventName;
+        this.date = EventDate;
     }
 }

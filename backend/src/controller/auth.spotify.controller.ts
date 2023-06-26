@@ -11,7 +11,7 @@ import {EventUser, Permission} from "../entities/EventUser";
 const router = Router({mergeParams: true});
 
 router.get('/sampleEvent', async (req, res) => {
-    const event = new Event("eventId");
+    const event = new Event("eventId", "eventName", new Date());
     const access_token1: string = "BQCy8QL6uz327kal8bUW0coIYCi5UyEfnyH6HtF1eLToIb569moDIAuTne8G1CzYlpypWcAQDV-PJAjEj0b4_nHqK_aux434dwZhQbHg7XWafrFhvuICY6V7sSOkBmHAOJFWU4YV9b8ytin85nY-aLstTkrlytIEHhlA0eW3Rnw3RQw1g4GJb3NbKbQPiKZzf2G7dcxujNFB-nptzRKpJI2HAxtH5iD8-dXj7zy4irXoaM-Mo5EOuvoVvTd__KUAuUldwtSHGQtCe4EUzganzPmbWqM";
     const access_token2: string = "";
     const user1 = new User("id1", access_token1, "", 0, 0);

@@ -5,6 +5,7 @@ import {Auth} from "./middleware/auth.middleware";
 import {EventController} from "./controller/event.controller";
 import {SpotifyAuthController} from "./controller/auth.spotify.controller";
 import {SchemaGenerator} from "@mikro-orm/postgresql";
+import cors from "cors";
 
 import 'dotenv/config';
 
@@ -42,14 +43,7 @@ export const initializeServer = async () => {
     await DI.generator.updateSchema();
     console.log("All database schemas updated !");
 
-    /*app.all('/*', function (req, res, next) {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "X-Requested-With");
-        next();
-    });
-    app.use(cors({
-        origin: '*', preflightContinue: true, optionsSuccessStatus: 200
-    }));*/
+    app.use(cors());
 
     // example middleware
     app.use((req, res, next) => {

@@ -13,10 +13,10 @@ export class User {
     //@Property({type: types.text})
     //image_url: string;
 
-    @Property({type: types.text})
+    @Property({type: types.text, nullable: true })
     spotifyAccessToken: string | null;
 
-    @Property({type: types.text})
+    @Property({type: types.text, nullable: true })
     spotifyRefreshToken: string | null;
 
     @Property()
