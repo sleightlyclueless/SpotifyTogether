@@ -1,17 +1,16 @@
 import { FunctionComponent, useMemo, useState } from "react";
 import {
+  BigButton,
+  EventOverview,
   Header,
+  JoinEventForm,
+  NewEventForm,
   PageContainer,
-  PlaylistOverview,
   StyledIonModal,
 } from "../components";
-import {
-  NewEventForm,
-  NewPlaylistButton,
-} from "../components/NewPlaylistButton";
 import styled from "styled-components";
 import { useGetUserName } from "../hooks";
-import { HOME } from "../constants";
+import { COLORS, HOME } from "../constants";
 
 const LoginContainer = styled.div`
   display: flex;
@@ -31,8 +30,64 @@ const LoginButton = styled.div`
   cursor: pointer;
 `;
 
+const NewEventButton = styled.div`
+  position: absolute;
+  bottom: 100px;
+  left: 25%;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: ${COLORS.button};
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: 1s fadeIn;
+  animation-fill-mode: forwards;
+  visibility: hidden;
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+`;
+
+const JoinEventButton = styled.div`
+  position: absolute;
+  bottom: 100px;
+  right: 25%;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: ${COLORS.button};
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: 1s fadeIn;
+  animation-fill-mode: forwards;
+  visibility: hidden;
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+`;
+
 export const HomePage: FunctionComponent = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isNewEventFormOpen, setIsNewEventFormOpen] = useState(false);
+  const [isJoinEventFormOpen, setIsJoinEventFormOpen] = useState(false);
+  const [bigButtonIsClicked, setBigButtonIsClicked] = useState(false);
   const getAccessToken = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get("access_token") || undefined;
@@ -55,11 +110,17 @@ export const HomePage: FunctionComponent = () => {
   };
 
   const handleOnNewPlaylistClick = () => {
-    setIsOpen(true);
+    setIsNewEventFormOpen(true);
+    setBigButtonIsClicked(false);
   };
 
   const handleCloseModal = () => {
-    setIsOpen(false);
+    setIsNewEventFormOpen(false);
+  };
+
+  const handleOnJoinEventClick = () => {
+    setIsJoinEventFormOpen(true);
+    setBigButtonIsClicked(false);
   };
 
   return (
@@ -67,17 +128,39 @@ export const HomePage: FunctionComponent = () => {
       {userName ? (
         <>
           <Header title={"Home"} userName={userName || undefined} />
-          <PlaylistOverview />
-          <NewPlaylistButton onClick={handleOnNewPlaylistClick} />
+          <EventOverview />
+          <BigButton
+            onClick={(): void => setBigButtonIsClicked(!bigButtonIsClicked)}
+          />
+          {bigButtonIsClicked && (
+            <>
+              <NewEventButton onClick={handleOnNewPlaylistClick}>
+                Create
+              </NewEventButton>
+              <JoinEventButton onClick={handleOnJoinEventClick}>
+                Join
+              </JoinEventButton>
+            </>
+          )}
           <StyledIonModal
-            isOpen={isOpen}
-            onDidDismiss={() => setIsOpen(false)}
+            isOpen={isNewEventFormOpen}
+            onDidDismiss={() => setIsNewEventFormOpen(false)}
             mode={"ios"}
             initialBreakpoint={0.8}
             breakpoints={[0.0, 0.8]}
             handleBehavior={"cycle"}
           >
             <NewEventForm closeModal={handleCloseModal} />
+          </StyledIonModal>
+          <StyledIonModal
+            isOpen={isJoinEventFormOpen}
+            onDidDismiss={() => setIsJoinEventFormOpen(false)}
+            mode={"ios"}
+            initialBreakpoint={0.5}
+            breakpoints={[0.0, 0.5]}
+            handleBehavior={"cycle"}
+          >
+            <JoinEventForm closeModal={handleCloseModal} />
           </StyledIonModal>
         </>
       ) : (

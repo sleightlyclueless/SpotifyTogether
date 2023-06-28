@@ -4,6 +4,7 @@ import { IoPlayBackOutline } from "react-icons/io5";
 import { CiHeadphones } from "react-icons/ci";
 import { IonModal } from "@ionic/react";
 import { UserSettings } from "../UserSettings";
+import { COLORS } from "../../constants";
 
 const Container = styled.div`
   display: flex;
@@ -45,7 +46,7 @@ const User = styled.div`
 
 export const StyledIonModal = styled(IonModal)`
   --backdrop-opacity: 0.5;
-  --background: #12001a;
+  --background: ${COLORS.background};
 `;
 
 type HeaderProps = {

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { RiPlayListAddLine } from "react-icons/ri";
 import { FunctionComponent } from "react";
+import { COLORS } from "../../constants";
 
 const Container = styled.div`
   display: flex;
@@ -9,7 +10,7 @@ const Container = styled.div`
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: #563a57;
+  background: ${COLORS.button};
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
   position: absolute;
   bottom: 16px;
@@ -20,7 +21,7 @@ type NewPlaylistButtonProps = {
   onClick: () => void;
 };
 
-export const NewPlaylistButton: FunctionComponent<NewPlaylistButtonProps> = ({
+export const BigButton: FunctionComponent<NewPlaylistButtonProps> = ({
   onClick,
 }) => {
   return (
