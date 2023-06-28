@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import axios from "axios";
-import { HOME } from "../../constants";
+import { COLORS, HOME } from "../../constants";
 
 const Container = styled.div`
   padding: 16px;
@@ -8,16 +8,16 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  height: 75%;
 `;
 
 const Content = styled.div`
   margin-top: 16px;
-  color: #ffffff;
+  color: ${COLORS.font};
 `;
 
 const LogoutButton = styled.div`
-  background: #563a57;
-  color: #ffffff;
+  background: ${COLORS.button};
   height: 60px;
   width: 160px;
   border-radius: 12px;

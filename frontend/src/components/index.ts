@@ -1,3 +1,4 @@
 export * from "./Header";
-export * from "./PlaylistOverview";
+export * from "./EventOverview";
 export * from "./shared";
+export * from "./NewEventForm";

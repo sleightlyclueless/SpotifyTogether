@@ -7,38 +7,43 @@ import {
 import styled from "styled-components";
 import { FunctionComponent, useState } from "react";
 import axios from "axios";
+import { COLORS } from "../../constants";
 
 const Container = styled.div`
   padding: 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   flex-direction: column;
-  gap: 16px;
+  height: 75%;
 `;
 
-const StyledEventNameInput = styled(IonInput)`
+export const StyledEventNameInput = styled(IonInput)`
+  margin-top: 32px;
   width: 100%;
   height: 40px;
   border-radius: 8px;
-  background: #563a57;
+  background: ${COLORS.backgroundLight};
   border: none;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
 
-const StyledIonDatetime = styled(IonDatetime)`
-  --background: #563a57;
+export const StyledIonDatetime = styled(IonDatetime)`
+  --background: ${COLORS.backgroundLight};
   border-radius: 8px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
 
-const SubmitButton = styled.div`
+export const SubmitButton = styled.div`
   width: 160px;
   height: 60px;
-  background: #563a57;
+  background: ${COLORS.button};
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 18px;
+  font-size: 16px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
 
 type NewEventFormProps = {
