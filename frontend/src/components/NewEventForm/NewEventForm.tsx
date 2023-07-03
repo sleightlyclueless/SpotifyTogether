@@ -8,6 +8,7 @@ import styled from "styled-components";
 import { FunctionComponent, useState } from "react";
 import axios from "axios";
 import { COLORS } from "../../constants";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   padding: 16px;
@@ -19,17 +20,17 @@ const Container = styled.div`
 `;
 
 export const StyledEventNameInput = styled(IonInput)`
+  --padding-start: 8px !important;
   margin-top: 32px;
   width: 100%;
   height: 40px;
   border-radius: 8px;
-  background: ${COLORS.backgroundLight};
+  background: ${COLORS.font};
   border: none;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
 
 export const StyledIonDatetime = styled(IonDatetime)`
-  --background: ${COLORS.backgroundLight};
   border-radius: 8px;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
@@ -58,8 +59,16 @@ export const NewEventForm: FunctionComponent<NewEventFormProps> = ({
 
   const handleSubmit = () => {
     if (!eventName || !eventDate) {
-      //TODO: Toast
-      console.log("Event name or date is null");
+      toast.error("Event Name or Date is not set!", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } else {
       axios
         .post(
@@ -86,24 +95,26 @@ export const NewEventForm: FunctionComponent<NewEventFormProps> = ({
   };
 
   return (
-    <Container>
-      <StyledEventNameInput
-        type={"text"}
-        placeholder={"Event Name"}
-        value={eventName}
-        onIonChange={(e: InputCustomEvent): void => {
-          setEventName(e.detail.value || null);
-        }}
-      />
-      <StyledIonDatetime
-        value={eventDate}
-        onIonChange={(e: DatetimeCustomEvent): void => {
-          if (e.detail.value) {
-            setEventDate(new Date(e.detail.value.toString()));
-          }
-        }}
-      />
-      <SubmitButton onClick={handleSubmit}>Create Event</SubmitButton>
-    </Container>
+    <>
+      <Container>
+        <StyledEventNameInput
+          type={"text"}
+          placeholder={"Event Name"}
+          value={eventName}
+          onIonChange={(e: InputCustomEvent): void => {
+            setEventName(e.detail.value || null);
+          }}
+        />
+        <StyledIonDatetime
+          value={eventDate}
+          onIonChange={(e: DatetimeCustomEvent): void => {
+            if (e.detail.value) {
+              setEventDate(new Date(e.detail.value.toString()));
+            }
+          }}
+        />
+        <SubmitButton onClick={handleSubmit}>Create Event</SubmitButton>
+      </Container>
+    </>
   );
 };

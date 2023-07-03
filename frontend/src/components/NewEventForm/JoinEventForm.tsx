@@ -4,6 +4,7 @@ import { InputCustomEvent, IonInput } from "@ionic/react";
 import { COLORS } from "../../constants";
 import { SubmitButton } from "./NewEventForm";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   padding: 16px;
@@ -37,7 +38,7 @@ export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
       return;
     }
     axios
-      .get(`http://localhost:4000/${eventCode}`, {
+      .get(`http://localhost:4000/events/${eventCode}`, {
         headers: {
           Authorization: `${localStorage.getItem("accessToken")}`,
         },
@@ -45,9 +46,11 @@ export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
       .then((res) => {
         if (res.status === 200) {
           closeModal();
-        } else {
-          console.log("Event Code is invalid");
+          window.location.reload();
         }
+      })
+      .catch(() => {
+        toast.error("Event code is invalid!");
       });
   };
 

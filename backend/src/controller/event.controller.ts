@@ -13,7 +13,23 @@ const MAX_EVENT_ID_GENERATION_RETRIES: number = 100;
 
 const router = Router({mergeParams: true});
 
-router.use(Auth.prepareEventAuthentication);
+router.param("eventId",  async function (req, res, next, eventId) {
+    const eventUser = await DI.em.findOne(EventUser,
+        {
+            event: {id: eventId},
+            user: {spotifyAccessToken: req.user!.spotifyAccessToken}
+        }
+    );
+    if (eventUser) {
+        req.eventUser = eventUser;
+        req.event = eventUser.event;
+    } else {
+        req.eventUser = null;
+        req.event = null;
+    }
+    next();
+});
+
 router.use("/:eventId/tracks", Auth.verifyEventAccess, TracksController);
 router.use("/:eventId/participants", Auth.verifyAdminAccess, EventParticipantsController);
 router.use("/:eventId/settings", Auth.verifyAdminAccess, EventSettingsController);
@@ -43,7 +59,6 @@ router.post('/', async (req, res) => {
     event = new Event(newEventId, req.body.name , req.body.date);
     const eventUser = new EventUser(Permission.OWNER, req.user!, event);
     await DI.em.persist(event).persist(eventUser).flush();
-    // TODO: return formatted event data
     res.status(201).json(event);
 });
 
@@ -51,12 +66,14 @@ router.post('/', async (req, res) => {
 router.get('/:eventId', async (req, res) => {
     const event = await DI.em.findOne(Event, {id: req.params.eventId});
     if (event) {
+        // check if user is already in event
+        req.eventUser = await DI.em.findOne(EventUser, {user: req.user, event: event});
         // add user if not already existing
-        if (req.eventUser == null) await DI.em.persistAndFlush(new EventUser(Permission.PARTICIPANT, req.user!, event));
-
-        // fetch event data
-        // TODO: return formatted event data
-        return res.status(200).json(event);
+        if (req.eventUser == null) {
+            await DI.em.persistAndFlush(new EventUser(Permission.PARTICIPANT, req.user!, event));
+            return res.status(200).json(event);
+        }
+        return res.status(200).send("User is already in event");
     } else return res.status(404).send("Event not found");
 });
 
@@ -70,11 +87,12 @@ router.put('/:eventId', Auth.verifyEventAccess, async (req, res) => {
 
 // delete one event
 router.delete('/:eventId', Auth.verifyOwnerAccess, async (req, res) => {
-    const event = await DI.em.find(Event, {id: req.params.eventId});
+    const event = await DI.em.findOne(Event, {id: req.params.eventId});
     if (event) {
         await DI.em.removeAndFlush(event);
         return res.status(200).end();
     } else return res.status(404).json("Event not found.");
 });
+
 
 export const EventController = router;
