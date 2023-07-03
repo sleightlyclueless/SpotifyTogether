@@ -12,7 +12,7 @@ export enum Permission {
 @Entity()
 export class EventUser {
 
-    @ManyToOne({entity: () => Event, primary: true})
+    @ManyToOne({entity: () => Event, primary: true, onUpdateIntegrity: 'set null', onDelete: 'cascade'})
     event!: Event;
 
     @ManyToOne({entity: () => User, primary: true})

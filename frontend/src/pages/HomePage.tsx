@@ -42,17 +42,14 @@ const NewEventButton = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: 1s fadeIn;
-  animation-fill-mode: forwards;
-  visibility: hidden;
+  animation: 0.3s slide-in;
 
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
+  @keyframes slide-in {
+    from {
+      transform: translateY(100%) translateX(100%);
     }
-    100% {
-      visibility: visible;
-      opacity: 1;
+    to {
+      transform: translateY(0) translateX(0);
     }
   }
 `;
@@ -69,17 +66,14 @@ const JoinEventButton = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: 1s fadeIn;
-  animation-fill-mode: forwards;
-  visibility: hidden;
+  animation: 0.3s slide-in2;
 
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
+  @keyframes slide-in2 {
+    from {
+      transform: translateY(100%) translateX(-50%);
     }
-    100% {
-      visibility: visible;
-      opacity: 1;
+    to {
+      transform: translateY(0) translateX(0);
     }
   }
 `;
@@ -114,8 +108,12 @@ export const HomePage: FunctionComponent = () => {
     setBigButtonIsClicked(false);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseNewEventModal = () => {
     setIsNewEventFormOpen(false);
+  };
+
+  const handleCloseJoinEventModal = () => {
+    setIsJoinEventFormOpen(false);
   };
 
   const handleOnJoinEventClick = () => {
@@ -150,7 +148,7 @@ export const HomePage: FunctionComponent = () => {
             breakpoints={[0.0, 0.8]}
             handleBehavior={"cycle"}
           >
-            <NewEventForm closeModal={handleCloseModal} />
+            <NewEventForm closeModal={handleCloseNewEventModal} />
           </StyledIonModal>
           <StyledIonModal
             isOpen={isJoinEventFormOpen}
@@ -160,7 +158,7 @@ export const HomePage: FunctionComponent = () => {
             breakpoints={[0.0, 0.5]}
             handleBehavior={"cycle"}
           >
-            <JoinEventForm closeModal={handleCloseModal} />
+            <JoinEventForm closeModal={handleCloseJoinEventModal} />
           </StyledIonModal>
         </>
       ) : (

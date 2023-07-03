@@ -14,7 +14,7 @@ const Container = styled.div`
   height: 40px;
   position: sticky;
   top: 16px;
-  padding: 0 16px 32px 24px;
+  padding: 0 20px 32px 24px;
 `;
 
 const Placeholder = styled.div`
@@ -72,8 +72,8 @@ export const Header: FunctionComponent<HeaderProps> = ({ title, userName }) => {
       <StyledIonModal
         trigger="open-modal"
         mode={"ios"}
-        initialBreakpoint={0.8}
-        breakpoints={[0.0, 0.8]}
+        initialBreakpoint={0.4}
+        breakpoints={[0.0, 0.4]}
         handleBehavior={"cycle"}
       >
         <UserSettings />
