@@ -14,6 +14,9 @@ export class Event {
     @Property()
     date: Date;
 
+    @Property()
+    locked: boolean;
+
     @OneToMany(() => EventUser, (EventUser) => EventUser.event)
     users = new Collection<EventUser>(this);
 
@@ -27,5 +30,6 @@ export class Event {
         this.id = EventID;
         this.name = EventName;
         this.date = EventDate;
+        this.locked = false;
     }
 }

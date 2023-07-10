@@ -1,4 +1,9 @@
 import {Router} from "express";
+import {Auth} from "../middleware/auth.middleware";
+import {DI} from "../index";
+import {Event} from "../entities/Event";
+import randomstring from "randomstring";
+import {EVENT_ID_LENGTH, MAX_EVENT_ID_GENERATION_RETRIES} from "./event.controller";
 
 const router = Router({mergeParams: true});
 
