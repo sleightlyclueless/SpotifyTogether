@@ -41,7 +41,7 @@ router.get('/:spotifyPlaylistId', async (req, res) => {
 });
 
 // propose new event track
-router.post('/:spotifyTrackId', Auth.verifyParticipantAccess, async (req, res) => {
+router.post('/:spotifyTrackId', Auth.verifyUnlockedEventParticipantAccess, async (req, res) => {
     let track = await DI.em.findOne(SpotifyTrack, req.params.spotifyTrackId);
     if (track == undefined) {
         axios.get(
@@ -67,7 +67,7 @@ router.post('/:spotifyTrackId', Auth.verifyParticipantAccess, async (req, res) =
 });
 
 // change event track status
-router.put('/:spotifyTrackId/:status', Auth.verifyAdminAccess, async (req, res) => {
+router.put('/:spotifyTrackId/:status', Auth.verifyEventAdminAccess, async (req, res) => {
     const eventTrack = await DI.em.findOne(EventTrack,
         {
             track: {id: req.params.spotifyTrackId},
@@ -87,7 +87,7 @@ router.put('/:spotifyTrackId/:status', Auth.verifyAdminAccess, async (req, res) 
 });
 
 // propose playlist
-router.post('/:spotifyPlaylistId', Auth.verifyParticipantAccess, async (req, res) => {
+router.post('/:spotifyPlaylistId', Auth.verifyUnlockedEventParticipantAccess, async (req, res) => {
     // remove playlists if exists
     await removePlaylist(req.params.spotifyPlaylistId, req.event!.id);
 
@@ -126,7 +126,7 @@ router.post('/:spotifyPlaylistId', Auth.verifyParticipantAccess, async (req, res
 });
 
 // accept all tracks from this playlist
-router.put('/:spotifyPlaylistId/accept', Auth.verifyAdminAccess, async (req, res) => {
+router.put('/:spotifyPlaylistId/accept', Auth.verifyEventAdminAccess, async (req, res) => {
     const playlist = await DI.em.findOne(Playlist,
         {
             id: req.params.spotifyPlaylistId,
@@ -148,7 +148,7 @@ router.put('/:spotifyPlaylistId/accept', Auth.verifyAdminAccess, async (req, res
 });
 
 // remove playlist & corresponding tracks
-router.put('/:spotifyPlaylistId/remove', Auth.verifyAdminAccess, async (req, res) => {
+router.put('/:spotifyPlaylistId/remove', Auth.verifyEventAdminAccess, async (req, res) => {
     const removedPlaylist = await removePlaylist(req.params.spotifyPlaylistId, req.event!.id);
     if (removedPlaylist) return res.status(200).end();
     else return res.status(404).send("Playlist not found.");

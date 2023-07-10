@@ -7,94 +7,12 @@ import {User} from "../entities/User";
 import {Event} from "../entities/Event";
 import {Auth} from "../middleware/auth.middleware";
 import {EventUser, Permission} from "../entities/EventUser";
+import {TracksController} from "./event.tracks.controller";
+import {EventAlgorithmController} from "./event.algorithm.controller";
 
 const router = Router({mergeParams: true});
 
-router.get('/sampleEvent', async (req, res) => {
-    const event = new Event("eventId", "eventName", new Date());
-    const access_token1: string = "BQCy8QL6uz327kal8bUW0coIYCi5UyEfnyH6HtF1eLToIb569moDIAuTne8G1CzYlpypWcAQDV-PJAjEj0b4_nHqK_aux434dwZhQbHg7XWafrFhvuICY6V7sSOkBmHAOJFWU4YV9b8ytin85nY-aLstTkrlytIEHhlA0eW3Rnw3RQw1g4GJb3NbKbQPiKZzf2G7dcxujNFB-nptzRKpJI2HAxtH5iD8-dXj7zy4irXoaM-Mo5EOuvoVvTd__KUAuUldwtSHGQtCe4EUzganzPmbWqM";
-    const access_token2: string = "";
-    const user1 = new User("id1", access_token1, "", 0, 0);
-    const user2 = new User("id2", access_token2, "", 0, 0);
-    const eventUser1 = new EventUser(Permission.ADMIN, user1, event);
-    const eventUser2 = new EventUser(Permission.ADMIN, user2, event);
-    await DI.em.persist(user1).persist(user2);
-    await DI.em.persist(eventUser1).persist(eventUser2);
-    await DI.em.persistAndFlush(event);
-});
-
-//algorithm
-// for each user in EventUser assigned to event: Get/me/top/artists or tracks. set limit for returned Objects(20?)
-//  - responseArtists/respnseTracks are saved in Datastructure responseObject.items.ArtistObject.id
-// sort the entries by frequency
-//
-router.get('/generate', async (req, res) => {
-    const eventUsers = await DI.em.find(EventUser,
-        {
-            event: {id: "eventId"},
-        },
-        {
-            populate: ['user']
-        }
-    );
-    if (eventUsers) {
-        // Map ArtistId|Counter
-        let artistMap = new Map<string, number>();
-        for (const eventUser of eventUsers) {
-            // get new access_token (old one is not invalidated)
-            /*let access_token = null;
-            axios.post(
-                'https://accounts.spotify.com/api/token',
-                {
-                    grant_type: 'refresh_token',
-                    refresh_token: req.user!.spotifyRefreshToken
-                },
-                {
-                    headers: {
-                        'Authorization': 'Basic ' + (Buffer.from(DI.spotifyClientId + ':' + DI.spotifyClientSecret).toString('base64')),
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                }).then((tokenResponse) => {
-                access_token = tokenResponse.data.access_token;
-            }).catch(function (error: Error) {
-                console.log(error);
-            });
-            if (access_token == null) continue;*/
-
-
-            // get top Artists
-            await axios.get(
-                "https://api.spotify.com/v1/me/top/artists",
-                {
-                    //TODO: set limit header field
-                    headers: {
-                        Authorization: 'Bearer ' + eventUser.user.spotifyAccessToken,
-                    },
-                }
-            ).then(async (artistResponse) => {
-                console.log("successful artist request");
-                // reformat artists
-                for (const artist of artistResponse.data.items) {
-                    if (artistMap.has(artist.name)) {
-                        let artistcounter = artistMap.get(artist.name);
-                        if (artistcounter) artistcounter++;
-                    } else artistMap.set(artist.name, 1);
-                }
-            }).catch(function (error) {
-                console.log(error.message);
-            });
-
-        }
-
-        console.log(artistMap);
-
-        // crete Playlist from map
-        //let artistMapSorted = new Map([...artistMap.entries()].sort()); //wilder code, nur übernommen
-
-        return res.status(200).end();
-    } else return res.status(404).end();
-});
-
+router.use("/:eventId/tracks", Auth.verifyEventOwnerAccess, EventAlgorithmController);
 
 router.get('/login', async (req, res) => {
     const state = randomstring.generate(16);

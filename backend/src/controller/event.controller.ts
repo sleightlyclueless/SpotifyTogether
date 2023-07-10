@@ -8,8 +8,8 @@ import {EventSettingsController} from "./event.settings.controller";
 import {EventParticipantsController} from "./event.participants.controller";
 import {TracksController} from "./event.tracks.controller";
 
-const EVENT_ID_LENGTH: number = 6;
-const MAX_EVENT_ID_GENERATION_RETRIES: number = 100;
+export const EVENT_ID_LENGTH: number = 6;
+export const MAX_EVENT_ID_GENERATION_RETRIES: number = 1000;
 
 const router = Router({mergeParams: true});
 
@@ -31,8 +31,8 @@ router.param("eventId",  async function (req, res, next, eventId) {
 });
 
 router.use("/:eventId/tracks", Auth.verifyEventAccess, TracksController);
-router.use("/:eventId/participants", Auth.verifyAdminAccess, EventParticipantsController);
-router.use("/:eventId/settings", Auth.verifyAdminAccess, EventSettingsController);
+router.use("/:eventId/participants", Auth.verifyEventAdminAccess, EventParticipantsController);
+router.use("/:eventId/settings", Auth.verifyEventAdminAccess, EventSettingsController);
 
 // fetch all events of user
 router.get('/', async (req, res) => {
@@ -86,13 +86,12 @@ router.put('/:eventId', Auth.verifyEventAccess, async (req, res) => {
 });
 
 // delete one event
-router.delete('/:eventId', Auth.verifyOwnerAccess, async (req, res) => {
+router.delete('/:eventId', Auth.verifyEventOwnerAccess, async (req, res) => {
     const event = await DI.em.findOne(Event, {id: req.params.eventId});
     if (event) {
         await DI.em.removeAndFlush(event);
         return res.status(200).end();
     } else return res.status(404).json("Event not found.");
 });
-
 
 export const EventController = router;

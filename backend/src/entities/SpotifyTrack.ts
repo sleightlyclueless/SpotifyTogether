@@ -1,11 +1,10 @@
 import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
-import {v4} from "uuid";
 import {EventTrack} from "./EventTrack";
 
 @Entity()
 export class SpotifyTrack {
     @PrimaryKey({nullable: false, unique: true})
-    id: string = v4();
+    id: string;
 
     @Property()
     genre: string;
