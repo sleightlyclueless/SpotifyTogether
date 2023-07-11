@@ -39,8 +39,3 @@ export class User {
         this.issuedAt = issued_at;
     }
 }
-
-export const LoginSchema = object({
-    email: string().required(),
-    password: string().required(),
-});

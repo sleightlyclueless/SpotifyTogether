@@ -35,6 +35,7 @@ router.get('/login', async (req, res) => {
         }));
 });
 
+// callback from spotify_response, creates/updates user in Database, redirects to frontend
 router.get('/login_response', async (req, res) => {
     const code = req.query.code || null;
     const state = req.query.state || null;
@@ -122,7 +123,7 @@ router.put('/refresh_token', Auth.verifySpotifyAccess, async (req, res) => {
         return res.status(400).send(error); // TODO: rework error
     });
 });
-
+// returns spotify user ID
 router.get('/spotifyUserId', Auth.verifySpotifyAccess, async (req, res) => {
     return res.status(200).json({spotifyUserId: req.user!.spotifyId});
 });

@@ -73,14 +73,14 @@ router.get('/:eventId', async (req, res) => {
             await DI.em.persistAndFlush(new EventUser(Permission.PARTICIPANT, req.user!, event));
             return res.status(200).json(event);
         }
-        return res.status(200).send("User is already in event");
-    } else return res.status(404).send("Event not found");
+        return res.status(200).json({message: "User is already in event"});
+    } else return res.status(404).json({message: "Event not found"});
 });
 
 // leave event (except owner)
 router.put('/:eventId', Auth.verifyEventAccess, async (req, res) => {
     if (req.eventUser!.permission == Permission.OWNER)
-        return res.status(400).send("Owner cant leave event, delete event instead.");
+        return res.status(400).json({message: "Owner cant leave event, delete event instead."});
     await DI.em.removeAndFlush(req.eventUser!);
     res.status(200).end();
 });
@@ -91,7 +91,7 @@ router.delete('/:eventId', Auth.verifyEventOwnerAccess, async (req, res) => {
     if (event) {
         await DI.em.removeAndFlush(event);
         return res.status(200).end();
-    } else return res.status(404).json("Event not found.");
+    } else return res.status(404).json({message: "Event not found."});
 });
 
 export const EventController = router;
