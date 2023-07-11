@@ -26,10 +26,3 @@ export class SpotifyTrack {
     }
 
 }
-
-/*export const CreateSpotifyTrackSchema = object({
-    TrackID: string().required(),
-    duration: string().required(),
-    Genre: object().required(),
-    Artist: object().required()
-});*/

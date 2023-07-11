@@ -3,6 +3,7 @@ import {Event} from './Event'
 import {SpotifyTrack} from "./SpotifyTrack";
 import {Playlist} from "./Playlist";
 
+// hierarchical order, top to bottom, every level has all rights of all levels above
 export enum TrackStatus {
     DENIED,
     PROPOSED,
@@ -18,9 +19,6 @@ export class EventTrack {
 
     @ManyToOne({entity: () => Event, primary: true})
     event: Event;
-
-    //@Property({ type: types.array}) // This means that you can't use values that contain comma with the ArrayType
-    //playlists!: string[];
 
     @ManyToMany(() => Playlist, 'eventTracks', {owner: true})
     playlists = new Collection<Playlist>(this);

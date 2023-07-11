@@ -8,6 +8,7 @@ import {SchemaGenerator} from "@mikro-orm/postgresql";
 import cors from "cors";
 
 import 'dotenv/config';
+import {EventAlgorithmController} from "./controller/event.algorithm.controller";
 
 const app = express();
 
@@ -43,15 +44,12 @@ export const initializeServer = async () => {
     await DI.generator.updateSchema();
     console.log("All database schemas updated !");
 
-    app.use(cors());
-
-    // example middleware
+    // global middleware
     app.use((req, res, next) => {
-        console.info(`New request to ${req.path}`);
+        console.info(`New request to ${req.path}`); // useful debug info
         next();
     });
-
-    // global middleware
+    app.use(cors());
     app.use(express.json());
     app.use((req, res, next) => RequestContext.create(DI.orm.em, next));
 
@@ -59,9 +57,11 @@ export const initializeServer = async () => {
     app.use(Auth.prepareUserAuthentication);
 
     // routes
+    app.use('/test', EventAlgorithmController);
     app.use('/account', SpotifyAuthController);
     app.use('/events', Auth.verifySpotifyAccess, EventController);
 
+    // start server
     DI.server = app.listen(process.env.PORT, () => {
         console.log(`Server started on port ${process.env.PORT}`);
     });

@@ -2,7 +2,57 @@
 - - -
 Create an event with the perfect playlist everyone loves.
 
+## Team Organisation
+- - -
+Wir haben eine klare Aufgabenteilung zwischen Backend und Frontend gemacht mit der alle im Team zufrieden waren. 
+Björn, Noah und Antoine haben sich ums das Backend, Paul und Sebi nur am Frontend gekümmert.
+
+### Team Frontend
+
+##### Sebi & Paul:
+
+### Team Backend:
+
+##### Noah & Björn:
+- regelmäig Freitags & Samstags online getroffen
+   - Zusammenarbeit in Jetbrains Webstorm code with me 
+- event.controller-struktur konzept und implementierung
+   - auth.spotify.controller.ts
+   - event.controller.ts
+   - event.algorithm.controller.ts 
+   - event.controller.ts
+   - event.settings.controller.ts 
+   - Integration des participants-controllers
+- auth middleware
+  - auth.middleware.ts
+- entity-relationships konzept + implementierung
+- Spotify-Anbindung
+- debugging mit Team Frontend (schnelles Troubleshooting bei integration des Frotend)
+- Hilfe bei Integration im Frontend
+- backend readme
+
+Disclaimer Teamarbeit Noah/Björn:
+
+Coden zu zweit ist lustiger, deswegen haben wir das Code-with-me-Feature fleißig benutzt und bessere Ergebnisse abgeliefert,
+da direkte Kommunikation sowie schnelles Troubleshooting für uns wichtiger waren als eigene Bearbeitungszeit.
+Da wir aus vorherigen Modulen zusammen schon ähnliche Codestandards übernommen haben fiel es uns leicht eine gehobene Codequalität abzuliefern.
+
+##### Antoine
+
+
 ## Backend
+- - -
+### Requirements
+- Node.js & NPM
+- Docker & Docker Compose
+
+### Our setup
+- Ubuntu 22.04
+- Node.js v18.14.1
+- Package Manager 9.3.1
+- Docker version 20.10.17
+- Docker-compose version 1.29.2
+
 - - -
 ### Start (Docker)
 To start the backend, you can either use the command:
@@ -12,9 +62,17 @@ docker-compose up
 
 ### Entities Structure
 ![alt text](entities.png "Entities")
+Bla Bla Bla irgendwas zu Entities
+
+### Spotify Authorization
+![alt text](auth-code-flow.png "Spotify Authorization")
+Als Anbindung an die Spotify API verwenden wir den 
+[Authorization Code Flow](https://developer.spotify.com/documentation/web-api/tutorials/code-flow) OAuth2 flow.
+Wir lagern somit sämtliche Authentification an Spotify aus und verwenden ihren access_token zum Validieren des Nutzers.
+...
 
 ### Backend Routes
-For almost all routes it is required to set the header field "Authorization" with a valid access_token.
+For almost all routes it is required to set the header field "Authorization" with a valid spotify access_token.
 
 The access_token must be a currently valid one issued by the spotify api through this backend and is valid for a maximum
 of one hour.
@@ -61,7 +119,7 @@ TODO: /account/login_response redirect sollte mit frontend abgesprochen werden, 
 | PUT    | /:spotifyUserId              | 204, 400, 403, 404 | verifyAdminAccess | kicks user from event         |
 | PUT    | /:spotifyUserId/:permissions | 204, 400, 403, 404 | verifyAdminAccess | change user permissions       |
 
-### TODO: Event Playlist ( /events/:eventId/tracks )
+### Event Playlist ( /events/:eventId/tracks )
 | method | route                      | codes         | Middleware              | description                         |
 |--------|----------------------------|---------------|-------------------------|-------------------------------------|
 | GET    | /                          | 200           | verifyEventAccess       | return all event tracks             |
@@ -72,7 +130,29 @@ TODO: /account/login_response redirect sollte mit frontend abgesprochen werden, 
 | POST   | /:spotifyPlaylistId        | 201, 429      | verifyParticipantAccess | propose new playlist                |
 | PUT    | /:spotifyPlaylistId/accept | 200, 404      | verifyAdminAccess       | accept all songs from a playlist    |
 | PUT    | /:spotifyPlaylistId/remove | 404           | verifyAdminAccess       | remove all songs from a playlist    |
+
 Note: The status code 429 is returned by spotify if the app has exceeded its rate limits.
+
+### Event Settings ( /events/:eventId/settings )
+| method | route          | codes   | Middleware        | description                 |
+|--------|----------------|---------|-------------------|-----------------------------|
+| PUT    | /generateNewId | 200,500 | verifyOwnerAccess | generates new ID for Event  | 
+| PUT    | /id/:newID     | 200,400 | verifyOwnerAccess | set custom ID for Event     |
+| PUT    | /name/:newName | 200     | verifyOwnerAccess | set new Name for Event      |
+| PUT    | /date/:newDate | 200     | verifyOwnerAccess | set new date for event      |
+| PUT    | /lock          | 200     | verifyOwnerAccess | close Event for new Entries |
+| PUT    | /unlock        | 200     | verifyOwnerAccess | open Event for new Entries  |
+
+### Event Algorithm ( /events/:eventId/algorithm )
+| method | route     | codes              | Middleware             | description                                |
+|--------|-----------|--------------------|------------------------|--------------------------------------------|
+| PUT    | /generate | 500, 200, 400, 404 | verifyEventOwnerAccess | Generates songs based on all participants. |
+
+### CI/CD ?
+todo
+
+### Tests
+todo
 
 ## Frontend
 - - -

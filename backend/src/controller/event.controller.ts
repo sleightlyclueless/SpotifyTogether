@@ -7,13 +7,16 @@ import {Auth} from "../middleware/auth.middleware";
 import {EventSettingsController} from "./event.settings.controller";
 import {EventParticipantsController} from "./event.participants.controller";
 import {TracksController} from "./event.tracks.controller";
+import {EventAlgorithmController} from "./event.algorithm.controller";
 
 export const EVENT_ID_LENGTH: number = 6;
 export const MAX_EVENT_ID_GENERATION_RETRIES: number = 1000;
 
 const router = Router({mergeParams: true});
 
-router.param("eventId",  async function (req, res, next, eventId) {
+// prepare to check requested event
+// (was planned to be part of the auth.middleware.ts but was missing access to the eventId param)
+router.param("eventId", async function (req, res, next, eventId) {
     const eventUser = await DI.em.findOne(EventUser,
         {
             event: {id: eventId},
@@ -32,7 +35,8 @@ router.param("eventId",  async function (req, res, next, eventId) {
 
 router.use("/:eventId/tracks", Auth.verifyEventAccess, TracksController);
 router.use("/:eventId/participants", Auth.verifyEventAdminAccess, EventParticipantsController);
-router.use("/:eventId/settings", Auth.verifyEventAdminAccess, EventSettingsController);
+router.use("/:eventId/settings", Auth.verifyEventOwnerAccess, EventSettingsController);
+router.use("/:eventId/algorithm", Auth.verifyEventOwnerAccess, EventAlgorithmController);
 
 // fetch all events of user
 router.get('/', async (req, res) => {
@@ -56,7 +60,7 @@ router.post('/', async (req, res) => {
     if (retries >= MAX_EVENT_ID_GENERATION_RETRIES && event != null) res.status(500).end();
 
     // create event & add user as owner
-    event = new Event(newEventId, req.body.name , req.body.date);
+    event = new Event(newEventId, req.body.name, req.body.date);
     const eventUser = new EventUser(Permission.OWNER, req.user!, event);
     await DI.em.persist(event).persist(eventUser).flush();
     res.status(201).json(event);
