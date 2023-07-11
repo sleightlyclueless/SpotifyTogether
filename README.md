@@ -9,10 +9,6 @@ To start the backend, you can either use the command:
 ```shell
 docker-compose up
 ```
-or in the /backend folder the command:
-```shell
-npm run start
-```
 
 ### Entities Structure
 ![alt text](entities.png "Entities")
