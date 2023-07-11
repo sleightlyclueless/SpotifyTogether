@@ -1,4 +1,3 @@
-import {object, string} from 'yup';
 import {Collection, Entity, OneToMany, PrimaryKey, Property, types} from '@mikro-orm/core';
 import {EventUser} from "./EventUser";
 
@@ -13,20 +12,17 @@ export class User {
     //@Property({type: types.text})
     //image_url: string;
 
-    @Property({type: types.text, nullable: true })
+    @Property({type: types.text, nullable: true})
     spotifyAccessToken: string | null;
 
-    @Property({type: types.text, nullable: true })
-    spotifyRefreshToken: string | null;
+    @Property({type: types.text, nullable: true})
+    spotifyRefreshToken: string | null; // In a real application you shouldn't save the token in plain text -> Salt.
 
     @Property()
     expiresInMs: number;
 
     @Property({type: types.bigint})
     issuedAt: number;
-
-    //@Property({type: types.text})
-    //spotifyTokenSalt: string; // TODO: encrypt tokens to safely store them
 
     @OneToMany(() => EventUser, (EventUser) => EventUser.user)
     eventUsers = new Collection<EventUser>(this);
@@ -39,8 +35,3 @@ export class User {
         this.issuedAt = issued_at;
     }
 }
-
-export const LoginSchema = object({
-    email: string().required(),
-    password: string().required(),
-});

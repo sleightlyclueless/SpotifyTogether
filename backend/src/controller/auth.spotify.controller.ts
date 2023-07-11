@@ -4,16 +4,11 @@ import randomstring from "randomstring";
 import axios from "axios";
 import {DI} from "../index";
 import {User} from "../entities/User";
-import {Event} from "../entities/Event";
 import {Auth} from "../middleware/auth.middleware";
-import {EventUser, Permission} from "../entities/EventUser";
-import {TracksController} from "./event.tracks.controller";
-import {EventAlgorithmController} from "./event.algorithm.controller";
 
 const router = Router({mergeParams: true});
 
-router.use("/:eventId/tracks", Auth.verifyEventOwnerAccess, EventAlgorithmController);
-
+//initiates Spotify Authorisation
 router.get('/login', async (req, res) => {
     const state = randomstring.generate(16);
     let scope = ""; // https://developer.spotify.com/documentation/web-api/concepts/scopes
@@ -35,14 +30,13 @@ router.get('/login', async (req, res) => {
         }));
 });
 
+// callback from spotify_response, creates/updates user in Database, redirects to frontend
 router.get('/login_response', async (req, res) => {
     const code = req.query.code || null;
     const state = req.query.state || null;
 
-    if (state === null) {
-        // TODO: handle error
-        res.redirect('/#' + querystring.stringify({error: 'state_mismatch'}));
-    } else {
+    if (state === null) res.redirect('/#' + querystring.stringify({error: 'state_mismatch'}));
+    else {
         axios.post(
             "https://accounts.spotify.com/api/token",
             {
@@ -72,9 +66,7 @@ router.get('/login_response', async (req, res) => {
                     user.expiresInMs = tokenResponse.data.expires_in * 1000; // convert to ms
                     user.issuedAt = Date.now(); // unix timestamp in ms
                     await DI.em.persistAndFlush(user);
-
                     res.redirect(`${DI.frontendUrl}/home?access_token=${user.spotifyAccessToken}`);
-                    //return res.status(200).json({access_token: user.spotifyAccessToken});
                 } else {
                     // create new user
                     let currentDate = Date.now();
@@ -85,23 +77,18 @@ router.get('/login_response', async (req, res) => {
                         tokenResponse.data.expires_in * 1000,
                         currentDate);
                     await DI.em.persistAndFlush(user);
-                    console.log("new user created:", user);
-
                     res.redirect(`${DI.frontendUrl}/home?access_token=${user.spotifyAccessToken}`);
-                    //return res.status(201).json({access_token: user.spotifyAccessToken});
                 }
-            }).catch(function (error: Error) {
-                console.log("spotify user not found");
-                console.log(error.message);
-                return res.status(400).send(error); // TODO: rework error
+            }).catch(function (error) {
+                return res.status(error.status).json(error);
             });
-        }).catch(function (error: Error) {
-            console.log("token request failed");
-            return res.status(400).send(error); // TODO: rework error
+        }).catch(function (error) {
+            return res.status(error.status).json(error);
         });
     }
 });
 
+// uses the user refresh_token to request a new one and returns it
 router.put('/refresh_token', Auth.verifySpotifyAccess, async (req, res) => {
     axios.post(
         'https://accounts.spotify.com/api/token',
@@ -116,27 +103,32 @@ router.put('/refresh_token', Auth.verifySpotifyAccess, async (req, res) => {
             },
         }).then((tokenResponse) => {
         req.user!.spotifyAccessToken = tokenResponse.data.access_token;
+        req.user!.expiresInMs = tokenResponse.data.expires_in;
+        req.user!.issuedAt = Date.now();
         DI.em.persistAndFlush(req.user!);
-        return res.status(200).send("alles cool bro"); // TODO: rework
-    }).catch(function (error: Error) {
-        return res.status(400).send(error); // TODO: rework error
+        return res.status(200).json(req.user);
+    }).catch(function (error) {
+        console.log(error);
+        return res.status(error.status).json(error);
     });
 });
-
+// returns spotify user ID
 router.get('/spotifyUserId', Auth.verifySpotifyAccess, async (req, res) => {
     return res.status(200).json({spotifyUserId: req.user!.spotifyId});
 });
 
+// returns how long the current access_token is still valid
 router.get('/remaining_expiry_time', Auth.verifySpotifyAccess, async (req, res) => {
     const remainingTime = req.user!.expiresInMs - (Date.now() - req.user!.issuedAt);
     return res.status(200).json({expires_in: remainingTime});
 });
 
+// resets the access- & refresh_token server side, token is not invalidated !
 router.put('/logout', Auth.verifySpotifyAccess, async (req, res) => {
     req.user!.spotifyAccessToken = null;
     req.user!.spotifyRefreshToken = null;
     await DI.em.persistAndFlush(req.user!);
-    return res.status(204).send("logout sucsessful"); // TODO: rework error
+    return res.status(204).end();
 });
 
 export const SpotifyAuthController = router;
