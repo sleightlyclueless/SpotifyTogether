@@ -36,11 +36,23 @@ const verifyParticipantAccess: RequestHandler = async (req, res, next) => {
     next();
 };
 
-const verifyAdminAccess: RequestHandler = async (req, res, next) => {
-    if(req.eventUser == null)
-        return res.status(403).json({errors: ["verifyAdminAccess(): You don't have access"]});
-    if(req.eventUser.permission < Permission.ADMIN)
-        return res.status(403).json({errors: ["verifyAdminAccess(): You must be at least a participant."]});
+// checks if user is at least a participant and event is not locked
+const verifyUnlockedEventParticipantAccess: RequestHandler = async (req, res, next) => {
+    if (req.eventUser == null || req.event == null)
+        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Missing event authentication."]});
+    if (req.eventUser.permission < Permission.PARTICIPANT)
+        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Insufficient access rights."]});
+    if (req.eventUser.permission < Permission.ADMIN && req.event!.locked)
+        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Event locked for participant."]});
+    next();
+};
+
+// checks if user is at least a admin
+const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
+    if (req.eventUser == null)
+        return res.status(403).json({errors: ["verifyEventAdminAccess: Missing event authentication."]});
+    if (req.eventUser.permission < Permission.ADMIN)
+        return res.status(403).json({errors: ["verifyEventAdminAccess: Insufficient access rights."]});
     next();
 };
 
@@ -56,7 +68,8 @@ export const Auth = {
     prepareUserAuthentication,
     verifySpotifyAccess,
     verifyEventAccess,
-    verifyParticipantAccess,
-    verifyAdminAccess,
-    verifyOwnerAccess,
+    verifyEventParticipantAccess,
+    verifyUnlockedEventParticipantAccess,
+    verifyEventAdminAccess,
+    verifyEventOwnerAccess,
 };

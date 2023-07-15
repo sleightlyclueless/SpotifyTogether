@@ -3,14 +3,6 @@ import {EventUser} from "./EventUser";
 import {EventTrack} from "./EventTrack";
 import {Playlist} from "./Playlist";
 
-//Event:
-// TrackList[Spotify-Track],
-// UserList[User],
-// TracksProposed[Spotify-Track],
-// duration: time,
-// EventID: integer(?)UNIQUE,
-// Owner: User,
-
 @Entity()
 export class Event {
     @PrimaryKey({nullable: false, unique: true})
@@ -21,6 +13,9 @@ export class Event {
 
     @Property()
     date: Date;
+
+    @Property()
+    locked: boolean;
 
     @OneToMany(() => EventUser, (EventUser) => EventUser.event)
     users = new Collection<EventUser>(this);
@@ -35,5 +30,6 @@ export class Event {
         this.id = EventID;
         this.name = EventName;
         this.date = EventDate;
+        this.locked = false;
     }
 }

@@ -5,16 +5,14 @@ import {Auth} from "../middleware/auth.middleware";
 import {EventTrack, TrackStatus} from "../entities/EventTrack";
 import {SpotifyTrack} from "../entities/SpotifyTrack";
 import {Playlist} from "../entities/Playlist";
-import {EventUser} from "../entities/EventUser";
 
 const router = Router({mergeParams: true});
 
 // fetch all event tracks
-// TODO: add query parameters for searching, filtering, limit & offset etc.
+// TODO: add query parameters for searching, filtering, limit & offset etc. (if required by frontend)
 router.get('/', async (req, res) => {
     if (!req.event!.eventTracks.isInitialized()) req.event!.eventTracks.init();
     const eventTracks = req.event!.eventTracks;
-    // TODO: format return data
     res.status(200).json(eventTracks);
 });
 
@@ -22,7 +20,6 @@ router.get('/', async (req, res) => {
 router.get('/spotifyPlaylistIds', async (req, res) => {
     if (!req.event!.playlists.isInitialized()) req.event!.playlists.init();
     const playlists = req.event!.playlists;
-    // TODO: format return data
     res.status(200).json(playlists);
 });
 
@@ -35,13 +32,12 @@ router.get('/:spotifyPlaylistId', async (req, res) => {
         },
         {populate: ['eventTracks']}
     );
-    // TODO: format data ?
     if (playlist) return res.status(200).json(playlist.eventTracks);
-    else return res.status(404).send("Playlist not found.");
+    else return res.status(404).end();
 });
 
 // propose new event track
-router.post('/:spotifyTrackId', Auth.verifyParticipantAccess, async (req, res) => {
+router.post('/:spotifyTrackId', Auth.verifyUnlockedEventParticipantAccess, async (req, res) => {
     let track = await DI.em.findOne(SpotifyTrack, req.params.spotifyTrackId);
     if (track == undefined) {
         axios.get(
@@ -67,7 +63,7 @@ router.post('/:spotifyTrackId', Auth.verifyParticipantAccess, async (req, res) =
 });
 
 // change event track status
-router.put('/:spotifyTrackId/:status', Auth.verifyAdminAccess, async (req, res) => {
+router.put('/:spotifyTrackId/:status', Auth.verifyEventAdminAccess, async (req, res) => {
     const eventTrack = await DI.em.findOne(EventTrack,
         {
             track: {id: req.params.spotifyTrackId},
@@ -78,16 +74,16 @@ router.put('/:spotifyTrackId/:status', Auth.verifyAdminAccess, async (req, res) 
         const newTrackStatus = TrackStatus[req.params.status.toUpperCase() as keyof typeof TrackStatus];
         if (newTrackStatus != undefined) {
             if (newTrackStatus == TrackStatus.PROPOSED || newTrackStatus == TrackStatus.GENERATED)
-                return res.status(400).send("Cannot set status proposed or generated.");
+                return res.status(400).json({message: "Cannot set status proposed or generated."});
             eventTrack.status = newTrackStatus;
             await DI.em.persistAndFlush(eventTrack);
             return res.status(200).end();
-        } else res.status(400).send("Failed to cast status to enum type.");
-    } else return res.status(404).send("EventTrack not found.");
+        } else res.status(400).json({message: "Failed to cast status to enum type."});
+    } else return res.status(404).json({message: "EventTrack not found."});
 });
 
 // propose playlist
-router.post('/:spotifyPlaylistId', Auth.verifyParticipantAccess, async (req, res) => {
+router.post('/:spotifyPlaylistId', Auth.verifyUnlockedEventParticipantAccess, async (req, res) => {
     // remove playlists if exists
     await removePlaylist(req.params.spotifyPlaylistId, req.event!.id);
 
@@ -126,7 +122,7 @@ router.post('/:spotifyPlaylistId', Auth.verifyParticipantAccess, async (req, res
 });
 
 // accept all tracks from this playlist
-router.put('/:spotifyPlaylistId/accept', Auth.verifyAdminAccess, async (req, res) => {
+router.put('/:spotifyPlaylistId/accept', Auth.verifyEventAdminAccess, async (req, res) => {
     const playlist = await DI.em.findOne(Playlist,
         {
             id: req.params.spotifyPlaylistId,
@@ -143,15 +139,15 @@ router.put('/:spotifyPlaylistId/accept', Auth.verifyAdminAccess, async (req, res
         }
         playlist.accepted = true;
         await DI.em.persistAndFlush(playlist);
-        return res.status(200).json(playlist); // TODO: format data
-    } else return res.status(404).send("Playlist not found.");
+        return res.status(200).json(playlist);
+    } else return res.status(404).json({message: "Playlist not found."});
 });
 
 // remove playlist & corresponding tracks
-router.put('/:spotifyPlaylistId/remove', Auth.verifyAdminAccess, async (req, res) => {
+router.put('/:spotifyPlaylistId/remove', Auth.verifyEventAdminAccess, async (req, res) => {
     const removedPlaylist = await removePlaylist(req.params.spotifyPlaylistId, req.event!.id);
     if (removedPlaylist) return res.status(200).end();
-    else return res.status(404).send("Playlist not found.");
+    else return res.status(404).json({message: "Playlist not found."});
 });
 
 // helper function to remove one playlist
@@ -198,7 +194,6 @@ async function removePlaylist(spotifyPlaylistId: string, eventId: string) {
         return true;
     } else return false;
 }
-
 
 
 export const TracksController = router;

@@ -1,3 +1,6 @@
+
+[DATEI UM ENTITIES & DB ZU PLANEN :)]
+
 !!11!!elf "Spotify-*" sind spotify-api-daten
 
 Event: TrackList[Spotify-Track],UserList[User], duration, EventID, Owner

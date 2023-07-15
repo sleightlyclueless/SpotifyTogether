@@ -7,13 +7,16 @@ import {Auth} from "../middleware/auth.middleware";
 import {EventSettingsController} from "./event.settings.controller";
 import {EventParticipantsController} from "./event.participants.controller";
 import {TracksController} from "./event.tracks.controller";
+import {EventAlgorithmController} from "./event.algorithm.controller";
 
-const EVENT_ID_LENGTH: number = 6;
-const MAX_EVENT_ID_GENERATION_RETRIES: number = 100;
+export const EVENT_ID_LENGTH: number = 6;
+export const MAX_EVENT_ID_GENERATION_RETRIES: number = 1000;
 
 const router = Router({mergeParams: true});
 
-router.param("eventId",  async function (req, res, next, eventId) {
+// prepare to check requested event
+// (was planned to be part of the auth.middleware.ts but was missing access to the eventId param)
+router.param("eventId", async function (req, res, next, eventId) {
     const eventUser = await DI.em.findOne(EventUser,
         {
             event: {id: eventId},
@@ -31,8 +34,9 @@ router.param("eventId",  async function (req, res, next, eventId) {
 });
 
 router.use("/:eventId/tracks", Auth.verifyEventAccess, TracksController);
-router.use("/:eventId/participants", Auth.verifyAdminAccess, EventParticipantsController);
-router.use("/:eventId/settings", Auth.verifyAdminAccess, EventSettingsController);
+router.use("/:eventId/participants", Auth.verifyEventAdminAccess, EventParticipantsController);
+router.use("/:eventId/settings", Auth.verifyEventOwnerAccess, EventSettingsController);
+router.use("/:eventId/algorithm", Auth.verifyEventOwnerAccess, EventAlgorithmController);
 
 // fetch all events of user
 router.get('/', async (req, res) => {
@@ -56,7 +60,7 @@ router.post('/', async (req, res) => {
     if (retries >= MAX_EVENT_ID_GENERATION_RETRIES && event != null) res.status(500).end();
 
     // create event & add user as owner
-    event = new Event(newEventId, req.body.name , req.body.date);
+    event = new Event(newEventId, req.body.name, req.body.date);
     const eventUser = new EventUser(Permission.OWNER, req.user!, event);
     await DI.em.persist(event).persist(eventUser).flush();
     res.status(201).json(event);
@@ -80,19 +84,18 @@ router.get('/:eventId', async (req, res) => {
 // leave event (except owner)
 router.put('/:eventId', Auth.verifyEventAccess, async (req, res) => {
     if (req.eventUser!.permission == Permission.OWNER)
-        return res.status(400).send("Owner cant leave event, delete event instead.");
+        return res.status(400).json({message: "Owner cant leave event, delete event instead."});
     await DI.em.removeAndFlush(req.eventUser!);
     res.status(200).end();
 });
 
 // delete one event
-router.delete('/:eventId', Auth.verifyOwnerAccess, async (req, res) => {
+router.delete('/:eventId', Auth.verifyEventOwnerAccess, async (req, res) => {
     const event = await DI.em.findOne(Event, {id: req.params.eventId});
     if (event) {
         await DI.em.removeAndFlush(event);
         return res.status(200).end();
-    } else return res.status(404).json("Event not found.");
+    } else return res.status(404).json({message: "Event not found."});
 });
-
 
 export const EventController = router;
