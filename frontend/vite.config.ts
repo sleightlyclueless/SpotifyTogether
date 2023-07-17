@@ -13,8 +13,7 @@ export default defineConfig({
       },
     },
     cors: true,
-    open: true,
-    origin: 'https://accounts.spotify.com/api/token'
+    open: true
   },
 });
 

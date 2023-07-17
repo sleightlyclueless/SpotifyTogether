@@ -34,6 +34,14 @@ const SinglePlaylist = styled.div`
   align-items: center;
   flex-direction: column;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  background: rgba(${COLORS.buttonRGB}, 0.8);
+  opacity: 0.85;
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    opacity: 1;
+  }
 `;
 
 const PartyName = styled.div`
@@ -91,6 +99,12 @@ const SmallButton = styled.div`
   align-items: center;
   font-size: 16px;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    background: ${COLORS.buttonHover};
+  }
 `;
 
 const Button = styled.div`
@@ -103,6 +117,12 @@ const Button = styled.div`
   align-items: center;
   font-size: 16px;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    background: ${COLORS.buttonHover};
+  }
 `;
 
 const ButtonContainer = styled.div`

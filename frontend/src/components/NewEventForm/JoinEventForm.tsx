@@ -16,11 +16,12 @@ const Container = styled.div`
 `;
 
 const EventCodeInput = styled(IonInput)`
+  --padding-start: 8px !important;
   margin-top: 32px;
   width: 100%;
   height: 40px;
   border-radius: 8px;
-  background: ${COLORS.backgroundLight};
+  background: ${COLORS.font};
   border: none;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;

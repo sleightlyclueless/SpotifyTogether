@@ -25,6 +25,13 @@ const LogoutButton = styled.div`
   justify-content: center;
   align-items: center;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    background: ${COLORS.buttonHover};
+  }
 `;
 
 export const UserSettings = () => {

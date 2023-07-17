@@ -15,6 +15,12 @@ const Container = styled.div`
   position: absolute;
   bottom: 16px;
   right: calc(50% - 40px);
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    background: ${COLORS.buttonHover};
+  }
 `;
 
 type NewPlaylistButtonProps = {

@@ -11,10 +11,10 @@ const Container = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  height: 40px;
   position: sticky;
-  top: 16px;
-  padding: 0 20px 32px 24px;
+  top: 0;
+  padding: 20px;
+  background-color: ${COLORS.background};
 `;
 
 const Placeholder = styled.div`
@@ -42,6 +42,11 @@ const User = styled.div`
   justify-content: center;
   width: 80px;
   gap: 4px;
+  transition: all .5s;
+  &:hover {
+    cursor: pointer;
+    color: ${COLORS.link};
+  }
 `;
 
 export const StyledIonModal = styled(IonModal)`

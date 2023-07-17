@@ -11,6 +11,27 @@ import {
 import styled from "styled-components";
 import { useGetUserName } from "../hooks";
 import { COLORS, HOME } from "../constants";
+import partyVid from "../assets/party.mp4";
+
+const VidOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: -1;
+`;
+
+const VideoBackground = styled.video`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+`;
 
 const LoginContainer = styled.div`
   display: flex;
@@ -42,8 +63,14 @@ const NewEventButton = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: 0.3s slide-in;
+  transition: all 0.5s;
 
+  &:hover {
+    cursor: pointer;
+    background: ${COLORS.buttonHover};
+  }
+  
+  animation: 0.3s slide-in;
   @keyframes slide-in {
     from {
       transform: translateY(100%) translateX(100%);
@@ -66,8 +93,14 @@ const JoinEventButton = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: 0.3s slide-in2;
+  transition: all 0.5s;
 
+  &:hover {
+    cursor: pointer;
+    background: ${COLORS.buttonHover};
+  }
+
+  animation: 0.3s slide-in2;
   @keyframes slide-in2 {
     from {
       transform: translateY(100%) translateX(-50%);
@@ -123,6 +156,10 @@ export const HomePage: FunctionComponent = () => {
 
   return (
     <PageContainer>
+      <VideoBackground autoPlay loop muted>
+        <source src={partyVid} type="video/mp4" />
+      </VideoBackground>
+      <VidOverlay />
       {userName ? (
         <>
           <Header title={"Home"} userName={userName || undefined} />
