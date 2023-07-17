@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import axios from "axios";
 import { COLORS, HOME } from "../../constants";
+import { useGetUserName } from "../../hooks";
 
 const Container = styled.div`
   padding: 16px;
@@ -9,6 +10,7 @@ const Container = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 35%;
+  color: ${COLORS.font};
 `;
 
 const Content = styled.div`
@@ -35,6 +37,10 @@ const LogoutButton = styled.div`
 `;
 
 export const UserSettings = () => {
+  const userName = useGetUserName(
+    localStorage.getItem("accessToken") || undefined
+  );
+
   const handleLogout = () => {
     const accessToken = localStorage.getItem("accessToken");
     axios
@@ -60,6 +66,7 @@ export const UserSettings = () => {
   return (
     <Container>
       <Content>Settings</Content>
+      Hello {userName}, let's create some events!
       <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
     </Container>
   );

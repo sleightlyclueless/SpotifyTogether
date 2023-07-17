@@ -40,29 +40,44 @@ const LoginContainer = styled.div`
   height: 100vh;
 `;
 
+const LoginText = styled.div`
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  margin-bottom: 16px;
+`;
+
 const LoginButton = styled.div`
   border-radius: 8px;
   border: 1px solid white;
-  width: 60px;
-  height: 20px;
   color: white;
   padding: 10px;
+  max-width: 200px;
+  margin: 20px auto;
   text-align: center;
   cursor: pointer;
+  background: ${COLORS.button};
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    background: ${COLORS.buttonHover};
+  }
 `;
 
 const NewEventButton = styled.div`
   position: absolute;
   bottom: 100px;
   left: 25%;
-  width: 80px;
-  height: 80px;
   border-radius: 50%;
   background: ${COLORS.button};
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 80px;
+  height: 80px;
   transition: all 0.5s;
 
   &:hover {
@@ -200,7 +215,11 @@ export const HomePage: FunctionComponent = () => {
         </>
       ) : (
         <LoginContainer>
-          <LoginButton onClick={handleOnLoginClick}>Login</LoginButton>
+          <LoginText>
+            Create your community, host events and build your custom playlist
+            for it with spotify.
+            <LoginButton onClick={handleOnLoginClick}>Get started!</LoginButton>
+          </LoginText>
         </LoginContainer>
       )}
     </PageContainer>
