@@ -28,7 +28,7 @@ const verifyEventAccess: RequestHandler = (req, res, next) => {
     next();
 };
 
-const verifyParticipantAccess: RequestHandler = async (req, res, next) => {
+const verifyEventParticipantAccess: RequestHandler = async (req, res, next) => {
     if(req.eventUser == null)
         return res.status(403).json({errors: ["verifyParticipantAccess(): You don't have access"]});
     if(req.eventUser.permission < Permission.PARTICIPANT)
@@ -56,7 +56,7 @@ const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
     next();
 };
 
-const verifyOwnerAccess: RequestHandler = async (req: Request, res, next) => {
+const verifyEventOwnerAccess: RequestHandler = async (req: Request, res, next) => {
     if(req.eventUser == null)
         return res.status(403).json({errors: ["verifyOwnerAccess(): You don't have access"]});
     if(req.eventUser.permission < Permission.OWNER)
