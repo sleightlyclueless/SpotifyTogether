@@ -1,7 +1,7 @@
 import styled from "styled-components";
+import { COLORS } from "../../constants";
 import { RiPlayListAddLine } from "react-icons/ri";
 import { FunctionComponent } from "react";
-import { COLORS } from "../../constants";
 
 const Container = styled.div`
   display: flex;

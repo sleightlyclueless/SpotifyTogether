@@ -1,17 +1,19 @@
 import { FunctionComponent, useRef, useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
+import { LuEdit2 } from "react-icons/lu";
+import { IonPopover } from "@ionic/react";
+import { BiCopy } from "react-icons/bi";
+import { toast } from "react-toastify";
+import { AiOutlineArrowDown } from "react-icons/ai";
+import { Link } from "react-router-dom";
+
 import { CountdownTimer } from "../CountDownTimer";
 import { useGetUserEvents } from "../../hooks";
 import { EventType } from "../../constants/types";
 import { COLORS } from "../../constants";
 import { StyledIonModal } from "../Header";
-import axios from "axios";
-import { LuEdit2 } from "react-icons/lu";
 import { EditEventForm } from "./EditEventForm";
-import { IonPopover } from "@ionic/react";
-import { BiCopy } from "react-icons/bi";
-import { toast } from "react-toastify";
-import { AiOutlineArrowDown } from "react-icons/ai";
 
 const Container = styled.div`
   display: flex;
@@ -89,10 +91,10 @@ const TimerText = styled.div`
   color: ${COLORS.font};
 `;
 
-const SmallButton = styled.div`
-  width: 160px;
-  height: 40px;
-  background: ${COLORS.backgroundLight};
+const Button = styled.div`
+  min-width: 160px;
+  min-height: 60px;
+  background: ${COLORS.button};
   border-radius: 8px;
   display: flex;
   justify-content: center;
@@ -107,22 +109,8 @@ const SmallButton = styled.div`
   }
 `;
 
-const Button = styled.div`
-  width: 160px;
-  height: 60px;
-  background: ${COLORS.button};
-  border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 16px;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    background: ${COLORS.buttonHover};
-  }
+const EventButtons = styled(Button)`
+  background: ${COLORS.backgroundLight};
 `;
 
 const ButtonContainer = styled.div`
@@ -140,6 +128,12 @@ const StyledLuEdit2 = styled(LuEdit2)`
   width: 20px;
   height: 20px;
   color: ${COLORS.font};
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    color: ${COLORS.link};
+  }
 `;
 
 const StyledIonPopover = styled(IonPopover)`
@@ -235,10 +229,10 @@ export const EventOverview: FunctionComponent = () => {
                         </Timer>
                       </TimerContainer>
                       <ButtonContainer>
-                        <SmallButton id={"generate-code"}>
-                          Generate Code
-                        </SmallButton>
-                        <SmallButton>Manage Roles</SmallButton>
+                        <EventButtons id={"generate-code"}>
+                          Event Code
+                        </EventButtons>
+                        <EventButtons>Manage Roles</EventButtons>
                         <Button onClick={(): void => handleDelete(event.id)}>
                           Delete Event
                         </Button>
@@ -252,6 +246,11 @@ export const EventOverview: FunctionComponent = () => {
                             <StyledBiCopy
                               onClick={(): void => copyCode(event.id)}
                             />
+                          </StyledCode>
+                          <StyledCode>
+                            <Link to={`generateqr?event=${event.id}`}>
+                              View QR-Code:{" "}
+                            </Link>
                           </StyledCode>
                         </StyledIonPopover>
                       </ButtonContainer>

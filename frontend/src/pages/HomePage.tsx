@@ -10,7 +10,7 @@ import {
 } from "../components";
 import styled from "styled-components";
 import { useGetUserName } from "../hooks";
-import { COLORS, HOME } from "../constants";
+import { COLORS, HOME, JOINEVENTBYQR } from "../constants";
 import partyVid from "../assets/party.mp4";
 
 const VidOverlay = styled.div`
@@ -146,6 +146,12 @@ export const HomePage: FunctionComponent = () => {
   const userName = useGetUserName(
     localStorage.getItem("accessToken") || undefined
   );
+
+  const eventCode = localStorage.getItem("autojoinevent") || undefined;
+  if (eventCode != undefined) {
+    localStorage.removeItem("autojoinevent");
+    window.location.href = JOINEVENTBYQR + `?event=${eventCode}`;
+  }
 
   const handleOnLoginClick = () => {
     window.location.href = "http://localhost:4000/account/login";

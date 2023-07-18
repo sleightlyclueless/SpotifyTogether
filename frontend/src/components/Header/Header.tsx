@@ -3,6 +3,7 @@ import { FunctionComponent } from "react";
 import { IoPlayBackOutline } from "react-icons/io5";
 import { CiHeadphones } from "react-icons/ci";
 import { IonModal } from "@ionic/react";
+
 import { UserSettings } from "../UserSettings";
 import { COLORS } from "../../constants";
 

@@ -2,9 +2,10 @@ import { FunctionComponent, useState } from "react";
 import styled from "styled-components";
 import { InputCustomEvent, IonInput } from "@ionic/react";
 import { COLORS } from "../../constants";
-import { SubmitButton } from "./NewEventForm";
 import axios from "axios";
 import { toast } from "react-toastify";
+
+import { SubmitButton } from "./NewEventForm";
 
 const Container = styled.div`
   padding: 16px;

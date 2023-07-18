@@ -1,13 +1,15 @@
 import styled from "styled-components";
+import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
+import { FunctionComponent, useState } from "react";
+import axios from "axios";
+
 import {
   StyledEventNameInput,
   StyledIonDatetime,
   SubmitButton,
 } from "../NewEventForm";
-import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
-import { FunctionComponent, useState } from "react";
 import { EventType } from "../../constants/types";
-import axios from "axios";
+
 
 const Container = styled.div`
   height: 75%;

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import axios from "axios";
 import { COLORS, HOME } from "../../constants";
+
 import { useGetUserName } from "../../hooks";
 
 const Container = styled.div`
