@@ -6,6 +6,7 @@ import { IonModal } from "@ionic/react";
 
 import { UserSettings } from "../UserSettings";
 import { COLORS } from "../../constants";
+import { HeaderProps } from "../../constants/types";
 
 const Container = styled.div`
   display: flex;
@@ -55,10 +56,7 @@ export const StyledIonModal = styled(IonModal)`
   --background: ${COLORS.background};
 `;
 
-type HeaderProps = {
-  title: string;
-  userName?: string;
-};
+
 
 export const Header: FunctionComponent<HeaderProps> = ({ title, userName }) => {
   return (

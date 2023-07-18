@@ -139,10 +139,10 @@ export const HomePage: FunctionComponent = () => {
       window.location.href = HOME;
     } else {
       // If access token refreshed check autoeventjoin
-      const eventCode = localStorage.getItem("autojoinevent") || undefined;
-      if (eventCode != undefined) {
+      const eventID = localStorage.getItem("autojoinevent") || undefined;
+      if (eventID != undefined) {
         localStorage.removeItem("autojoinevent");
-        window.location.href = JOINEVENTBYQR + `?event=${eventCode}`;
+        window.location.href = JOINEVENTBYQR + `?event=${eventID}`;
       }
     }
   };

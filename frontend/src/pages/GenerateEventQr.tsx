@@ -43,19 +43,19 @@ const QrOverlay = styled.div`
 
 export const GenerateEventQr = () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const eventCode = urlParams.get("event") || undefined;
+  const eventID = urlParams.get("event") || undefined;
 
   useEffect(() => {
     // You can perform any additional logic or API calls related to generating the QR code here
-  }, [eventCode]);
+  }, [eventID]);
 
   return (
     <Container>
       <IntroText>
-        <h1>Join Event: {eventCode}</h1>
+        <h1>Join Event: {eventID}</h1>
       </IntroText>
       <QrOverlay>
-        <QRCode value={`/join?event=${eventCode}`} />
+        <QRCode value={`/join?event=${eventID}`} />
       </QrOverlay>
     </Container>
   );

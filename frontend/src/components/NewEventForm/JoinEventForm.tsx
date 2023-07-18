@@ -16,7 +16,7 @@ const Container = styled.div`
   height: 40%;
 `;
 
-const EventCodeInput = styled(IonInput)`
+const EventIDInput = styled(IonInput)`
   --padding-start: 8px !important;
   margin-top: 32px;
   width: 100%;
@@ -33,14 +33,14 @@ type JoinEventFormProps = {
 export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
   closeModal,
 }) => {
-  const [eventCode, setEventCode] = useState<string | null>(null);
+  const [eventID, seteventID] = useState<string | null>(null);
   const handleSubmit = () => {
-    if (!eventCode) {
+    if (!eventID) {
       console.log("Event code is null");
       return;
     }
     axios
-      .get(`http://localhost:4000/events/${eventCode}`, {
+      .get(`http://localhost:4000/events/${eventID}`, {
         headers: {
           Authorization: `${localStorage.getItem("accessToken")}`,
         },
@@ -58,12 +58,12 @@ export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
 
   return (
     <Container>
-      <EventCodeInput
+      <EventIDInput
         placeholder="Enter event code"
         type={"text"}
-        value={eventCode}
+        value={eventID}
         onIonChange={(e: InputCustomEvent): void => {
-          setEventCode(e.detail.value || null);
+          seteventID(e.detail.value || null);
         }}
       />
       <SubmitButton onClick={handleSubmit}>Join Event</SubmitButton>

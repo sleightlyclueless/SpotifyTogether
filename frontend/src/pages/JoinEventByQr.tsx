@@ -9,7 +9,7 @@ export const JoinEventByQr = (): JSX.Element | null => {
   const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const urlParams = new URLSearchParams(window.location.search);
-  const eventCode = urlParams.get("event") || undefined;
+  const eventID = urlParams.get("event") || undefined;
 
   const TextContainer = styled.div`
     display: flex;
@@ -27,9 +27,9 @@ export const JoinEventByQr = (): JSX.Element | null => {
 
   useEffect(() => {
     if (accessToken) {
-      if (eventCode) {
+      if (eventID) {
         axios
-          .get(`http://localhost:4000/events/${eventCode}`, {
+          .get(`http://localhost:4000/events/${eventID}`, {
             headers: {
               Authorization: `${accessToken}`,
             },
@@ -49,12 +49,12 @@ export const JoinEventByQr = (): JSX.Element | null => {
       }
     } else {
       toast.error("Sorry, no access token provided!");
-      if (eventCode) {
-        localStorage.setItem("autojoinevent", eventCode);
+      if (eventID) {
+        localStorage.setItem("autojoinevent", eventID);
         window.location.href = "http://localhost:4000/account/login";
       }
     }
-  }, [eventCode, accessToken]);
+  }, [eventID, accessToken]);
 
   return <TextContainer>Joining event...</TextContainer>;
 };

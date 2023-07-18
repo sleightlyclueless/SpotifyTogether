@@ -9,11 +9,11 @@ import { AiOutlineArrowDown } from "react-icons/ai";
 import { Link } from "react-router-dom";
 
 import { CountdownTimer } from "../CountDownTimer";
-import { useGetUserEvents } from "../../hooks";
-import { EventType } from "../../constants/types";
+import { useGetUserEvents, useGetUserName } from "../../hooks";
 import { COLORS } from "../../constants";
 import { StyledIonModal } from "../Header";
 import { EditEventForm } from "./EditEventForm";
+import { EventType, Participant } from "../../constants/types";
 
 const Container = styled.div`
   display: flex;
@@ -184,44 +184,19 @@ const StyledAiOutlineArrowDown = styled(AiOutlineArrowDown)`
 
 export const EventOverview: FunctionComponent = () => {
   const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
-  const [participants, setParticipants] = useState<Participant[]>([]);
-
-  type Participant = {
-    event: string;
-    user: {
-      spotifyId: string;
-      spotifyAccessToken: string | null;
-      spotifyRefreshToken: string | null;
-      expiresInMs: number;
-      issuedAt: string;
-    };
-    permission: string;
-  };
-
-  const fetchParticipants = (eventID: string): void => {
-    axios
-      .get(`http://localhost:4000/events/${eventID}/participants`, {
-        headers: {
-          Authorization: localStorage.getItem("accessToken"),
-        },
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          setParticipants(res.data.allUsers);
-        }
-      })
-      .catch(() => {
-        toast.error("Failed to fetch participants");
-      });
-  };
-
   const events: EventType[] = useGetUserEvents();
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
+  const accessToken = localStorage.getItem("accessToken") || undefined;
+  let loggedInUserName: string | undefined = undefined;
+  if (accessToken != undefined) {
+    loggedInUserName = useGetUserName(accessToken);
+  }
+
   const handleDelete = (eventID: string): void => {
     axios
       .delete(`http://localhost:4000/events/${eventID}`, {
         headers: {
-          Authorization: localStorage.getItem("accessToken"),
+          Authorization: accessToken,
         },
       })
       .then(() => {
@@ -236,27 +211,31 @@ export const EventOverview: FunctionComponent = () => {
     toast("Copied to clipboard!");
   };
 
-  useEffect(() => {
-    if (events.length > 0) {
-      fetchParticipants(events[0].id); // Fetch participants for the first event
-    }
-  }, [events]);
-
   return (
     <>
       <Container>
         {events.length > 0 ? (
           events.map((event) => {
+            const participant = event.participants.find(
+              (participant) => participant.user.spotifyId === loggedInUserName
+            );
+
+            if (!participant) {
+              return null; // Skip rendering the event if the user is not a participant
+            }
+
+            const isOwner = participant.permission === "owner";
+
             return (
-              <div key={event.name}>
-                <SinglePlaylist id={event.name}>
+              <div key={event.id}>
+                <SinglePlaylist id={event.id}>
                   <PartyName>{event.name}</PartyName>
                   <Timer>
                     <CountdownTimer targetDate={new Date(event.date)} />
                   </Timer>
                 </SinglePlaylist>
                 <StyledIonModal
-                  trigger={event.name}
+                  trigger={event.id}
                   mode={"ios"}
                   initialBreakpoint={0.8}
                   breakpoints={[0.0, 0.8]}
@@ -277,16 +256,12 @@ export const EventOverview: FunctionComponent = () => {
                         </Timer>
                       </TimerContainer>
                       <ParticipantsContainer>
-                        {/* Display Participants */}
-                        {participants.length > 0 && (
+                        {event.participants.length > 0 && (
                           <div>
                             <h2>Participants:</h2>
                             <ul>
-                              {participants.map((participant, index) => (
-                                <li key={index}>
-                                  <div>
-                                    <strong>Participant {index + 1}:</strong>
-                                  </div>
+                              {event.participants.map((participant) => (
+                                <li key={participant.user.spotifyId}>
                                   <div>
                                     <strong>Event:</strong> {participant.event}
                                   </div>
@@ -317,32 +292,34 @@ export const EventOverview: FunctionComponent = () => {
                           </div>
                         )}
                       </ParticipantsContainer>
-                      <ButtonContainer>
-                        <EventButtons id={"generate-code"}>
-                          Event Code
-                        </EventButtons>
-                        <EventButtons>Manage Roles</EventButtons>
-                        <Button onClick={(): void => handleDelete(event.id)}>
-                          Delete Event
-                        </Button>
-                        <StyledIonPopover
-                          ref={popoverRef}
-                          trigger={"generate-code"}
-                          side={"top"}
-                        >
-                          <StyledCode>
-                            Code: {event.id}{" "}
-                            <StyledBiCopy
-                              onClick={(): void => copyCode(event.id)}
-                            />
-                          </StyledCode>
-                          <StyledCode>
-                            <Link to={`generateqr?event=${event.id}`}>
-                              View QR-Code:{" "}
-                            </Link>
-                          </StyledCode>
-                        </StyledIonPopover>
-                      </ButtonContainer>
+                      {isOwner && (
+                        <ButtonContainer>
+                          <EventButtons id={"generate-code"}>
+                            Event Code
+                          </EventButtons>
+                          <EventButtons>Manage Roles</EventButtons>
+                          <Button onClick={(): void => handleDelete(event.id)}>
+                            Delete Event
+                          </Button>
+                          <StyledIonPopover
+                            ref={popoverRef}
+                            trigger={"generate-code"}
+                            side={"top"}
+                          >
+                            <StyledCode>
+                              Code: {event.id}{" "}
+                              <StyledBiCopy
+                                onClick={(): void => copyCode(event.id)}
+                              />
+                            </StyledCode>
+                            <StyledCode>
+                              <Link to={`generateqr?event=${event.id}`}>
+                                View QR-Code:{" "}
+                              </Link>
+                            </StyledCode>
+                          </StyledIonPopover>
+                        </ButtonContainer>
+                      )}
                     </DetailViewEventContainer>
                   )}
                 </StyledIonModal>
