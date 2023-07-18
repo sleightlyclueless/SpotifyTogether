@@ -13,12 +13,11 @@ Björn, Noah und Antoine haben sich ums das Backend, Paul und Sebi nur am Fronte
 
 ### Team Backend:
 
-##### Noah & Björn & Antoine:
+##### Noah & Björn:
 - regelmäig Freitags & Samstags online getroffen
    - Zusammenarbeit in Jetbrains Webstorm code with me 
 - event.controller-struktur konzept und implementierung
    - auth.spotify.controller.ts
-   - event.controller.ts
    - event.algorithm.controller.ts 
    - event.controller.ts
    - event.settings.controller.ts 
@@ -30,6 +29,18 @@ Björn, Noah und Antoine haben sich ums das Backend, Paul und Sebi nur am Fronte
 - debugging mit Team Frontend (schnelles Troubleshooting bei integration des Frotend)
 - Hilfe bei Integration im Frontend
 - backend readme
+
+##### Antoine:
+- Unterstützung von Backend und Frontend über Code with Me
+- Unterstützung bei CORS Problemen zwischen Backend und Frontend
+- Gitlab-CI Pipeline
+- Docker Umgebung inklusive Dockerfile und docker-compose
+- event.controller-struktur konzept und implementierung
+   - event.participants.controller.ts
+   - event.controller.ts
+- Datenbank automatische Erstellung von Tabellen in der Docker Umgebung
+- Entwicklung einer Test Strategie fürs Backend (In der Abschlusspräsentation)
+- Backend readme   
 
 Disclaimer Teamarbeit Noah/Björn/Antoine:
 
