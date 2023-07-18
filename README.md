@@ -159,11 +159,12 @@ Note: The status code 429 is returned by spotify if the app has exceeded its rat
 |--------|-----------|--------------------|------------------------|--------------------------------------------|
 | PUT    | /generate | 500, 200, 400, 404 | verifyEventOwnerAccess | Generates songs based on all participants. |
 
-### CI/CD ?
-todo
-
 ### Tests
-todo
+Das Backend und Frontend lässt sich leider nicht leicht per Postman oder automatisierten Tests testen, da alles sehr stark an die Spotify-API angebunden ist und somit auch abhängig von dieser ist. Dies hängt mit der Funktionsweise unserer Anwendung zusammen und hat seine Richtigkeit. Getestet wird also über die live Anwendung. Daher haben wir frühzeitig Kontakt mit unserem Projektbetreuer aufgenommen, nach Rücksprache mit ihm sollen wir in unserer README erwähnen, wie man das Testing mit deutlich mehr Zeit durchführen könnte. Normalerweise, wenn man mehr Zeit für das Projekt hätte, dann würde man die Anwendung und somit auch die Tests unabhängiger von der Spotify-API machen. Die Spotify-API würde von uns Gemockt also im kleinen Nachgebaut werden, sodass diese unsere Automatisierten / Postman Tests nicht mehr behindert. Backend und Frontend sollten möglichst komplett unabhängig voneinander und von anderen getrennt testbar sein.
+
+
+### CI/CD ?
+Eine CI/CD Pipeline ist eingerichtet, diese testet nach jedem Commit und Merge den Code durch. 
 
 ## Frontend
 - - -
