@@ -13,7 +13,7 @@ Björn, Noah und Antoine haben sich ums das Backend, Paul und Sebi nur am Fronte
 
 ### Team Backend:
 
-##### Noah & Björn:
+##### Noah & Björn & Antoine:
 - regelmäig Freitags & Samstags online getroffen
    - Zusammenarbeit in Jetbrains Webstorm code with me 
 - event.controller-struktur konzept und implementierung
@@ -31,14 +31,14 @@ Björn, Noah und Antoine haben sich ums das Backend, Paul und Sebi nur am Fronte
 - Hilfe bei Integration im Frontend
 - backend readme
 
-Disclaimer Teamarbeit Noah/Björn:
+Disclaimer Teamarbeit Noah/Björn/Antoine:
 
 Coden zu zweit ist lustiger, deswegen haben wir das Code-with-me-Feature fleißig benutzt und bessere Ergebnisse abgeliefert,
 da direkte Kommunikation sowie schnelles Troubleshooting für uns wichtiger waren als eigene Bearbeitungszeit.
 Da wir aus vorherigen Modulen zusammen schon ähnliche Codestandards übernommen haben fiel es uns leicht eine gehobene Codequalität abzuliefern.
 
-##### Antoine
-
+Disclaimer Antoine
+In den letzten Wochen vor der Angabe ist bei mir ein nahestehender verstorben. Eigentlich wollte ich das Testing noch möglichst groß behandeln, aber das hat jetzt Sebi aus dem Frontend Team übernommen, um mich ein bisschen zu entlasten.
 
 ## Backend
 - - -
