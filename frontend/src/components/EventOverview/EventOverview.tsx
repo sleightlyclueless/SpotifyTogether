@@ -1,4 +1,4 @@
-import { FunctionComponent, useRef, useState } from "react";
+import { FunctionComponent, useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { LuEdit2 } from "react-icons/lu";
@@ -23,6 +23,17 @@ const Container = styled.div`
   flex-wrap: wrap;
   padding: 16px;
   gap: 16px;
+`;
+
+const ParticipantsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 16px;
+  gap: 16px;
+  color: ${COLORS.font};
 `;
 
 const SinglePlaylist = styled.div`
@@ -173,6 +184,37 @@ const StyledAiOutlineArrowDown = styled(AiOutlineArrowDown)`
 
 export const EventOverview: FunctionComponent = () => {
   const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+
+  type Participant = {
+    event: string;
+    user: {
+      spotifyId: string;
+      spotifyAccessToken: string | null;
+      spotifyRefreshToken: string | null;
+      expiresInMs: number;
+      issuedAt: string;
+    };
+    permission: string;
+  };
+
+  const fetchParticipants = (eventID: string): void => {
+    axios
+      .get(`http://localhost:4000/events/${eventID}/participants`, {
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          setParticipants(res.data.allUsers);
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to fetch participants");
+      });
+  };
+
   const events: EventType[] = useGetUserEvents();
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
   const handleDelete = (eventID: string): void => {
@@ -193,6 +235,12 @@ export const EventOverview: FunctionComponent = () => {
     popoverRef.current?.dismiss();
     toast("Copied to clipboard!");
   };
+
+  useEffect(() => {
+    if (events.length > 0) {
+      fetchParticipants(events[0].id); // Fetch participants for the first event
+    }
+  }, [events]);
 
   return (
     <>
@@ -228,6 +276,47 @@ export const EventOverview: FunctionComponent = () => {
                           <CountdownTimer targetDate={new Date(event.date)} />
                         </Timer>
                       </TimerContainer>
+                      <ParticipantsContainer>
+                        {/* Display Participants */}
+                        {participants.length > 0 && (
+                          <div>
+                            <h2>Participants:</h2>
+                            <ul>
+                              {participants.map((participant, index) => (
+                                <li key={index}>
+                                  <div>
+                                    <strong>Participant {index + 1}:</strong>
+                                  </div>
+                                  <div>
+                                    <strong>Event:</strong> {participant.event}
+                                  </div>
+                                  <div>
+                                    <strong>Permission:</strong>{" "}
+                                    {participant.permission}
+                                  </div>
+                                  <div>
+                                    <strong>User:</strong>
+                                    <ul>
+                                      <li>
+                                        <strong>Spotify ID:</strong>{" "}
+                                        {participant.user.spotifyId}
+                                      </li>
+                                      <li>
+                                        <strong>Expires In Ms:</strong>{" "}
+                                        {participant.user.expiresInMs}
+                                      </li>
+                                      <li>
+                                        <strong>Issued At:</strong>{" "}
+                                        {participant.user.issuedAt}
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </ParticipantsContainer>
                       <ButtonContainer>
                         <EventButtons id={"generate-code"}>
                           Event Code

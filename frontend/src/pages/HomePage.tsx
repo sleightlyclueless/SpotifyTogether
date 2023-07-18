@@ -12,6 +12,7 @@ import styled from "styled-components";
 import { useGetUserName } from "../hooks";
 import { COLORS, HOME, JOINEVENTBYQR } from "../constants";
 import partyVid from "../assets/party.mp4";
+import { toast } from "react-toastify";
 
 const VidOverlay = styled.div`
   position: fixed;
@@ -84,7 +85,7 @@ const NewEventButton = styled.div`
     cursor: pointer;
     background: ${COLORS.buttonHover};
   }
-  
+
   animation: 0.3s slide-in;
   @keyframes slide-in {
     from {
@@ -136,6 +137,13 @@ export const HomePage: FunctionComponent = () => {
     if (accessToken) {
       localStorage.setItem("accessToken", accessToken || "");
       window.location.href = HOME;
+    } else {
+      // If access token refreshed check autoeventjoin
+      const eventCode = localStorage.getItem("autojoinevent") || undefined;
+      if (eventCode != undefined) {
+        localStorage.removeItem("autojoinevent");
+        window.location.href = JOINEVENTBYQR + `?event=${eventCode}`;
+      }
     }
   };
 
@@ -146,12 +154,6 @@ export const HomePage: FunctionComponent = () => {
   const userName = useGetUserName(
     localStorage.getItem("accessToken") || undefined
   );
-
-  const eventCode = localStorage.getItem("autojoinevent") || undefined;
-  if (eventCode != undefined) {
-    localStorage.removeItem("autojoinevent");
-    window.location.href = JOINEVENTBYQR + `?event=${eventCode}`;
-  }
 
   const handleOnLoginClick = () => {
     window.location.href = "http://localhost:4000/account/login";
