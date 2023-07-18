@@ -1,9 +1,10 @@
-import { FunctionComponent, useRef, useState, useEffect } from "react";
+import { FunctionComponent, useRef, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { LuEdit2 } from "react-icons/lu";
 import { IonPopover } from "@ionic/react";
 import { BiCopy } from "react-icons/bi";
+import { MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
 import { AiOutlineArrowDown } from "react-icons/ai";
 import { Link } from "react-router-dom";
@@ -13,7 +14,7 @@ import { useGetUserEvents, useGetUserName } from "../../hooks";
 import { COLORS } from "../../constants";
 import { StyledIonModal } from "../Header";
 import { EditEventForm } from "./EditEventForm";
-import { EventType, Participant } from "../../constants/types";
+import { EventType } from "../../constants/types";
 
 const Container = styled.div`
   display: flex;
@@ -34,6 +35,17 @@ const ParticipantsContainer = styled.div`
   padding: 16px;
   gap: 16px;
   color: ${COLORS.font};
+`;
+
+const ParticipantItem = styled.div`
+  display: flex;
+  flex-direction: row; /* Modified */
+  align-items: center; /* Modified */
+  gap: 16px; /* Added */
+`;
+
+const ParticipantId = styled.div`
+  font-weight: bold;
 `;
 
 const SinglePlaylist = styled.div`
@@ -168,6 +180,24 @@ const StyledBiCopy = styled(BiCopy)`
   transition: 0.2s ease-in-out;
 `;
 
+const StyledMdClose = styled(MdClose)`
+  width: 20px;
+  height: 20px;
+  color: ${COLORS.font};
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+`;
+
+const StyledRoleDropdown = styled.select`
+  padding: 8px;
+  border-radius: 8px;
+  background: ${COLORS.backgroundLight};
+  color: ${COLORS.font};
+  border: none;
+  font-size: 14px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+`;
+
 const NoEventsContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -200,6 +230,46 @@ export const EventOverview: FunctionComponent = () => {
         },
       })
       .then(() => {
+        window.location.reload();
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const removeParticipant = (eventID: string, spotifyUserId: string): void => {
+    axios
+      .put(
+        `http://localhost:4000/events/${eventID}/participants/${spotifyUserId}`,
+        {},
+        {
+          headers: {
+            Authorization: accessToken,
+          },
+        }
+      )
+      .then(() => {
+        toast("Participant removed successfully");
+        window.location.reload();
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const changeRole = (
+    eventID: string,
+    spotifyUserId: string,
+    newRole: string
+  ): void => {
+    axios
+      .put(
+        `http://localhost:4000/events/${eventID}/participants/${spotifyUserId}/${newRole}`,
+        {},
+        {
+          headers: {
+            Authorization: accessToken,
+          },
+        }
+      )
+      .then(() => {
+        toast("Role changed successfully");
         window.location.reload();
       })
       .catch((error) => console.log(error));
@@ -259,36 +329,44 @@ export const EventOverview: FunctionComponent = () => {
                         {event.participants.length > 0 && (
                           <div>
                             <h2>Participants:</h2>
-                            <ul>
-                              {event.participants.map((participant) => (
-                                <li key={participant.user.spotifyId}>
-                                  <div>
-                                    <strong>Event:</strong> {participant.event}
-                                  </div>
-                                  <div>
-                                    <strong>Permission:</strong>{" "}
-                                    {participant.permission}
-                                  </div>
-                                  <div>
-                                    <strong>User:</strong>
-                                    <ul>
-                                      <li>
-                                        <strong>Spotify ID:</strong>{" "}
-                                        {participant.user.spotifyId}
-                                      </li>
-                                      <li>
-                                        <strong>Expires In Ms:</strong>{" "}
-                                        {participant.user.expiresInMs}
-                                      </li>
-                                      <li>
-                                        <strong>Issued At:</strong>{" "}
-                                        {participant.user.issuedAt}
-                                      </li>
-                                    </ul>
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
+                            {event.participants.map((participant) => (
+                              <ParticipantItem key={participant.user.spotifyId}>
+                                <ParticipantId>
+                                  {participant.user.spotifyId} (
+                                  {participant.permission})
+                                </ParticipantId>
+                                {isOwner &&
+                                  participant.permission !== "owner" && (
+                                    <>
+                                      <StyledRoleDropdown
+                                        value={participant.permission}
+                                        onChange={(
+                                          e: React.ChangeEvent<HTMLSelectElement>
+                                        ): void =>
+                                          changeRole(
+                                            event.id,
+                                            participant.user.spotifyId,
+                                            e.target.value
+                                          )
+                                        }
+                                      >
+                                        <option value="ADMIN">Admin</option>
+                                        <option value="PARTICIPANT">
+                                          Participant
+                                        </option>
+                                      </StyledRoleDropdown>
+                                      <StyledMdClose
+                                        onClick={(): void =>
+                                          removeParticipant(
+                                            event.id,
+                                            participant.user.spotifyId
+                                          )
+                                        }
+                                      />
+                                    </>
+                                  )}
+                              </ParticipantItem>
+                            ))}
                           </div>
                         )}
                       </ParticipantsContainer>

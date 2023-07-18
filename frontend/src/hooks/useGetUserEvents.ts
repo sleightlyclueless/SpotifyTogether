@@ -5,7 +5,7 @@ import { EventType, Participant } from "../constants/types";
 
 export const useGetUserEvents = () => {
   const [events, setEvents] = useState<EventType[]>([]);
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participants, setParticipants] = useState<Participant[][]>([]);
 
   const fetchEvents = (): void => {
     axios
@@ -22,21 +22,23 @@ export const useGetUserEvents = () => {
       });
   };
 
-  const fetchParticipants = (eventID: string): void => {
-    axios
-      .get(`http://localhost:4000/events/${eventID}/participants`, {
-        headers: {
-          Authorization: localStorage.getItem("accessToken"),
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          setParticipants(response.data.allUsers);
+  const fetchParticipants = async (eventID: string): Promise<Participant[]> => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/events/${eventID}/participants`,
+        {
+          headers: {
+            Authorization: localStorage.getItem("accessToken"),
+          },
         }
-      })
-      .catch(() => {
-        toast.error("Failed to fetch participants");
-      });
+      );
+      if (response.status === 200) {
+        return response.data.allUsers;
+      }
+    } catch (error) {
+      toast.error("Failed to fetch participants");
+    }
+    return [];
   };
 
   useEffect(() => {
@@ -44,15 +46,21 @@ export const useGetUserEvents = () => {
   }, []);
 
   useEffect(() => {
-    events.forEach((event) => {
-      fetchParticipants(event.id);
-    });
+    const fetchEventParticipants = async (): Promise<void> => {
+      const participantPromises = events.map((event) =>
+        fetchParticipants(event.id)
+      );
+      const participantResults = await Promise.all(participantPromises);
+      setParticipants(participantResults);
+    };
+
+    fetchEventParticipants();
   }, [events]);
 
-  return events.map((event) => ({
+  const mergedEvents = events.map((event, index) => ({
     ...event,
-    participants: participants.filter(
-      (participant) => participant.event === event.id
-    ),
+    participants: participants[index] || [], // Ensure participants array is available
   }));
+
+  return mergedEvents;
 };
