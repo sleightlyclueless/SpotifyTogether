@@ -1,6 +1,5 @@
 import { FunctionComponent, useRef, useState } from "react";
 import styled from "styled-components";
-import axios from "axios";
 import { LuEdit2 } from "react-icons/lu";
 import { IonPopover } from "@ionic/react";
 import { BiCopy } from "react-icons/bi";
@@ -15,6 +14,9 @@ import { COLORS } from "../../constants";
 import { StyledIonModal } from "../Header";
 import { EditEventForm } from "./EditEventForm";
 import { EventType } from "../../constants/types";
+import { useDeleteEvent } from "../../hooks/events/useDeleteEvent";
+import { useRemoveParticipant } from "../../hooks/events/participants/useRemoveParticipant";
+import { useEditParticipantRole } from "../../hooks/events/participants/useEditParticipantRole";
 
 const Container = styled.div`
   display: flex;
@@ -222,57 +224,23 @@ export const EventOverview: FunctionComponent = () => {
     loggedInUserName = useGetUserName(accessToken);
   }
 
-  const handleDelete = (eventID: string): void => {
-    axios
-      .delete(`http://localhost:4000/events/${eventID}`, {
-        headers: {
-          Authorization: accessToken,
-        },
-      })
-      .then(() => {
-        window.location.reload();
-      })
-      .catch((error) => console.log(error));
+  const handleDelete = useDeleteEvent(accessToken);
+  const handleDeleteEvent = (eventID: string): void => {
+    handleDelete(eventID);
   };
 
-  const removeParticipant = (eventID: string, spotifyUserId: string): void => {
-    axios
-      .put(
-        `http://localhost:4000/events/${eventID}/participants/${spotifyUserId}`,
-        {},
-        {
-          headers: {
-            Authorization: accessToken,
-          },
-        }
-      )
-      .then(() => {
-        toast("Participant removed successfully");
-        window.location.reload();
-      })
-      .catch((error) => console.log(error));
+  const removeParticipant = useRemoveParticipant(accessToken);
+  const handleRemoveParticipant = (eventID: string, spotifyUserId: string) => {
+    removeParticipant(eventID, spotifyUserId);
   };
 
-  const changeRole = (
+  const { changeRole } = useEditParticipantRole(accessToken);
+  const handleChangeRole = (
     eventID: string,
     spotifyUserId: string,
     newRole: string
-  ): void => {
-    axios
-      .put(
-        `http://localhost:4000/events/${eventID}/participants/${spotifyUserId}/${newRole}`,
-        {},
-        {
-          headers: {
-            Authorization: accessToken,
-          },
-        }
-      )
-      .then(() => {
-        toast("Role changed successfully");
-        window.location.reload();
-      })
-      .catch((error) => console.log(error));
+  ) => {
+    changeRole(eventID, spotifyUserId, newRole);
   };
 
   const copyCode = (code: string): void => {
@@ -343,7 +311,7 @@ export const EventOverview: FunctionComponent = () => {
                                         onChange={(
                                           e: React.ChangeEvent<HTMLSelectElement>
                                         ): void =>
-                                          changeRole(
+                                          handleChangeRole(
                                             event.id,
                                             participant.user.spotifyId,
                                             e.target.value
@@ -357,7 +325,7 @@ export const EventOverview: FunctionComponent = () => {
                                       </StyledRoleDropdown>
                                       <StyledMdClose
                                         onClick={(): void =>
-                                          removeParticipant(
+                                          handleRemoveParticipant(
                                             event.id,
                                             participant.user.spotifyId
                                           )
@@ -373,9 +341,8 @@ export const EventOverview: FunctionComponent = () => {
                       {isOwner && (
                         <ButtonContainer>
                           <EventButtons id={"generate-code"}>
-                            Event Code
+                            Invite People
                           </EventButtons>
-                          <EventButtons>Manage Roles</EventButtons>
                           <Button onClick={(): void => handleDelete(event.id)}>
                             Delete Event
                           </Button>

@@ -6,8 +6,8 @@ import {
 } from "@ionic/react";
 import styled from "styled-components";
 import { FunctionComponent, useState } from "react";
-import axios from "axios";
 import { COLORS } from "../../constants";
+import { useCreateEvent } from "../../hooks/events/useCreateEvent";
 import { toast } from "react-toastify";
 
 const Container = styled.div`
@@ -63,42 +63,18 @@ export const NewEventForm: FunctionComponent<NewEventFormProps> = ({
 }) => {
   const [eventName, setEventName] = useState<string | null>(null);
   const [eventDate, setEventDate] = useState<Date | null>(null);
+  const { isLoading, error, createEvent } = useCreateEvent(); // Use the hook
 
-  const handleSubmit = () => {
-    if (!eventName || !eventDate) {
-      toast.error("Event Name or Date is not set!", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-    } else {
-      axios
-        .post(
-          "http://localhost:4000/events",
-          {
-            name: eventName,
-            date: eventDate,
-          },
-          {
-            headers: {
-              Authorization: localStorage.getItem("accessToken"),
-            },
-          }
-        )
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      closeModal();
-      window.location.reload();
-    }
+  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const handleSubmit = async () => {
+    await createEvent(eventName || "", eventDate, accessToken, (error) => {
+      if (!error) {
+        closeModal();
+        window.location.reload();
+      } else {
+        toast.error(error);
+      }
+    });
   };
 
   return (

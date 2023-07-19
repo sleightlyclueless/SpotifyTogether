@@ -53,7 +53,7 @@ router.put('/:spotifyUserId/:permissions', async (req: express.Request<{
             return res.status(400).json({message: "Owner cant be modified."});
         if (targetUser.permission == Permission.ADMIN && requestingUser.permission == Permission.ADMIN)
             return res.status(403).json({message: "Admins cant be updated by other Admins."});
-        const newPermissions = TrackStatus[req.params.permissions.toUpperCase() as keyof typeof TrackStatus];
+        const newPermissions = Permission[req.params.permissions.toUpperCase() as keyof typeof Permission];
         if (newPermissions != undefined) {
             targetUser.permission = req.params.permissions;
             await DI.em.persistAndFlush(targetUser);

@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
 import { FunctionComponent, useState } from "react";
-import axios from "axios";
 
 import {
   StyledEventNameInput,
@@ -9,7 +8,7 @@ import {
   SubmitButton,
 } from "../NewEventForm";
 import { EventType } from "../../constants/types";
-
+import { useUpdateEvent } from "../../hooks/events/useUpdateEvent";
 
 const Container = styled.div`
   height: 75%;
@@ -28,15 +27,23 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
   event,
 }) => {
   const [eventName, setEventName] = useState<string>(event.name);
-  const [eventDate, setEventDate] = useState<Date>(event.date);
+  const [eventDate, setEventDate] = useState<Date>(new Date(event.date));
+  const { isLoading, error, updateEvent } = useUpdateEvent();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const changedEvent = {
       ...event,
       name: eventName,
-      date: eventDate,
+      date: eventDate.toISOString(), // Convert Date to string
     };
-    axios.put(`http://localhost:4000/events/${event.id}`, changedEvent);
+
+    try {
+      const accessToken = localStorage.getItem("accessToken") || undefined;
+      await updateEvent(event.id, changedEvent, accessToken); // Call the hook function to update the event
+    } catch (error) {
+      console.error("Error updating event:", error);
+      // Handle the error, show an error message, etc.
+    }
   };
 
   return (
@@ -50,9 +57,9 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
         }}
       />
       <StyledIonDatetime
-        value={eventDate}
+        value={eventDate.toISOString()} // Convert Date to string
         onIonChange={(e: DatetimeCustomEvent): void => {
-          if (e.detail.value) setEventDate(new Date(e.detail.value.toString()));
+          if (e.detail.value) setEventDate(new Date(e.detail.value)); // Convert string to Date
         }}
       />
       <SubmitButton onClick={handleSave}>Save Changes</SubmitButton>

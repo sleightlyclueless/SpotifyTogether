@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { EventType, Participant } from "../constants/types";
+import { EventType, Participant } from "../../constants/types";
 
 export const useGetUserEvents = () => {
   const [events, setEvents] = useState<EventType[]>([]);

@@ -1,3 +1,3 @@
 export * from "./useCountdown";
-export * from "./useGetUserName";
-export * from "./useGetUserEvents";
+export * from "./account/useGetUserName";
+export * from "./events/useGetUserEvents";

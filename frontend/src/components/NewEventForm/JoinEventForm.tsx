@@ -2,8 +2,7 @@ import { FunctionComponent, useState } from "react";
 import styled from "styled-components";
 import { InputCustomEvent, IonInput } from "@ionic/react";
 import { COLORS } from "../../constants";
-import axios from "axios";
-import { toast } from "react-toastify";
+import { useJoinEvent } from "../../hooks/events/useJoinEvent";
 
 import { SubmitButton } from "./NewEventForm";
 
@@ -30,30 +29,17 @@ const EventIDInput = styled(IonInput)`
 type JoinEventFormProps = {
   closeModal: () => void;
 };
-export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
-  closeModal,
-}) => {
+export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({ closeModal }) => {
   const [eventID, seteventID] = useState<string | null>(null);
+  const { isLoading, joinEvent } = useJoinEvent(); // Use the hook
+
+  const accessToken = localStorage.getItem("accessToken") || undefined;
+
   const handleSubmit = () => {
-    if (!eventID) {
-      console.log("Event code is null");
-      return;
-    }
-    axios
-      .get(`http://localhost:4000/events/${eventID}`, {
-        headers: {
-          Authorization: `${localStorage.getItem("accessToken")}`,
-        },
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          closeModal();
-          window.location.reload();
-        }
-      })
-      .catch(() => {
-        toast.error("Event code is invalid!");
-      });
+    joinEvent(eventID, accessToken, () => {
+      closeModal();
+      window.location.reload();
+    });
   };
 
   return (
@@ -66,7 +52,9 @@ export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
           seteventID(e.detail.value || null);
         }}
       />
-      <SubmitButton onClick={handleSubmit}>Join Event</SubmitButton>
+      <SubmitButton onClick={handleSubmit} disabled={isLoading}>
+        {isLoading ? "Joining..." : "Join Event"}
+      </SubmitButton>
     </Container>
   );
 };
