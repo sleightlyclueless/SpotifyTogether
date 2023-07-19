@@ -41,13 +41,17 @@ const ParticipantsContainer = styled.div`
 
 const ParticipantItem = styled.div`
   display: flex;
-  flex-direction: row; /* Modified */
-  align-items: center; /* Modified */
-  gap: 16px; /* Added */
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid ${COLORS.font};
 `;
 
 const ParticipantId = styled.div`
   font-weight: bold;
+  min-width: 100px;
 `;
 
 const SinglePlaylist = styled.div`
@@ -200,6 +204,10 @@ const StyledRoleDropdown = styled.select`
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
 
+const StyledRoleText = styled.div`
+  min-width: 100px;
+`;
+
 const NoEventsContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -262,7 +270,12 @@ export const EventOverview: FunctionComponent = () => {
               return null; // Skip rendering the event if the user is not a participant
             }
 
-            const isOwner = participant.permission === "owner";
+            participant.permission = participant.permission.toUpperCase();
+
+            const roles = ["PARTICIPANT", "ADMIN"];
+            const isOwner = participant.permission === "OWNER";
+            const isAdmin = participant.permission === "ADMIN";
+            const isParticipant = participant.permission === "PARTICIPANT";
 
             return (
               <div key={event.id}>
@@ -297,47 +310,118 @@ export const EventOverview: FunctionComponent = () => {
                         {event.participants.length > 0 && (
                           <div>
                             <h2>Participants:</h2>
-                            {event.participants.map((participant) => (
-                              <ParticipantItem key={participant.user.spotifyId}>
-                                <ParticipantId>
-                                  {participant.user.spotifyId} (
-                                  {participant.permission})
-                                </ParticipantId>
-                                {isOwner &&
-                                  participant.permission !== "owner" && (
-                                    <>
-                                      <StyledRoleDropdown
-                                        value={participant.permission}
-                                        onChange={(
-                                          e: React.ChangeEvent<HTMLSelectElement>
-                                        ): void =>
-                                          handleChangeRole(
-                                            event.id,
-                                            participant.user.spotifyId,
-                                            e.target.value
-                                          )
-                                        }
-                                      >
-                                        <option value="ADMIN">Admin</option>
-                                        <option value="PARTICIPANT">
-                                          Participant
-                                        </option>
-                                      </StyledRoleDropdown>
-                                      <StyledMdClose
-                                        onClick={(): void =>
-                                          handleRemoveParticipant(
-                                            event.id,
-                                            participant.user.spotifyId
-                                          )
-                                        }
-                                      />
-                                    </>
-                                  )}
-                              </ParticipantItem>
-                            ))}
+                            {event.participants.map(
+                              (participant) => (
+                                (participant.permission =
+                                  participant.permission.toUpperCase()),
+                                (
+                                  <ParticipantItem
+                                    key={participant.user.spotifyId}
+                                  >
+                                    <ParticipantId>
+                                      {participant.user.spotifyId}
+                                    </ParticipantId>
+                                    {isOwner &&
+                                      participant.permission === "OWNER" && (
+                                        <>
+                                          <StyledRoleText>
+                                            {participant.permission}
+                                          </StyledRoleText>
+                                        </>
+                                      )}
+                                    {isOwner &&
+                                      participant.permission !== "OWNER" && (
+                                        <>
+                                          <StyledRoleDropdown
+                                            value={participant.permission}
+                                            onChange={(
+                                              e: React.ChangeEvent<HTMLSelectElement>
+                                            ): void =>
+                                              handleChangeRole(
+                                                event.id,
+                                                participant.user.spotifyId,
+                                                e.target.value
+                                              )
+                                            }
+                                          >
+                                            {roles.map((role) => (
+                                              <option key={role} value={role}>
+                                                {role}
+                                              </option>
+                                            ))}
+                                          </StyledRoleDropdown>
+                                          <StyledMdClose
+                                            onClick={(): void =>
+                                              handleRemoveParticipant(
+                                                event.id,
+                                                participant.user.spotifyId
+                                              )
+                                            }
+                                          />
+                                        </>
+                                      )}
+
+                                    {isAdmin &&
+                                      (participant.permission === "OWNER" ||
+                                        participant.permission === "ADMIN") && (
+                                        <>
+                                          <StyledRoleText>
+                                            {participant.permission}
+                                          </StyledRoleText>
+                                        </>
+                                      )}
+
+                                    {isAdmin &&
+                                      participant.permission ===
+                                        "PARTICIPANT" && (
+                                        <>
+                                          <StyledRoleText>
+                                            {participant.permission}
+                                          </StyledRoleText>
+                                          <StyledMdClose
+                                            onClick={(): void =>
+                                              handleRemoveParticipant(
+                                                event.id,
+                                                participant.user.spotifyId
+                                              )
+                                            }
+                                          />
+                                        </>
+                                      )}
+                                    {isParticipant && (
+                                      <div>{participant.permission}</div>
+                                    )}
+                                  </ParticipantItem>
+                                )
+                              )
+                            )}
                           </div>
                         )}
                       </ParticipantsContainer>
+                      {isAdmin && (
+                        <ButtonContainer>
+                          <EventButtons id={"generate-code"}>
+                            Invite People
+                          </EventButtons>
+                          <StyledIonPopover
+                            ref={popoverRef}
+                            trigger={"generate-code"}
+                            side={"top"}
+                          >
+                            <StyledCode>
+                              Code: {event.id}{" "}
+                              <StyledBiCopy
+                                onClick={(): void => copyCode(event.id)}
+                              />
+                            </StyledCode>
+                            <StyledCode>
+                              <Link to={`generateqr?event=${event.id}`}>
+                                View QR-Code:{" "}
+                              </Link>
+                            </StyledCode>
+                          </StyledIonPopover>
+                        </ButtonContainer>
+                      )}
                       {isOwner && (
                         <ButtonContainer>
                           <EventButtons id={"generate-code"}>

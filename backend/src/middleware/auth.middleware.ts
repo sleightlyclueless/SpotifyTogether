@@ -31,7 +31,7 @@ const verifyEventAccess: RequestHandler = (req, res, next) => {
 const verifyEventParticipantAccess: RequestHandler = async (req, res, next) => {
     if(req.eventUser == null)
         return res.status(403).json({errors: ["verifyParticipantAccess(): You don't have access"]});
-    if(req.eventUser.permission < Permission.PARTICIPANT)
+    if(req.eventUser.permission.toLowerCase() < Permission.PARTICIPANT)
         return res.status(403).json({errors: ["verifyParticipantAccess(): You must be at least a participant."]});
     next();
 };
@@ -42,16 +42,20 @@ const verifyUnlockedEventParticipantAccess: RequestHandler = async (req, res, ne
         return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Missing event authentication."]});
     if (req.eventUser.permission < Permission.PARTICIPANT)
         return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Insufficient access rights."]});
-    if (req.eventUser.permission < Permission.ADMIN && req.event!.locked)
+    if (req.eventUser.permission.toLowerCase() < Permission.ADMIN && req.event!.locked)
         return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Event locked for participant."]});
     next();
 };
 
 // checks if user is at least a admin
 const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
+    console.info("PERMISSION ILTAM 1: " + req.eventUser?.permission.toLowerCase());
+    console.info("PERMISSION ILTAM 2: " + Permission.ADMIN);
+    if (req.eventUser)
+        console.info("PERMISSION ILTAM 3: " + req.eventUser.permission.toLowerCase() < Permission.ADMIN);
     if (req.eventUser == null)
         return res.status(403).json({errors: ["verifyEventAdminAccess: Missing event authentication."]});
-    if (req.eventUser.permission < Permission.ADMIN)
+    if (req.eventUser.permission.toLowerCase() < Permission.ADMIN)
         return res.status(403).json({errors: ["verifyEventAdminAccess: Insufficient access rights."]});
     next();
 };
@@ -59,7 +63,7 @@ const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
 const verifyEventOwnerAccess: RequestHandler = async (req: Request, res, next) => {
     if(req.eventUser == null)
         return res.status(403).json({errors: ["verifyOwnerAccess(): You don't have access"]});
-    if(req.eventUser.permission < Permission.OWNER)
+    if(req.eventUser.permission.toLowerCase() < Permission.OWNER)
         return res.status(403).json({errors: ["verifyOwnerAccess(): You must be at least a owner."]});
     next();
 };

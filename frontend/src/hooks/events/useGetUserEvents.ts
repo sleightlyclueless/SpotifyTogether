@@ -37,6 +37,7 @@ export const useGetUserEvents = () => {
       }
     } catch (error) {
       toast.error("Failed to fetch participants");
+      console.log(error);
     }
     return [];
   };
