@@ -227,8 +227,8 @@ export const EventOverview: FunctionComponent = () => {
   const events: EventType[] = useGetUserEvents();
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
-  let loggedInUserName: string | undefined = undefined;
-  if (accessToken != undefined) {
+  let loggedInUserName: string | null = null;
+  if (accessToken != null) {
     loggedInUserName = useGetUserName();
   }
 

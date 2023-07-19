@@ -1,15 +1,12 @@
 import axios from "axios";
 import { useState } from "react";
 import { EventType } from "../../constants/types";
-import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
 
+// TODO - No backend endpoint for updating an event yet?
 export const useUpdateEvent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    localStorage.getItem("accessToken") || undefined
-  );
-  useCheckAndRefreshToken(setAccessToken); // Move the useCheckAndRefreshToken hook call outside of useUpdateEvent hook
+  const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const updateEvent = async (eventID: string, updatedEvent: EventType) => {
     try {

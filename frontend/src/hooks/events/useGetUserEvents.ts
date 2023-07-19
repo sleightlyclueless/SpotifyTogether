@@ -7,12 +7,7 @@ import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
 export const useGetUserEvents = () => {
   const [events, setEvents] = useState<EventType[]>([]);
   const [participants, setParticipants] = useState<Participant[][]>([]);
-  
-  // Call the useCheckAndRefreshToken hook outside of the fetch functions
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    localStorage.getItem("accessToken") || undefined
-  );
-  useCheckAndRefreshToken(setAccessToken);
+  const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const fetchEvents = (): void => {
     axios

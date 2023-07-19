@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { HOME, LOGIN, GENERATEEVENTQR, JOINEVENTBYQR } from "./constants";
+import { HOME, GENERATEEVENTQR, JOINEVENTBYQR } from "./constants";
 import { HomePage } from "./pages";
 import "./globalCSS.css";
 import { IonApp, setupIonicReact } from "@ionic/react";

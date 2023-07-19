@@ -1,17 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useCheckAndRefreshToken } from "./useCheckAndRefreshToken";
 
-export const useGetUserName = (): string => {
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    localStorage.getItem("accessToken") || undefined
-  );
-  useCheckAndRefreshToken(setAccessToken);
-
-  const [userName, setUserName] = useState<string>("");
+export const useGetUserName = (): string | null => {
+  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
-    if (accessToken == undefined) return;
+    if (accessToken === undefined) return;
 
     axios
       .get(`http://localhost:4000/account/spotifyUserId`, {
@@ -23,7 +18,7 @@ export const useGetUserName = (): string => {
         setUserName(res.data.spotifyUserId);
       })
       .catch((error) => {
-        console.log("Error:", error);
+        console.log("Error fetching username:", error);
       });
   }, [accessToken]);
 

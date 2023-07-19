@@ -12,7 +12,7 @@ import styled from "styled-components";
 import { useGetUserName } from "../hooks";
 import { COLORS, HOME, JOINEVENTBYQR } from "../constants";
 import partyVid from "../assets/party.mp4";
-import { toast } from "react-toastify";
+import { useCheckAndRefreshToken } from "../hooks";
 
 const VidOverlay = styled.div`
   position: fixed;
@@ -131,11 +131,12 @@ export const HomePage: FunctionComponent = () => {
   const [isNewEventFormOpen, setIsNewEventFormOpen] = useState(false);
   const [isJoinEventFormOpen, setIsJoinEventFormOpen] = useState(false);
   const [bigButtonIsClicked, setBigButtonIsClicked] = useState(false);
+
   const getAccessToken = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get("access_token") || undefined;
-    if (accessToken) {
-      localStorage.setItem("accessToken", accessToken || "");
+    const accessTokenCheck = urlParams.get("access_token") || undefined;
+    if (accessTokenCheck) {
+      localStorage.setItem("accessToken", accessTokenCheck || "");
       window.location.href = HOME;
     } else {
       // If access token refreshed check autoeventjoin
@@ -150,6 +151,13 @@ export const HomePage: FunctionComponent = () => {
   useMemo(() => {
     getAccessToken();
   }, []);
+
+  const [accessToken, setAccessToken] = useState<string | undefined>(
+    localStorage.getItem("accessToken") || undefined
+  );
+
+  // Call the useCheckAndRefreshToken hook
+  useCheckAndRefreshToken(setAccessToken);
 
   const userName = useGetUserName();
 

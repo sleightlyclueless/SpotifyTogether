@@ -1,15 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { HOME } from "../../constants";
-import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
 
 export const useJoinEventByQr = (eventID: string | null) => {
-  // Move the useCheckAndRefreshToken hook call outside of the useJoinEventByQr hook
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    localStorage.getItem("accessToken") || undefined
-  );
-  useCheckAndRefreshToken(setAccessToken);
+  const accessToken = localStorage.getItem("accessToken") || undefined;
 
   useEffect(() => {
     if (accessToken) {

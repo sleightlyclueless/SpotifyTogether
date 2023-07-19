@@ -1,13 +1,8 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useState } from "react";
-import { useCheckAndRefreshToken } from "../../account/useCheckAndRefreshToken";
 
 export const useEditParticipantRole = () => {
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    localStorage.getItem("accessToken") || undefined
-  );
-  useCheckAndRefreshToken(setAccessToken);
+  const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const changeRole = (
     eventID: string,

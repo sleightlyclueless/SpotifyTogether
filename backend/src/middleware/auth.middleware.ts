@@ -49,10 +49,6 @@ const verifyUnlockedEventParticipantAccess: RequestHandler = async (req, res, ne
 
 // checks if user is at least a admin
 const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
-    console.info("PERMISSION ILTAM 1: " + req.eventUser?.permission.toLowerCase());
-    console.info("PERMISSION ILTAM 2: " + Permission.ADMIN);
-    if (req.eventUser)
-        console.info("PERMISSION ILTAM 3: " + req.eventUser.permission.toLowerCase() < Permission.ADMIN);
     if (req.eventUser == null)
         return res.status(403).json({errors: ["verifyEventAdminAccess: Missing event authentication."]});
     if (req.eventUser.permission.toLowerCase() < Permission.ADMIN)

@@ -103,7 +103,7 @@ router.put('/refresh_token', Auth.verifySpotifyAccess, async (req, res) => {
             },
         }).then((tokenResponse) => {
         req.user!.spotifyAccessToken = tokenResponse.data.access_token;
-        req.user!.expiresInMs = tokenResponse.data.expires_in;
+        req.user!.expiresInMs = tokenResponse.data.expires_in * 1000;
         req.user!.issuedAt = Date.now();
         DI.em.persistAndFlush(req.user!);
         return res.status(200).json(req.user);

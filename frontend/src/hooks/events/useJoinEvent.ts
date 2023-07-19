@@ -1,14 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
 
 export const useJoinEvent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    localStorage.getItem("accessToken") || undefined
-  );
-  useCheckAndRefreshToken(setAccessToken); // Move the useCheckAndRefreshToken hook call outside of useJoinEvent hook
+  const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const joinEvent = async (eventID: string | null, onSuccess: () => void) => {
     try {

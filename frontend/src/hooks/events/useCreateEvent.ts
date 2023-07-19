@@ -1,15 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
 import { EventType } from "../../constants/types";
-import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
 
 export const useCreateEvent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    localStorage.getItem("accessToken") || undefined
-  );
-  useCheckAndRefreshToken(setAccessToken); // Move the useCheckAndRefreshToken hook call outside of useCreateEvent hook
+  const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const createEvent = async (
     eventName: string,

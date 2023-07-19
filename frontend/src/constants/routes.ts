@@ -1,8 +1,6 @@
-export const SPOTIFY = "/spotify";
+// Homepage with modals for all functions
 export const HOME = "/";
 
-export const LOGIN = "/login";
-export const LOGINRESPONSE = "/login_response";
-
+// Join by QR bundle
 export const JOINEVENTBYQR = "/join";
 export const GENERATEEVENTQR = "/generateqr";

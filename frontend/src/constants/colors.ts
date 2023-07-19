@@ -6,5 +6,6 @@ export const COLORS = {
   button: "#497f9c",
   buttonRGB: "73, 127, 156",
   buttonHover: "#0e8388",
+  buttonHoverRGB: "14, 131, 136",
   link: "#ff9900",
 };
