@@ -1,10 +1,8 @@
-import axios from "axios";
-import { useEffect } from "react";
-import { HOME } from "../constants";
-import { toast } from "react-toastify";
+import { useState } from "react";
 import styled from "styled-components";
 import { COLORS } from "../constants";
 import { useJoinEventByQr } from "../hooks/events/useJoinEventByQr";
+import { useCheckAndRefreshToken } from "../hooks";
 
 const TextContainer = styled.div`
   display: flex;
@@ -21,12 +19,16 @@ const TextContainer = styled.div`
 `;
 
 export const JoinEventByQr = (): JSX.Element | null => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  // Call the useCheckAndRefreshToken hook
+  const [accessToken, setAccessToken] = useState<string | undefined>(
+    localStorage.getItem("accessToken") || undefined
+  );
+  useCheckAndRefreshToken(setAccessToken);
 
   const urlParams = new URLSearchParams(window.location.search);
   const eventID = urlParams.get("event") || null;
 
-  useJoinEventByQr(eventID, accessToken);
+  useJoinEventByQr(eventID);
 
   return <TextContainer>Joining event...</TextContainer>;
 };

@@ -152,11 +152,11 @@ export const HomePage: FunctionComponent = () => {
     getAccessToken();
   }, []);
 
+
+  // Call the useCheckAndRefreshToken hook
   const [accessToken, setAccessToken] = useState<string | undefined>(
     localStorage.getItem("accessToken") || undefined
   );
-
-  // Call the useCheckAndRefreshToken hook
   useCheckAndRefreshToken(setAccessToken);
 
   const userName = useGetUserName();

@@ -1,17 +1,16 @@
 import styled from "styled-components";
 import { FunctionComponent } from "react";
-import { IoPlayBackOutline } from "react-icons/io5";
+import { IoHome } from "react-icons/io5";
 import { CiHeadphones } from "react-icons/ci";
 import { IonModal } from "@ionic/react";
-
+import { HOME } from "../../constants/routes";
 import { UserSettings } from "../UserSettings";
 import { COLORS } from "../../constants";
 import { HeaderProps } from "../../constants/types";
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 15% 70% 15%;
   align-items: center;
   position: sticky;
   top: 0;
@@ -19,12 +18,24 @@ const Container = styled.div`
   background-color: ${COLORS.background};
 `;
 
-const Placeholder = styled.div`
-  width: 80px;
-  height: 32px;
+const PageName = styled.div`
+  font-size: 18px;
+  text-align: center;
 `;
 
-const BackButton = styled.div`
+const User = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  transition: all 0.5s;
+  &:hover {
+    cursor: pointer;
+    color: ${COLORS.link};
+  }
+`;
+
+const HomeIcon = styled.div`
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -32,22 +43,11 @@ const BackButton = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-`;
+  cursor: pointer;
+  transition: all 0.5s;
 
-const PageName = styled.div`
-  font-size: 18px;
-`;
-
-const User = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 80px;
-  gap: 4px;
-  transition: all .5s;
   &:hover {
-    cursor: pointer;
-    color: ${COLORS.link};
+    background-color: ${COLORS.link};
   }
 `;
 
@@ -56,18 +56,16 @@ export const StyledIonModal = styled(IonModal)`
   --background: ${COLORS.background};
 `;
 
-
-
 export const Header: FunctionComponent<HeaderProps> = ({ title, userName }) => {
+  const handleHomeIconClick = () => {
+    window.location.href = HOME;
+  };
+
   return (
     <Container>
-      {title === "Home" ? (
-        <Placeholder></Placeholder>
-      ) : (
-        <BackButton>
-          <IoPlayBackOutline />
-        </BackButton>
-      )}
+      <HomeIcon onClick={handleHomeIconClick}>
+        <IoHome />
+      </HomeIcon>
       <PageName>{title}</PageName>
       <User id="open-modal">
         {userName && <div>{userName}</div>}

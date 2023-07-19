@@ -9,6 +9,7 @@ export const useUpdateEvent = () => {
   const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const updateEvent = async (eventID: string, updatedEvent: EventType) => {
+    console.log("Updating event:", updatedEvent);
     try {
       setIsLoading(true);
       setError(null);
