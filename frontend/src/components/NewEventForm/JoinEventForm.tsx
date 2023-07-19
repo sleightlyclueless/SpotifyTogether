@@ -29,14 +29,13 @@ const EventIDInput = styled(IonInput)`
 type JoinEventFormProps = {
   closeModal: () => void;
 };
-export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({ closeModal }) => {
+export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
+  closeModal,
+}) => {
   const [eventID, seteventID] = useState<string | null>(null);
-  const { isLoading, joinEvent } = useJoinEvent(); // Use the hook
-
-  const accessToken = localStorage.getItem("accessToken") || undefined;
-
+  const { isLoading, joinEvent } = useJoinEvent();
   const handleSubmit = () => {
-    joinEvent(eventID, accessToken, () => {
+    joinEvent(eventID, () => {
       closeModal();
       window.location.reload();
     });

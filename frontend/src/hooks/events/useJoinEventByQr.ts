@@ -1,9 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { HOME } from "../../constants";
+import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
 
-export const useJoinEventByQr = (eventID: string | null, accessToken: string | undefined) => {
+export const useJoinEventByQr = (eventID: string | null) => {
+  // Move the useCheckAndRefreshToken hook call outside of the useJoinEventByQr hook
+  const [accessToken, setAccessToken] = useState<string | undefined>(
+    localStorage.getItem("accessToken") || undefined
+  );
+  useCheckAndRefreshToken(setAccessToken);
+
   useEffect(() => {
     if (accessToken) {
       if (eventID) {
@@ -33,5 +40,5 @@ export const useJoinEventByQr = (eventID: string | null, accessToken: string | u
         window.location.href = "http://localhost:4000/account/login";
       }
     }
-  }, [eventID, accessToken]);
+  }, [accessToken, eventID]); // Include accessToken as a dependency
 };

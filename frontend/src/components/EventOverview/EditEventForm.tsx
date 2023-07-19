@@ -28,7 +28,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 }) => {
   const [eventName, setEventName] = useState<string>(event.name);
   const [eventDate, setEventDate] = useState<Date>(new Date(event.date));
-  const { isLoading, error, updateEvent } = useUpdateEvent();
+  const { updateEvent } = useUpdateEvent();
 
   const handleSave = async () => {
     const changedEvent = {
@@ -38,8 +38,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
     };
 
     try {
-      const accessToken = localStorage.getItem("accessToken") || undefined;
-      await updateEvent(event.id, changedEvent, accessToken); // Call the hook function to update the event
+      await updateEvent(event.id, changedEvent); // Call the hook function to update the event
     } catch (error) {
       console.error("Error updating event:", error);
       // Handle the error, show an error message, etc.
@@ -59,7 +58,18 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
       <StyledIonDatetime
         value={eventDate.toISOString()} // Convert Date to string
         onIonChange={(e: DatetimeCustomEvent): void => {
-          if (e.detail.value) setEventDate(new Date(e.detail.value)); // Convert string to Date
+          const selectedDate =
+            typeof e.detail.value === "string"
+              ? new Date(e.detail.value)
+              : e.detail.value;
+
+          // Check for undefined before setting the state
+          if (selectedDate instanceof Date) {
+            setEventDate(selectedDate);
+          } else {
+            // Handle the case where selectedDate is not a Date (e.g., set a default date)
+            console.log("Invalid date format");
+          }
         }}
       />
       <SubmitButton onClick={handleSave}>Save Changes</SubmitButton>

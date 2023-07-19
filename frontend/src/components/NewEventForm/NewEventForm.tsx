@@ -63,11 +63,10 @@ export const NewEventForm: FunctionComponent<NewEventFormProps> = ({
 }) => {
   const [eventName, setEventName] = useState<string | null>(null);
   const [eventDate, setEventDate] = useState<Date | null>(null);
-  const { isLoading, error, createEvent } = useCreateEvent(); // Use the hook
+  const { createEvent } = useCreateEvent(); // Use the hook
 
-  const accessToken = localStorage.getItem("accessToken") || undefined;
   const handleSubmit = async () => {
-    await createEvent(eventName || "", eventDate, accessToken, (error) => {
+    await createEvent(eventName || "", eventDate, (error) => {
       if (!error) {
         closeModal();
         window.location.reload();

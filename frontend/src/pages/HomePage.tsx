@@ -151,9 +151,7 @@ export const HomePage: FunctionComponent = () => {
     getAccessToken();
   }, []);
 
-  const userName = useGetUserName(
-    localStorage.getItem("accessToken") || undefined
-  );
+  const userName = useGetUserName();
 
   const handleOnLoginClick = () => {
     window.location.href = "http://localhost:4000/account/login";

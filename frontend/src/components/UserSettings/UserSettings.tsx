@@ -38,9 +38,7 @@ const LogoutButton = styled.div`
 `;
 
 export const UserSettings = () => {
-  const userName = useGetUserName(
-    localStorage.getItem("accessToken") || undefined
-  );
+  const userName = useGetUserName();
 
   const handleLogout = () => {
     const accessToken = localStorage.getItem("accessToken");

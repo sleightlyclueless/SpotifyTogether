@@ -1,15 +1,19 @@
 import { useState } from "react";
 import axios from "axios";
 import { EventType } from "../../constants/types";
+import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
 
 export const useCreateEvent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | undefined>(
+    localStorage.getItem("accessToken") || undefined
+  );
+  useCheckAndRefreshToken(setAccessToken); // Move the useCheckAndRefreshToken hook call outside of useCreateEvent hook
 
   const createEvent = async (
     eventName: string,
     eventDate: Date | null,
-    accessToken: string | undefined,
     onError: (error: string | null) => void // Callback function to handle the error in the component
   ) => {
     try {
@@ -37,9 +41,15 @@ export const useCreateEvent = () => {
       setIsLoading(false);
       onError(null); // Call the callback with no error (success)
     } catch (error) {
-      setError((error as Error).message || "An error occurred while creating the event.");
+      setError(
+        (error as Error).message ||
+          "An error occurred while creating the event."
+      );
       setIsLoading(false);
-      onError((error as Error).message || "An error occurred while creating the event."); // Call the callback with the error
+      onError(
+        (error as Error).message ||
+          "An error occurred while creating the event."
+      ); // Call the callback with the error
     }
   };
 

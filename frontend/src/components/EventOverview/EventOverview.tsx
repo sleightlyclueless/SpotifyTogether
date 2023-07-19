@@ -229,20 +229,20 @@ export const EventOverview: FunctionComponent = () => {
   const accessToken = localStorage.getItem("accessToken") || undefined;
   let loggedInUserName: string | undefined = undefined;
   if (accessToken != undefined) {
-    loggedInUserName = useGetUserName(accessToken);
+    loggedInUserName = useGetUserName();
   }
 
-  const handleDelete = useDeleteEvent(accessToken);
+  const handleDelete = useDeleteEvent();
   const handleDeleteEvent = (eventID: string): void => {
     handleDelete(eventID);
   };
 
-  const removeParticipant = useRemoveParticipant(accessToken);
+  const removeParticipant = useRemoveParticipant();
   const handleRemoveParticipant = (eventID: string, spotifyUserId: string) => {
     removeParticipant(eventID, spotifyUserId);
   };
 
-  const { changeRole } = useEditParticipantRole(accessToken);
+  const { changeRole } = useEditParticipantRole();
   const handleChangeRole = (
     eventID: string,
     spotifyUserId: string,

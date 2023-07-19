@@ -2,16 +2,23 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { EventType, Participant } from "../../constants/types";
+import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
 
 export const useGetUserEvents = () => {
   const [events, setEvents] = useState<EventType[]>([]);
   const [participants, setParticipants] = useState<Participant[][]>([]);
+  
+  // Call the useCheckAndRefreshToken hook outside of the fetch functions
+  const [accessToken, setAccessToken] = useState<string | undefined>(
+    localStorage.getItem("accessToken") || undefined
+  );
+  useCheckAndRefreshToken(setAccessToken);
 
   const fetchEvents = (): void => {
     axios
       .get("http://localhost:4000/events", {
         headers: {
-          Authorization: localStorage.getItem("accessToken"),
+          Authorization: accessToken,
         },
       })
       .then((response) => {
@@ -28,7 +35,7 @@ export const useGetUserEvents = () => {
         `http://localhost:4000/events/${eventID}/participants`,
         {
           headers: {
-            Authorization: localStorage.getItem("accessToken"),
+            Authorization: accessToken,
           },
         }
       );
@@ -44,7 +51,7 @@ export const useGetUserEvents = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [accessToken]); // Fetch events when the accessToken changes
 
   useEffect(() => {
     const fetchEventParticipants = async (): Promise<void> => {
@@ -56,7 +63,7 @@ export const useGetUserEvents = () => {
     };
 
     fetchEventParticipants();
-  }, [events]);
+  }, [accessToken, events]); // Fetch participants when the accessToken or events change
 
   const mergedEvents = events.map((event, index) => ({
     ...event,
