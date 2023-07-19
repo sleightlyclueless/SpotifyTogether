@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import QRCode from "qrcode.react";
 import styled from "styled-components";
 import { COLORS } from "../constants";
+import { Header, PageContainer } from "../components";
+import { useGetUserName } from "../hooks";
 
 const Container = styled.div`
   display: flex;
@@ -45,18 +47,22 @@ export const GenerateEventQr = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const eventID = urlParams.get("event") || undefined;
 
-  useEffect(() => {
-    // You can perform any additional logic or API calls related to generating the QR code here
-  }, [eventID]);
+  const userName = useGetUserName();
 
   return (
-    <Container>
-      <IntroText>
-        <h1>Join Event: {eventID}</h1>
-      </IntroText>
-      <QrOverlay>
-        <QRCode value={`/join?event=${eventID}`} />
-      </QrOverlay>
-    </Container>
+    <PageContainer>
+      <Header
+        title={"Join Event via QR Code"}
+        userName={userName || undefined}
+      />
+      <Container>
+        <IntroText>
+          <h1>Join Event: {eventID}</h1>
+        </IntroText>
+        <QrOverlay>
+          <QRCode value={`/join?event=${eventID}`} />
+        </QrOverlay>
+      </Container>
+    </PageContainer>
   );
 };
