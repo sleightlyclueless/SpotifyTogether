@@ -224,6 +224,7 @@ const StyledAiOutlineArrowDown = styled(AiOutlineArrowDown)`
 
 export const EventOverview: FunctionComponent = () => {
   const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
+  const [isTracksMode, setIsTracksMode] = useState<boolean>(false);
   const events: EventType[] = useGetUserEvents();
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
@@ -257,6 +258,7 @@ export const EventOverview: FunctionComponent = () => {
     toast("Copied to clipboard!");
   };
 
+
   return (
     <>
       <Container>
@@ -265,18 +267,18 @@ export const EventOverview: FunctionComponent = () => {
             const participant = event.participants.find(
               (participant) => participant.user.spotifyId === loggedInUserName
             );
-
+  
             if (!participant) {
               return null; // Skip rendering the event if the user is not a participant
             }
-
+  
             participant.permission = participant.permission.toUpperCase();
-
+  
             const roles = ["PARTICIPANT", "ADMIN"];
             const isOwner = participant.permission === "OWNER";
             const isAdmin = participant.permission === "ADMIN";
             const isParticipant = participant.permission === "PARTICIPANT";
-
+  
             return (
               <div key={event.id}>
                 <SinglePlaylist id={event.id}>
@@ -285,7 +287,7 @@ export const EventOverview: FunctionComponent = () => {
                     <CountdownTimer targetDate={new Date(event.date)} />
                   </Timer>
                 </SinglePlaylist>
-
+  
                 <StyledIonModal
                   trigger={event.id}
                   mode={"ios"}
@@ -363,7 +365,7 @@ export const EventOverview: FunctionComponent = () => {
                                           />
                                         </>
                                       )}
-
+  
                                     {isAdmin &&
                                       (participant.permission === "OWNER" ||
                                         participant.permission === "ADMIN") && (
@@ -373,7 +375,7 @@ export const EventOverview: FunctionComponent = () => {
                                           </StyledRoleText>
                                         </>
                                       )}
-
+  
                                     {isAdmin &&
                                       participant.permission ===
                                         "PARTICIPANT" && (
@@ -406,6 +408,17 @@ export const EventOverview: FunctionComponent = () => {
                           <EventButtons id={"generate-code"}>
                             Invite People
                           </EventButtons>
+                          {isTracksMode ? (
+                            <div>TODO</div>
+                          ) : (
+                            <EventButtons
+                              onClick={(): void =>
+                                setIsTracksMode(!isTracksMode)
+                              }
+                            >
+                              View Playlist
+                            </EventButtons>
+                          )}
                           <StyledIonPopover
                             ref={popoverRef}
                             trigger={"generate-code"}
@@ -430,6 +443,17 @@ export const EventOverview: FunctionComponent = () => {
                           <EventButtons id={"generate-code"}>
                             Invite People
                           </EventButtons>
+                          {isTracksMode ? (
+                            <div>TODO</div>
+                          ) : (
+                            <EventButtons
+                              onClick={(): void =>
+                                setIsTracksMode(!isTracksMode)
+                              }
+                            >
+                              View Playlist
+                            </EventButtons>
+                          )}
                           <Button onClick={(): void => handleDelete(event.id)}>
                             Delete Event
                           </Button>
@@ -467,4 +491,4 @@ export const EventOverview: FunctionComponent = () => {
       </Container>
     </>
   );
-};
+}
