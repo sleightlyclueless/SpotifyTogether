@@ -285,6 +285,7 @@ export const EventOverview: FunctionComponent = () => {
                     <CountdownTimer targetDate={new Date(event.date)} />
                   </Timer>
                 </SinglePlaylist>
+
                 <StyledIonModal
                   trigger={event.id}
                   mode={"ios"}
@@ -292,9 +293,11 @@ export const EventOverview: FunctionComponent = () => {
                   breakpoints={[0.0, 0.8]}
                   handleBehavior={"cycle"}
                 >
-                  <StyledLuEdit2
-                    onClick={(): void => setIsEditingMode(!isEditingMode)}
-                  />
+                  {isOwner && (
+                    <StyledLuEdit2
+                      onClick={(): void => setIsEditingMode(!isEditingMode)}
+                    />
+                  )}
                   {isEditingMode ? (
                     <EditEventForm event={event} />
                   ) : (

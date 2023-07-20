@@ -6,4 +6,4 @@ export * from "./events/useCreateEvent";
 export * from "./events/useDeleteEvent";
 export * from "./events/useJoinEvent";
 export * from "./events/useJoinEventByQr";
-export * from "./events/useUpdateEvent";
+export * from "./events/settings/useUpdateEvent";

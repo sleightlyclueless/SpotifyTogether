@@ -30,6 +30,16 @@ export const StyledEventNameInput = styled(IonInput)`
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
 
+export const StyledEventIdInput = styled.input`
+  padding-left: 8px;
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  background: ${COLORS.font};
+  border: none;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+`;
+
 export const StyledIonDatetime = styled(IonDatetime)`
   border-radius: 8px;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
