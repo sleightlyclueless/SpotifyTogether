@@ -26,13 +26,18 @@ export const useUpdateEvent = () => {
     }
   };
 
-  const setCustomEventId = async (eventID: string, newEventId: string) => {
+  const setCustomEventId = async (
+    eventID: string,
+    newEventId: string,
+    newName: string,
+    newDate: string
+  ) => {
     try {
       setIsLoading(true);
 
       await axios.put(
         `http://localhost:4000/events/${eventID}/settings/id/${newEventId}`,
-        {},
+        { newName, newDate }, // Include newName and newDate in the request body
         {
           headers: {
             Authorization: accessToken,
@@ -47,24 +52,31 @@ export const useUpdateEvent = () => {
     }
   };
 
-  const updateEventName = async (eventID: string, newName: string) => {
-    try {
-      setIsLoading(true);
+  const updateEventName = async (
+    eventID: string,
+    newName: string,
+    currentName: string
+  ) => {
+    // Only update the name if it's different from the current name
+    if (newName !== currentName) {
+      try {
+        setIsLoading(true);
 
-      await axios.put(
-        `http://localhost:4000/events/${eventID}/settings/name/${newName}`,
-        {},
-        {
-          headers: {
-            Authorization: accessToken,
-          },
-        }
-      );
+        await axios.put(
+          `http://localhost:4000/events/${eventID}/settings/name/${newName}`,
+          {},
+          {
+            headers: {
+              Authorization: accessToken,
+            },
+          }
+        );
 
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
+        setIsLoading(false);
+      } catch (error) {
+        console.log(error);
+        setIsLoading(false);
+      }
     }
   };
 

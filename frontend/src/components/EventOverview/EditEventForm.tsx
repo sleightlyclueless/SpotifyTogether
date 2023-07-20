@@ -57,12 +57,8 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
   const [eventName, setEventName] = useState<string>(event.name);
   const [eventDate, setEventDate] = useState<Date>(new Date(event.date));
   const [customEventId, setFormCustomEventId] = useState<string>(event.id); // Renamed the state variable
-  const {
-    isLoading,
-    updateEventName,
-    updateEventDate,
-    setCustomEventId,
-  } = useUpdateEvent();
+  const { isLoading, updateEventName, updateEventDate, setCustomEventId } =
+    useUpdateEvent();
 
   useEffect(() => {
     setEventName(event.name);
@@ -72,34 +68,65 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 
   const handleSave = async () => {
     try {
-      // Update name
-      await updateEventName(event.id, eventName);
+      // Update ID
+      if (!/^[a-zA-Z0-9]{6}$/.test(customEventId)) {
+        toast.error(
+          "Event ID must be exactly 6 characters long and contain only letters."
+        );
+        return;
+      }
 
-      // Check if the selected date is in the past
-      if (eventDate.getTime() < Date.now()) {
-        toast.error("Selected date is in the past.");
+      // Attempt to update the event ID
+      try {
+        console.log("Updating event ID:", customEventId);
+        await setCustomEventId(
+          event.id,
+          customEventId,
+          eventName,
+          eventDate.toISOString()
+        );
+        event.id = customEventId;
+      } catch (error) {
+        toast.error("Failed to update event ID. Please check the input.");
+        console.log(error);
+        return;
+      }
+
+      // Update name
+      try {
+        console.log("Updating event name:", eventName, "for event:", event.id);
+        await updateEventName(event.id, eventName, event.name);
+      } catch (error) {
+        toast.error("Failed to update event name. Please check the input.");
+        console.log(error);
         return;
       }
 
       // Update date
-      const eventDateString = eventDate.toISOString();
-      await updateEventDate(event.id, eventDateString);
-
-      // Update ID
-      await setCustomEventId(event.id, customEventId); // Renamed the function call
+      if (eventDate.getTime() < Date.now()) {
+        toast.error("Selected date is in the past.");
+        return;
+      }
+      try {
+        console.log("Updating event date:", eventDate.toISOString());
+        await updateEventDate(event.id, eventDate.toISOString());
+      } catch (error) {
+        toast.error("Failed to update event date. Please check the input.");
+        console.log(error);
+        return;
+      }
 
       // Show success message
       toast.success("Event details updated successfully.");
-      /*setTimeout(() => {
+      setTimeout(() => {
         window.location.reload();
-      }, 1000);*/
+      }, 500);
     } catch (error) {
       console.error("Error updating event:", error);
     }
   };
 
-  const handleGenerateRandomId = (
-  ) => {
+  const handleGenerateRandomId = () => {
     const randomId = generateRandomId();
     setFormCustomEventId(randomId);
   };
@@ -155,7 +182,8 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 };
 
 function generateRandomId() {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
   let randomId = "";
   for (let i = 0; i < 6; i++) {
     const randomIndex = Math.floor(Math.random() * characters.length);
