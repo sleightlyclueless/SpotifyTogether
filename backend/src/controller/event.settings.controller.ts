@@ -30,7 +30,7 @@ router.put('/id/:newId', async (req, res) => {
         return res.status(400).send({message: "Id is not " + EVENT_ID_LENGTH + " long."});
 
     let event = await DI.em.findOne(Event, {id: req.params.newId});
-    if (!event)
+    if (event)
         return res.status(400).json({message: "Another event already uses this id."});
 
     req.event!.id = req.params.newId;
@@ -49,11 +49,14 @@ router.put('/name/:newName', async (req, res) => {
 // change event date
 router.put('/date/:newDate', async (req, res) => {
     // cast string to Date
+    console.log("1" + req.params.newDate);
     let timestamp = Date.parse(req.params.newDate);
-    if (!isNaN(timestamp)) return res.status(400).json({message: "Provided string is not a valid date."});
+    console.log("2" + timestamp);
+    if (isNaN(timestamp)) return res.status(400).json({message: "Provided string is not a valid date."});
 
     // update date
     req.event!.date = new Date(timestamp);
+    console.log(req.event!.date);
     await DI.em.persistAndFlush(req.event!);
     return res.status(200).end();
 });
