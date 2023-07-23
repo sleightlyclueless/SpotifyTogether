@@ -3,7 +3,7 @@ import { IoHome } from "react-icons/io5";
 import { CiHeadphones } from "react-icons/ci";
 import { HOME, HeaderProps } from "../../constants";
 import { UserSettings } from "../UserSettings";
-import { HeaderContainer, PageName, User, HomeIcon, StyledIonModal } from "../../styles/index";
+import { HeaderContainer, PageName, User, HomeIcon, StyledIonModal } from "../../styles";
 
 export const Header: FunctionComponent<HeaderProps> = ({ title, userName }) => {
   const handleHomeIconClick = () => {

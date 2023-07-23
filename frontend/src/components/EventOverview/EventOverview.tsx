@@ -3,13 +3,15 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { CountdownTimer } from "../CountDownTimer";
 import { useGetUserEvents, useGetUserName } from "../../hooks";
-import { StyledIonModal } from "../../styles/index";
 import { EditEventForm } from "./EditEventForm";
 import { EventType } from "../../constants";
-import { useDeleteEvent } from "../../hooks/events/useDeleteEvent";
-import { useRemoveParticipant } from "../../hooks/events/participants/useRemoveParticipant";
-import { useEditParticipantRole } from "../../hooks/events/participants/useEditParticipantRole";
 import {
+  useDeleteEvent,
+  useRemoveParticipant,
+  useEditParticipantRole,
+} from "../../hooks";
+import {
+  StyledIonModal,
   EventOverviewContainer,
   ParticipantsContainer,
   ParticipantItem,
@@ -33,7 +35,7 @@ import {
   StyledRoleText,
   NoEventsContainer,
   StyledAiOutlineArrowDown,
-} from "../../styles/index";
+} from "../../styles";
 
 export const EventOverview: FunctionComponent = () => {
   const [isEditingMode, setIsEditingMode] = useState<boolean>(false);

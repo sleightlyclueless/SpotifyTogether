@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import { ShowCounterContainer } from "../../styles/index";
+import { ShowCounterContainer } from "../../styles";
 
 type ShowCounterProps = {
   days: number;

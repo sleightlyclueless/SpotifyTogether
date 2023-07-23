@@ -1,6 +1,6 @@
 import { RiPlayListAddLine } from "react-icons/ri";
 import { FunctionComponent } from "react";
-import { BigButtonContainer } from "../../styles/index";
+import { BigButtonContainer } from "../../styles";
 
 type NewPlaylistButtonProps = {
   onClick: () => void;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useJoinEventByQr } from "../hooks/events/useJoinEventByQr";
+import { useJoinEventByQr } from "../hooks";
 import { useCheckAndRefreshToken } from "../hooks";
 import { TextContainer } from "../styles";
 

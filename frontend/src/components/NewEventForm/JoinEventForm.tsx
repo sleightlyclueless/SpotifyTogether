@@ -1,7 +1,7 @@
 import { FunctionComponent, useState } from "react";
 import { InputCustomEvent } from "@ionic/react";
-import { useJoinEvent } from "../../hooks/events/useJoinEvent";
-import { JoinFormContainer, EventIDInput, SubmitButton } from "../../styles/index";
+import { useJoinEvent } from "../../hooks";
+import { JoinFormContainer, EventIDInput, SubmitButton } from "../../styles";
 
 type JoinEventFormProps = {
   closeModal: () => void;

@@ -1,7 +1,7 @@
 import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
 import { FunctionComponent, useState, useEffect, ChangeEvent } from "react";
 import { EventType } from "../../constants";
-import { useUpdateEvent } from "../../hooks/events/settings/useUpdateEvent";
+import { useUpdateEvent } from "../../hooks";
 import { toast } from "react-toastify";
 import {
   FormContainer,
@@ -12,7 +12,7 @@ import {
   StyledEventNameInput,
   StyledIonDatetime,
   SubmitButton
-} from "../../styles/index";
+} from "../../styles";
 
 type EditEventFormProps = {
   event: EventType;
