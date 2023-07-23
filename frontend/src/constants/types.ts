@@ -1,3 +1,30 @@
+export type HeaderProps = {
+  title: string;
+  userName?: string;
+};
+
+export type EventType = {
+  id: string;
+  name: string;
+  date: string;
+  locked: boolean;
+  participants: Participant[];
+};
+
+export type Participant = {
+  event: string;
+  user: {
+    spotifyId: string;
+    spotifyAccessToken: string | null;
+    spotifyRefreshToken: string | null;
+    expiresInMs: number;
+    issuedAt: string;
+  };
+  permission: string;
+};
+
+// TODO: Track type with event
+
 export type EventTrackType = {
   track: SpotifyTrackType;
   event: EventType;
@@ -19,11 +46,6 @@ export type TrackStatus =
   | "GENERATED"
   | "ACCEPTED";
 
-export type HeaderProps = {
-  title: string;
-  userName?: string;
-};
-
 export type SpotifyTrackType = {
   // Define the properties of SpotifyTrack entity if needed
   // Example:
@@ -31,27 +53,4 @@ export type SpotifyTrackType = {
   // duration: number;
   // genre: string;
   // artist: string;
-};
-
-// Add other types as needed based on your entities
-// ...
-
-export type EventType = {
-  id: string;
-  name: string;
-  date: string;
-  locked: boolean;
-  participants: Participant[];
-};
-
-export type Participant = {
-  event: string;
-  user: {
-    spotifyId: string;
-    spotifyAccessToken: string | null;
-    spotifyRefreshToken: string | null;
-    expiresInMs: number;
-    issuedAt: string;
-  };
-  permission: string;
 };

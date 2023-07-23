@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { EventType, Participant } from "../../constants/types";
-import { useCheckAndRefreshToken } from "../account/useCheckAndRefreshToken";
+import { EventType, Participant } from "../../constants";
 
 export const useGetUserEvents = () => {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -46,7 +45,7 @@ export const useGetUserEvents = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, [accessToken]); // Fetch events when the accessToken changes
+  }, [accessToken]);
 
   useEffect(() => {
     const fetchEventParticipants = async (): Promise<void> => {
@@ -58,11 +57,11 @@ export const useGetUserEvents = () => {
     };
 
     fetchEventParticipants();
-  }, [accessToken, events]); // Fetch participants when the accessToken or events change
+  }, [accessToken, events]);
 
   const mergedEvents = events.map((event, index) => ({
     ...event,
-    participants: participants[index] || [], // Ensure participants array is available
+    participants: participants[index] || [],
   }));
 
   return mergedEvents;

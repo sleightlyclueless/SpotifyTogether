@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import { EventTrackType } from "../../../constants/types";
+import { EventTrackType } from "../../../constants";
 
 export const useFetchTracksOfPlaylist = () => {
   const [playlistTracks, setPlaylistTracks] = useState<EventTrackType[]>([]);

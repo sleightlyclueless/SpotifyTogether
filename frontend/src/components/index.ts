@@ -1,4 +1,5 @@
-export * from "./Header";
+export * from "./CountDownTimer";
 export * from "./EventOverview";
-export * from "./shared";
+export * from "./Header";
 export * from "./NewEventForm";
+export * from "./UserSettings";

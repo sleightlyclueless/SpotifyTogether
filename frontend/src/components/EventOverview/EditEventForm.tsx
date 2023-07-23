@@ -1,51 +1,18 @@
-import styled from "styled-components";
 import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
 import { FunctionComponent, useState, useEffect, ChangeEvent } from "react";
-import { AiOutlineReload } from "react-icons/ai"; // Import the AiOutlineReload icon
+import { EventType } from "../../constants";
+import { useUpdateEvent } from "../../hooks/events/settings/useUpdateEvent";
+import { toast } from "react-toastify";
 import {
+  FormContainer,
+  Label,
+  IconContainer,
+  RandomIcon,
   StyledEventIdInput,
   StyledEventNameInput,
   StyledIonDatetime,
-  SubmitButton,
-} from "../NewEventForm";
-import { EventType } from "../../constants/types";
-import { useUpdateEvent } from "../../hooks/events/settings/useUpdateEvent";
-import { toast } from "react-toastify";
-import { COLORS } from "../../constants/colors";
-
-const Container = styled.div`
-  height: 75%;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const IconContainer = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%; /* Make the container take the full width */
-  margin-top: 32px; /* Add top margin to separate from other elements */
-  position: relative; /* Add relative positioning */
-`;
-
-const RandomIcon = styled(AiOutlineReload)`
-  cursor: pointer;
-  font-size: 24px;
-  color: #007bff;
-  position: absolute; /* Position the icon inside the input */
-  right: 8px; /* Adjust the position from the right side */
-`;
-
-const Label = styled.label`
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 4px;
-  color: ${COLORS.font};
-  width: 100%;
-  text-align: left;
-`;
+  SubmitButton
+} from "../../styles/index";
 
 type EditEventFormProps = {
   event: EventType;
@@ -56,7 +23,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 }) => {
   const [eventName, setEventName] = useState<string>(event.name);
   const [eventDate, setEventDate] = useState<Date>(new Date(event.date));
-  const [customEventId, setFormCustomEventId] = useState<string>(event.id); // Renamed the state variable
+  const [customEventId, setFormCustomEventId] = useState<string>(event.id);
   const { isLoading, updateEventName, updateEventDate, setCustomEventId } =
     useUpdateEvent();
 
@@ -132,7 +99,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
   };
 
   return (
-    <Container>
+    <FormContainer>
       <Label>Event ID</Label>
       <IconContainer>
         <StyledEventIdInput
@@ -177,7 +144,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
           <SubmitButton onClick={handleSave}>Save Changes</SubmitButton>
         </>
       )}
-    </Container>
+    </FormContainer>
   );
 };
 

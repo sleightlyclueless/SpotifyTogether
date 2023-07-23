@@ -1,34 +1,12 @@
 import { FunctionComponent, useState } from "react";
-import styled from "styled-components";
-import { InputCustomEvent, IonInput } from "@ionic/react";
-import { COLORS } from "../../constants";
+import { InputCustomEvent } from "@ionic/react";
 import { useJoinEvent } from "../../hooks/events/useJoinEvent";
-
-import { SubmitButton } from "./NewEventForm";
-
-const Container = styled.div`
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: column;
-  height: 40%;
-`;
-
-const EventIDInput = styled(IonInput)`
-  --padding-start: 8px !important;
-  margin-top: 32px;
-  width: 100%;
-  height: 40px;
-  border-radius: 8px;
-  background: ${COLORS.font};
-  border: none;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-`;
+import { JoinFormContainer, EventIDInput, SubmitButton } from "../../styles/index";
 
 type JoinEventFormProps = {
   closeModal: () => void;
 };
+
 export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
   closeModal,
 }) => {
@@ -42,7 +20,7 @@ export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
   };
 
   return (
-    <Container>
+    <JoinFormContainer>
       <EventIDInput
         placeholder="Enter event code"
         type={"text"}
@@ -54,6 +32,6 @@ export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
       <SubmitButton onClick={handleSubmit} disabled={isLoading}>
         {isLoading ? "Joining..." : "Join Event"}
       </SubmitButton>
-    </Container>
+    </JoinFormContainer>
   );
 };

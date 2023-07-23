@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { EventTrackType } from "../../../constants/types";
+import { EventTrackType } from "../../../constants";
 
 export const useFetchEventTracks = () => {
   const [eventTracks, setEventTracks] = useState<EventTrackType[]>([]);
@@ -26,7 +26,8 @@ export const useFetchEventTracks = () => {
       setIsLoading(false);
     } catch (error) {
       setError(
-        (error as Error).message || "An error occurred while fetching event tracks."
+        (error as Error).message ||
+          "An error occurred while fetching event tracks."
       );
       setIsLoading(false);
     }

@@ -35,5 +35,5 @@ export const useJoinEventByQr = (eventID: string | null) => {
         window.location.href = "http://localhost:4000/account/login";
       }
     }
-  }, [accessToken, eventID]); // Include accessToken as a dependency
+  }, [accessToken, eventID]);
 };

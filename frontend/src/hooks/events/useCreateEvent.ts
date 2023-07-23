@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { EventType } from "../../constants/types";
+import { EventType } from "../../constants";
 
 export const useCreateEvent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -21,11 +21,11 @@ export const useCreateEvent = () => {
       }
 
       const eventData: EventType = {
-        id: "", // You can generate the id here or leave it empty to be set on the server side
+        id: "",
         name: eventName,
         date: eventDate.toISOString(),
-        locked: false, // Set other properties as needed
-        participants: [], // Set other properties as needed
+        locked: false,
+        participants: [],
       };
 
       await axios.post("http://localhost:4000/events", eventData, {
@@ -35,7 +35,7 @@ export const useCreateEvent = () => {
       });
 
       setIsLoading(false);
-      onError(null); // Call the callback with no error (success)
+      onError(null);
     } catch (error) {
       setError(
         (error as Error).message ||
@@ -45,7 +45,7 @@ export const useCreateEvent = () => {
       onError(
         (error as Error).message ||
           "An error occurred while creating the event."
-      ); // Call the callback with the error
+      );
     }
   };
 

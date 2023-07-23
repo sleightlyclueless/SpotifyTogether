@@ -1,68 +1,13 @@
-import {
-  DatetimeCustomEvent,
-  InputCustomEvent,
-  IonDatetime,
-  IonInput,
-} from "@ionic/react";
-import styled from "styled-components";
+import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
 import { FunctionComponent, useState } from "react";
-import { COLORS } from "../../constants";
 import { useCreateEvent } from "../../hooks/events/useCreateEvent";
 import { toast } from "react-toastify";
-
-const Container = styled.div`
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: column;
-  height: 75%;
-`;
-
-export const StyledEventNameInput = styled(IonInput)`
-  --padding-start: 8px !important;
-  margin-top: 32px;
-  width: 100%;
-  height: 40px;
-  border-radius: 8px;
-  background: ${COLORS.font};
-  border: none;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-`;
-
-export const StyledEventIdInput = styled.input`
-  padding-left: 8px;
-  width: 100%;
-  height: 40px;
-  border-radius: 8px;
-  background: ${COLORS.font};
-  border: none;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-`;
-
-export const StyledIonDatetime = styled(IonDatetime)`
-  border-radius: 8px;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-`;
-
-export const SubmitButton = styled.div`
-  width: 160px;
-  height: 60px;
-  background: ${COLORS.button};
-  border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 16px;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-
-  transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    background: ${COLORS.buttonHover};
-  }
-`;
+import {
+  NewFormContainer,
+  StyledEventNameInput,
+  StyledIonDatetime,
+  SubmitButton,
+} from "../../styles/index";
 
 type NewEventFormProps = {
   closeModal: () => void;
@@ -88,7 +33,7 @@ export const NewEventForm: FunctionComponent<NewEventFormProps> = ({
 
   return (
     <>
-      <Container>
+      <NewFormContainer>
         <StyledEventNameInput
           type={"text"}
           placeholder={"Event Name"}
@@ -106,7 +51,7 @@ export const NewEventForm: FunctionComponent<NewEventFormProps> = ({
           }}
         />
         <SubmitButton onClick={handleSubmit}>Create Event</SubmitButton>
-      </Container>
+      </NewFormContainer>
     </>
   );
 };

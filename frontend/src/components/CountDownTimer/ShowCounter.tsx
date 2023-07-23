@@ -1,14 +1,5 @@
 import { FunctionComponent } from "react";
-import styled from "styled-components";
-import { COLORS } from "../../constants";
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  color: ${COLORS.font};
-`;
+import { ShowCounterContainer } from "../../styles/index";
 
 type ShowCounterProps = {
   days: number;
@@ -24,8 +15,8 @@ export const ShowCounter: FunctionComponent<ShowCounterProps> = ({
   seconds,
 }) => {
   return (
-    <Container className="show-counter">
+    <ShowCounterContainer className="show-counter">
       {days}:{hours}:{minutes}:{seconds}
-    </Container>
+    </ShowCounterContainer>
   );
 };
