@@ -1,9 +1,9 @@
 import axios from "axios";
 import { useState } from "react";
-import { PlaylistType } from "../../../constants";
+import { Playlist } from "../../../constants";
 
 export const useFetchSpotifyPlaylistIds = () => {
-  const [spotifyPlaylistIds, setSpotifyPlaylistIds] = useState<PlaylistType[]>(
+  const [spotifyPlaylistIds, setSpotifyPlaylistIds] = useState<Playlist[]>(
     []
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);

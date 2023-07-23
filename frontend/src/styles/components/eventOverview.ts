@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { LuEdit2 } from "react-icons/lu";
 import { IonPopover } from "@ionic/react";
 import { BiCopy } from "react-icons/bi";
-import { MdClose } from "react-icons/md";
+import { MdClose, MdCopyAll } from "react-icons/md";
 import { AiOutlineArrowDown } from "react-icons/ai";
 import { COLORS } from "../colors";
 
@@ -185,6 +185,36 @@ export const StyledLuEdit2 = styled(LuEdit2)`
 `;
 
 export const StyledLuClose = styled(MdClose)`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 20px;
+  height: 20px;
+  color: ${COLORS.font};
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    color: ${COLORS.link};
+  }
+`;
+
+export const StyledBiCheckCircle = styled(MdCopyAll)`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 20px;
+  height: 20px;
+  color: ${COLORS.font};
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    color: ${COLORS.link};
+  }
+`;
+
+export const StyledBiXCircle = styled(MdClose)`
   position: absolute;
   top: 16px;
   right: 16px;

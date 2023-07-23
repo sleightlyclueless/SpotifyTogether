@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { EventType, Participant } from "../../constants";
+import { Event, Participant } from "../../constants";
 
 export const useGetUserEvents = () => {
-  const [events, setEvents] = useState<EventType[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [participants, setParticipants] = useState<Participant[][]>([]);
   const accessToken = localStorage.getItem("accessToken") || undefined;
 

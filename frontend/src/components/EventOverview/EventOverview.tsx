@@ -5,7 +5,7 @@ import { CountdownTimer } from "../CountDownTimer";
 import { useGetUserEvents, useGetUserName } from "../../hooks";
 import { EditEventForm } from "../NewEventForm/EditEventForm";
 import { EditEventPlaylist } from "../EventPlaylist/EditEventPlaylist";
-import { EventType } from "../../constants";
+import { Event } from "../../constants";
 import {
   useDeleteEvent,
   useRemoveParticipant,
@@ -42,7 +42,7 @@ import {
 export const EventOverview: FunctionComponent = () => {
   // 0: Normal content; 1: EditEventForm; 2: EditEventPlaylist
   const [contenMode, setContentMode] = useState<number>(0);
-  const events: EventType[] = useGetUserEvents();
+  const events: Event[] = useGetUserEvents();
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
   let loggedInUserName: string | null = null;
@@ -130,7 +130,7 @@ export const EventOverview: FunctionComponent = () => {
                         <EditEventForm event={event} />
                       ) : contenMode === 2 ? (
                         // Show EditEventPlaylist
-                        <EditEventPlaylist event={event} />
+                        <EditEventPlaylist eventId={event.id} />
                       ) : null}
                     </>
                   ) : (

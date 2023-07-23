@@ -1,9 +1,9 @@
 import axios from "axios";
 import { useState } from "react";
-import { EventTrackType } from "../../../constants";
+import { EventTrack } from "../../../constants";
 
 export const useFetchTracksOfPlaylist = () => {
-  const [playlistTracks, setPlaylistTracks] = useState<EventTrackType[]>([]);
+  const [playlistTracks, setPlaylistTracks] = useState<EventTrack[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;

@@ -3,12 +3,14 @@ export type HeaderProps = {
   userName?: string;
 };
 
-export type EventType = {
+export type Event = {
   id: string;
   name: string;
-  date: string;
+  date: string; // Date is represented as a string here, you can convert it to a JavaScript Date object if needed
   locked: boolean;
   participants: Participant[];
+  eventTracks: EventTrack[];
+  playlists: Playlist[];
 };
 
 export type Participant = {
@@ -25,32 +27,33 @@ export type Participant = {
 
 // TODO: Track type with event
 
-export type EventTrackType = {
-  track: SpotifyTrackType;
-  event: EventType;
-  playlists: PlaylistType[];
+export type EventTrack = {
+  track: SpotifyTrack;
+  event: Event;
+  playlists: Playlist[];
   status: TrackStatus;
 };
 
-export type PlaylistType = {
+export enum TrackStatus {
+  DENIED,
+  PROPOSED,
+  ACCEPTED_PLAYLIST,
+  GENERATED,
+  ACCEPTED,
+}
+
+export type Playlist = {
   id: string;
   accepted: boolean;
-  event: EventType;
-  eventTracks: EventTrackType[];
+  event: Event;
+  eventTracks: EventTrack[];
 };
 
-export type TrackStatus =
-  | "DENIED"
-  | "PROPOSED"
-  | "ACCEPTED_PLAYLIST"
-  | "GENERATED"
-  | "ACCEPTED";
-
-export type SpotifyTrackType = {
-  // Define the properties of SpotifyTrack entity if needed
-  // Example:
-  // id: string;
-  // duration: number;
-  // genre: string;
-  // artist: string;
+export type SpotifyTrack = {
+  id: string;
+  name: string;
+  genre: string;
+  duration: number;
+  artist: string;
+  eventTracks: EventTrack[];
 };

@@ -1,6 +1,6 @@
 import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
 import { FunctionComponent, useState, useEffect, ChangeEvent } from "react";
-import { EventType } from "../../constants";
+import { Event } from "../../constants";
 import { useUpdateEvent } from "../../hooks";
 import { toast } from "react-toastify";
 import {
@@ -15,7 +15,7 @@ import {
 } from "../../styles";
 
 type EditEventFormProps = {
-  event: EventType;
+  event: Event;
 };
 
 export const EditEventForm: FunctionComponent<EditEventFormProps> = ({

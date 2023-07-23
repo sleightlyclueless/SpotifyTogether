@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import { TrackStatus } from "../../../constants";
 
 export const useChangeEventTrackStatus = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -9,7 +10,7 @@ export const useChangeEventTrackStatus = () => {
   const changeEventTrackStatus = async (
     eventId: string,
     spotifyTrackId: string,
-    newStatus: string,
+    newStatus: TrackStatus,
     onError: (error: string | null) => void
   ) => {
     try {

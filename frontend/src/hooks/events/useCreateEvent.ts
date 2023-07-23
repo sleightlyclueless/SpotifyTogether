@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { EventType } from "../../constants";
+import { Event } from "../../constants";
 
 export const useCreateEvent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -20,12 +20,14 @@ export const useCreateEvent = () => {
         throw new Error("Event Name or Date is not set!");
       }
 
-      const eventData: EventType = {
+      const eventData: Event = {
         id: "",
         name: eventName,
         date: eventDate.toISOString(),
         locked: false,
         participants: [],
+        eventTracks: [],
+        playlists: [],
       };
 
       await axios.post("http://localhost:4000/events", eventData, {

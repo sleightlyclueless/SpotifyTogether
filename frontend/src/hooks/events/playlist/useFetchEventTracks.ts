@@ -1,37 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { EventTrackType } from "../../../constants";
+import { EventTrack, Event } from "../../../constants";
 
-export const useFetchEventTracks = () => {
-  const [eventTracks, setEventTracks] = useState<EventTrackType[]>([]);
+type UseFetchEventTracksProps = {
+  eventId: string;
+};
+
+export const useFetchEventTracks = ({ eventId }: UseFetchEventTracksProps) => {
+  const [eventTracks, setEventTracks] = useState<EventTrack[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
 
-  const fetchEventTracks = async (eventId: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  useEffect(() => {
+    const fetchEventTracks = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const response = await axios.get(
-        `http://localhost:4000/events/${eventId}/tracks`,
-        {
-          headers: {
-            Authorization: accessToken,
-          },
-        }
-      );
+        const response = await axios.get(
+          `http://localhost:4000/events/${eventId}/tracks`,
+          {
+            headers: {
+              Authorization: accessToken,
+            },
+          }
+        );
 
-      setEventTracks(response.data);
-      setIsLoading(false);
-    } catch (error) {
-      setError(
-        (error as Error).message ||
-          "An error occurred while fetching event tracks."
-      );
-      setIsLoading(false);
-    }
-  };
+        setEventTracks(response.data);
+        setIsLoading(false);
+      } catch (error) {
+        setError(
+          (error as Error).message ||
+            "An error occurred while fetching event tracks."
+        );
+        setIsLoading(false);
+      }
+    };
 
-  return { eventTracks, isLoading, error, fetchEventTracks };
+    fetchEventTracks();
+  }, [eventId, accessToken]);
+
+  return { eventTracks, isLoading, error };
 };
