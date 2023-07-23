@@ -3,7 +3,8 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { CountdownTimer } from "../CountDownTimer";
 import { useGetUserEvents, useGetUserName } from "../../hooks";
-import { EditEventForm } from "./EditEventForm";
+import { EditEventForm } from "../NewEventForm/EditEventForm";
+import { EditEventPlaylist } from "../EventPlaylist/EditEventPlaylist";
 import { EventType } from "../../constants";
 import {
   useDeleteEvent,
@@ -27,6 +28,7 @@ import {
   EventButtons,
   ButtonContainer,
   StyledLuEdit2,
+  StyledLuClose,
   StyledIonPopover,
   StyledCode,
   StyledBiCopy,
@@ -38,8 +40,8 @@ import {
 } from "../../styles";
 
 export const EventOverview: FunctionComponent = () => {
-  const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
-  const [isTracksMode, setIsTracksMode] = useState<boolean>(false);
+  // 0: Normal content; 1: EditEventForm; 2: EditEventPlaylist
+  const [contenMode, setContentMode] = useState<number>(0);
   const events: EventType[] = useGetUserEvents();
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
@@ -107,13 +109,32 @@ export const EventOverview: FunctionComponent = () => {
                   handleBehavior={"cycle"}
                 >
                   {isOwner && (
-                    <StyledLuEdit2
-                      onClick={(): void => setIsEditingMode(!isEditingMode)}
-                    />
+                    <>
+                      {contenMode != 0 ? (
+                        // Show EditEventForm
+                        <StyledLuClose
+                          onClick={(): void => setContentMode(0)}
+                        />
+                      ) : (
+                        // Show EditEventPlaylist
+                        <StyledLuEdit2
+                          onClick={(): void => setContentMode(1)}
+                        />
+                      )}
+                    </>
                   )}
-                  {isEditingMode ? (
-                    <EditEventForm event={event} />
+                  {contenMode ? (
+                    <>
+                      {contenMode === 1 ? (
+                        // Show EditEventForm
+                        <EditEventForm event={event} />
+                      ) : contenMode === 2 ? (
+                        // Show EditEventPlaylist
+                        <EditEventPlaylist event={event} />
+                      ) : null}
+                    </>
                   ) : (
+                    // Show normal content
                     <DetailViewEventContainer>
                       <FullPartyName>{event.name}</FullPartyName>
                       <TimerContainer>
@@ -219,17 +240,10 @@ export const EventOverview: FunctionComponent = () => {
                           <EventButtons id={"generate-code"}>
                             Invite People
                           </EventButtons>
-                          {isTracksMode ? (
-                            <div>TODO</div>
-                          ) : (
-                            <EventButtons
-                              onClick={(): void =>
-                                setIsTracksMode(!isTracksMode)
-                              }
-                            >
-                              View Playlist
-                            </EventButtons>
-                          )}
+
+                          <EventButtons onClick={(): void => setContentMode(2)}>
+                            Manage Playlist
+                          </EventButtons>
                           <StyledIonPopover
                             ref={popoverRef}
                             trigger={"generate-code"}
@@ -254,17 +268,9 @@ export const EventOverview: FunctionComponent = () => {
                           <EventButtons id={"generate-code"}>
                             Invite People
                           </EventButtons>
-                          {isTracksMode ? (
-                            <div>TODO</div>
-                          ) : (
-                            <EventButtons
-                              onClick={(): void =>
-                                setIsTracksMode(!isTracksMode)
-                              }
-                            >
-                              View Playlist
-                            </EventButtons>
-                          )}
+                          <EventButtons onClick={(): void => setContentMode(2)}>
+                            View Playlist
+                          </EventButtons>
                           <Button onClick={(): void => handleDelete(event.id)}>
                             Delete Event
                           </Button>

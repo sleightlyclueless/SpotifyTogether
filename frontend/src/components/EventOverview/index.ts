@@ -1,2 +1,2 @@
 export * from "./EventOverview";
-export * from "./EditEventForm";
+export * from "../NewEventForm/EditEventForm";

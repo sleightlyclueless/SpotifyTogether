@@ -184,6 +184,21 @@ export const StyledLuEdit2 = styled(LuEdit2)`
   }
 `;
 
+export const StyledLuClose = styled(MdClose)`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 20px;
+  height: 20px;
+  color: ${COLORS.font};
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    color: ${COLORS.link};
+  }
+`;
+
 export const StyledIonPopover = styled(IonPopover)`
   --box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
