@@ -230,10 +230,12 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
         return;
       }
 
-      const response = await axios.post(
-        `http://localhost:4000/events/${eventId}/tracks/search?query=${searchQuery}`,
-        null,
+      const response = await axios.get(
+        `http://localhost:4000/events/${eventId}/tracks/search`,
         {
+          params: {
+            query: searchQuery, // Pass the search query as a query parameter
+          },
           headers: {
             Authorization: localStorage.getItem("accessToken"),
           },

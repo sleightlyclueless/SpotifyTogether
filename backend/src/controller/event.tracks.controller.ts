@@ -35,6 +35,9 @@ router.get("/search", async (req, res) => {
         type: "track",
         limit: 10, // You can adjust the number of results here
       },
+      headers: {
+        Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
+      },
     })
     .then((response) => {
       console.log("2: " + response.data);
