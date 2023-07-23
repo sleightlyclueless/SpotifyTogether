@@ -31,7 +31,7 @@ const verifyEventAccess: RequestHandler = (req, res, next) => {
 const verifyEventParticipantAccess: RequestHandler = async (req, res, next) => {
     if(req.eventUser == null)
         return res.status(403).json({errors: ["verifyParticipantAccess(): You don't have access"]});
-    if(req.eventUser.permission.toLowerCase() < Permission.PARTICIPANT)
+    if(castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.PARTICIPANT))
         return res.status(403).json({errors: ["verifyParticipantAccess(): You must be at least a participant."]});
     next();
 };
@@ -39,11 +39,11 @@ const verifyEventParticipantAccess: RequestHandler = async (req, res, next) => {
 // checks if user is at least a participant and event is not locked
 const verifyUnlockedEventParticipantAccess: RequestHandler = async (req, res, next) => {
     if (req.eventUser == null || req.event == null)
-        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Missing event authentication."]});
-    if (req.eventUser.permission < Permission.PARTICIPANT)
+        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess(): Missing event authentication."]});
+    if (castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.PARTICIPANT))
         return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Insufficient access rights."]});
-    if (req.eventUser.permission.toLowerCase() < Permission.ADMIN && req.event!.locked)
-        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Event locked for participant."]});
+    if (castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.ADMIN) && req.event!.locked)
+        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess(): Event locked for participant."]});
     next();
 };
 
@@ -51,7 +51,7 @@ const verifyUnlockedEventParticipantAccess: RequestHandler = async (req, res, ne
 const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
     if (req.eventUser == null)
         return res.status(403).json({errors: ["verifyEventAdminAccess: Missing event authentication."]});
-    if (req.eventUser.permission.toLowerCase() < Permission.ADMIN)
+    if (castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.ADMIN))
         return res.status(403).json({errors: ["verifyEventAdminAccess: Insufficient access rights."]});
     next();
 };
@@ -59,7 +59,7 @@ const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
 const verifyEventOwnerAccess: RequestHandler = async (req: Request, res, next) => {
     if(req.eventUser == null)
         return res.status(403).json({errors: ["verifyOwnerAccess(): You don't have access"]});
-    if(req.eventUser.permission.toLowerCase() < Permission.OWNER)
+    if(castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.OWNER))
         return res.status(403).json({errors: ["verifyOwnerAccess(): You must be at least a owner."]});
     next();
 };
@@ -73,3 +73,13 @@ export const Auth = {
     verifyEventAdminAccess,
     verifyEventOwnerAccess,
 };
+
+function castPermissionToInt(permission: string): number {
+    switch (permission.toLowerCase()) {
+        case "owner": return 4;
+        case "admin": return 3;
+        case "participant": return 2;
+        case "guest": return 1;
+        default: return 0;
+    }
+}
