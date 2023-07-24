@@ -33,10 +33,7 @@ router.param("eventId", async function (req, res, next, eventId) {
 });
 
 router.use("/:eventId/tracks", Auth.verifyEventAccess, TracksController);
-router.use(
-  "/:eventId/participants",
-  EventParticipantsController
-);
+router.use("/:eventId/participants", EventParticipantsController);
 router.use(
   "/:eventId/settings",
   Auth.verifyEventOwnerAccess,
@@ -81,19 +78,20 @@ router.post("/", async (req, res) => {
 router.get("/:eventId", async (req, res) => {
   const event = await DI.em.findOne(Event, { id: req.params.eventId });
   if (event) {
-    console.log("NEEDLE: " + req.user!);
     // check if user is already in event
     req.eventUser = await DI.em.findOne(EventUser, {
       user: req.user,
       event: event,
     });
-    console.log("NEEDLE: " + req.eventUser);
     // add user if not already existing
     if (req.eventUser == null) {
-      await DI.em.persistAndFlush(
-        new EventUser(Permission.PARTICIPANT, req.user!, event)
-      );
-      return res.status(200).json(event);
+      try {
+        const newUser = new EventUser(Permission.PARTICIPANT, req.user!, event);
+        await DI.em.persistAndFlush(newUser);
+        return res.status(200).json(event);
+      } catch (error) {
+        return res.status(500).send("Error joining event");
+      }
     }
     return res.status(200).send("User is already in event");
   } else return res.status(404).send("Event not found");
