@@ -26,22 +26,11 @@ class Artist {
 
 const router = Router({ mergeParams: true });
 
-// TODO: remove
-router.get("/sample", async (req, res) => {
-  const event = new Event("eventId", "eventName", new Date());
-  const user1 = new User("id1", "Test1", "", 60 * 60 * 1000, Date.now());
-  const user2 = new User("id2", "Test2", "", 60 * 60 * 1000, Date.now());
-  const eventUser1 = new EventUser(Permission.OWNER, user1, event);
-  const eventUser2 = new EventUser(Permission.ADMIN, user2, event);
-  await DI.em.persist(user1).persist(user2);
-  await DI.em.persist(eventUser1).persist(eventUser2);
-  await DI.em.persistAndFlush(event);
-  res.status(200).end();
-});
 
 // TODO: add comment
 router.put("/generate", async (req, res) => {
   // TODO: lock event
+  req.event = await DI.em.findOne(Event, { id: req.event!.id });
   const eventUserOwner = await DI.em.findOne(
     EventUser,
     {
@@ -71,6 +60,8 @@ router.put("/generate", async (req, res) => {
         populate: ["user"],
       }
     );
+    console.log("1: Generating playlist for event " + req.event!.id + " from owner " + eventUserOwner.user.spotifyId + " with " + eventUsers.length + " users.");
+    
     if (eventUsers) {
       // data structures
       let artists = new Map<string, number>();
@@ -86,13 +77,9 @@ router.put("/generate", async (req, res) => {
         if (access_token == null) continue;
 
         // fetch user top & followed artists
-        const userArtists: Map<string, Artist> = await fetchUserArtists(
-          access_token
-        );
+        const userArtists: Map<string, Artist> = new Map();
+        await fetchUserArtists(access_token, userArtists);
         await evaluateUserArtists(artists, genres, userArtists);
-
-        // fetch user top tracks (intersections more difficult)
-        // -> collect genres ? no duplicates ? set ? weight: 10 ?
       }
 
       // sort artists and genres by weight
@@ -104,8 +91,9 @@ router.put("/generate", async (req, res) => {
         }
       );
       console.log(
-        "sortedArtists: " + sortedArtists.length + sortedArtists.entries()
+        "2: Artists: " + sortedArtists.length + sortedArtists.entries()
       );
+
       const sortedGenres: [string, number][] = [...genres.entries()].sort(
         ([genreId1, genreWeight1], [genreId2, genreWeight2]) => {
           if (genreWeight1 < genreWeight2) return 1;
@@ -114,7 +102,7 @@ router.put("/generate", async (req, res) => {
         }
       );
       console.log(
-        "sortedGenres: " + sortedGenres.length + sortedGenres.entries()
+        "3: Genres: " + sortedGenres.length + sortedGenres.entries()
       );
 
       // fetch top tracks for top artist with the largest weight ?
@@ -170,16 +158,15 @@ function generateAccessToken(user: User): Promise<string | null> {
       return tokenResponse.data.access_token;
     })
     .catch((error) => {
-      console.log("generateAccessToken()" + error.message);
+      console.log("generateAccessToken() " + error.message);
       return null;
     });
 }
 
 async function fetchUserArtists(
-  user_access_token: string
-): Promise<Map<string, Artist>> {
-  let userArtists = new Map<string, Artist>();
-
+  user_access_token: string,
+  userArtists: Map<string, Artist>
+): Promise<void> {
   // fetch top artists
   await axios
     .get("https://api.spotify.com/v1/me/top/artists?limit=50", {
@@ -188,15 +175,27 @@ async function fetchUserArtists(
       },
     })
     .then(async (response) => {
-      for (const artist of response.data.items)
-        if (!userArtists.has(artist.id))
-          userArtists.set(
-            artist.id,
-            new Artist(artist.id, TOP_ARTIST_WEIGHT, artist.genres)
-          );
+      for (const artist of response.data.items) {
+        const artistId = artist.id;
+        const startWeight = userArtists.has(artistId)
+          ? userArtists.get(artistId)!.highestWeight
+          : RELATED_ARTIST_WEIGHT;
+        const genres = artist.genres || [];
+        if (!userArtists.has(artistId)) {
+          userArtists.set(artistId, new Artist(artistId, startWeight, genres));
+        } else {
+          const existingArtist = userArtists.get(artistId)!;
+          existingArtist.genres = [
+            ...new Set(existingArtist.genres.concat(genres)),
+          ];
+          if (startWeight > existingArtist.highestWeight) {
+            existingArtist.highestWeight = startWeight;
+          }
+        }
+      }
     })
-    .catch(function (error) {
-      console.log("fetchUserArtists() 1: " + error.message);
+    .catch((error) => {
+      console.log("fetchUserArtists() " + error.message);
     });
 
   // fetch followed artists
@@ -207,22 +206,32 @@ async function fetchUserArtists(
       },
     })
     .then(async (response) => {
-      for (const artist of response.data.items)
-        if (!userArtists.has(artist.id))
-          userArtists.set(
-            artist.id,
-            new Artist(artist.id, FOLLOWED_ARTIST_WEIGHT, artist.genres)
-          );
+      for (const artist of response.data.items) {
+        const artistId = artist.id;
+        const startWeight = userArtists.has(artistId)
+          ? userArtists.get(artistId)!.highestWeight
+          : RELATED_ARTIST_WEIGHT;
+        const genres = artist.genres || [];
+        if (!userArtists.has(artistId)) {
+          userArtists.set(artistId, new Artist(artistId, startWeight, genres));
+        } else {
+          const existingArtist = userArtists.get(artistId)!;
+          existingArtist.genres = [
+            ...new Set(existingArtist.genres.concat(genres)),
+          ];
+          if (startWeight > existingArtist.highestWeight) {
+            existingArtist.highestWeight = startWeight;
+          }
+        }
+      }
     })
-    .catch(function (error) {
-      console.log("fetchUserArtists() 2: " + error.message);
+    .catch((error) => {
+      console.log("fetchUserArtists() " + error.message);
     });
 
   // TODO: fetch related artists for top artists ? or else remove
   // -> collect names -> weight: RELATED_ARTIST_WEIGHT
   // -> collect genre -> weight: 1
-
-  return userArtists;
 }
 
 async function evaluateUserArtists(
@@ -270,6 +279,7 @@ async function addArtistTopTracksToEvent(
   const percentage = sortedArtists.length <= 20 ? 1 : 0.2;
 
   for (let i = 0; i < sortedArtists.length * percentage; i++) {
+    console.log("4: Adding 10 Songs from Artist " + sortedArtists[i][0]);
     const artistId = sortedArtists[i][0];
     const artistDetails = await getArtistDetails(artistId, owner_access_token);
 
@@ -299,7 +309,7 @@ async function addArtistTopTracksToEvent(
           }
         })
         .catch(function (error: Error) {
-          console.log("ERR: addArtistTopTracksToEvent)=" + error.message);
+          console.log("addArtistTopTracksToEvent() " + error.message);
         });
     }
   }
@@ -350,6 +360,7 @@ async function getRecommendation(
     genre.replace(/\s+/g, "+")
   );
 
+  console.log("5: Getting Recommendations for " + toBeRecommendedArtists.length + " Artists and " + formattedGenres.length + " Genres");
   // Construct the query with the correct URL
   const query =
     "https://api.spotify.com/v1/recommendations" +
@@ -391,7 +402,7 @@ async function getRecommendation(
       }
     })
     .catch(function (error) {
-      console.log("getRecommendation()" + error.message);
+      console.log("getRecommendation() " + error.message);
     });
 }
 
@@ -425,6 +436,7 @@ async function addTrackToEvent(
       topTrack,
       event
     );
+    event.eventTracks.add(insertEventTrack);
     await DI.em.persist(insertEventTrack);
   } else {
     if (
@@ -440,23 +452,28 @@ async function createSpotifyPlaylistFromEvent(
   owner: User
 ): Promise<boolean> {
   let success: boolean = false;
-  console.log("createSpotifyPlaylistFromEvent() 1: " + owner.spotifyId);
-  await axios
+  console.log("6: Creating Playlist for Event " + event.id + " from owner " + owner.spotifyId);
+  const query =
+    "https://api.spotify.com/v1/users/" + owner.spotifyId + "/playlists";
+
+  // Initialize the eventTracks collection before querying the database
+  await event.eventTracks.init();
+
+  axios
     .post(
-      "https://api.spotify.com/v1/users/" + owner.spotifyId + "/playlists",
+      query,
+      {
+        name: event.name,
+        description: "Automatically generated by FWE Spotify App.",
+        public: true,
+      },
       {
         headers: {
           Authorization: "Bearer " + owner.spotifyAccessToken,
         },
-        body: {
-          name: event.name,
-          description: "Automatically generated by FWE Spotify App.",
-        },
       }
     )
-    .then(function (response) {
-      console.log("createSpotifyPlaylistFromEvent() 2: " + util.inspect(response.data, false, null, true /* enable colors */));
-      if (event.eventTracks.isInitialized()) event.eventTracks.init();
+    .then(async function (response) {
       const playlistId = response.data.id;
       let batch = new Array<string>();
       for (const batchTrack of event.eventTracks) {
@@ -466,17 +483,20 @@ async function createSpotifyPlaylistFromEvent(
           batchTrack.status == TrackStatus.ACCEPTED
         )
           batch.push("spotify:track:" + batchTrack.track.id);
-        if (batch.length >= 100)
-          pushTracksToSpotifyPlaylist(owner, playlistId, batch);
+        if (batch.length >= 25)
+          await pushTracksToSpotifyPlaylist(owner, playlistId, batch);
       }
       if (batch.length > 0)
-        pushTracksToSpotifyPlaylist(owner, playlistId, batch);
+        await pushTracksToSpotifyPlaylist(owner, playlistId, batch);
+
       success = true;
     })
     .catch(function (error) {
-      console.log("createSpotifyPlaylistFromEvent()" + error.message);
+      console.log("createSpotifyPlaylistFromEvent() " + error.message);
       success = false;
     });
+  console.log("createSpotifyPlaylistFromEvent(): Done! " + success);
+
   return success;
 }
 
@@ -485,18 +505,26 @@ async function pushTracksToSpotifyPlaylist(
   playlistId: string,
   trackBatch: Array<string>
 ) {
-  await axios
-    .post("https://api.spotify.com/v1/playlists/" + playlistId + "/tracks", {
-      headers: {
-        Authorization: "Bearer " + owner.spotifyAccessToken,
+  const query =
+    "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks";
+
+  axios
+    .post(
+      query,
+      {
+        uris: trackBatch,
       },
-      body: {
-        uris: trackBatch.toString(),
-      },
+      {
+        headers: {
+          Authorization: "Bearer " + owner.spotifyAccessToken,
+        },
+      }
+    )
+    .then(function (response) {
+      console.log("Tracks successfully added to the playlist.");
     })
-    .then(function (response) {})
     .catch(function (error) {
-      console.log("General Error" + error.message);
+      console.log("pushTracksToSpotifyPlaylist() " + error.message);
     });
 }
 
