@@ -125,8 +125,6 @@ router.get('/remaining_expiry_time', Auth.verifySpotifyAccess, async (req, res) 
 
 // resets the access- & refresh_token server side, token is not invalidated !
 router.put('/logout', Auth.verifySpotifyAccess, async (req, res) => {
-    req.user!.spotifyAccessToken = null;
-    req.user!.spotifyRefreshToken = null;
     await DI.em.persistAndFlush(req.user!);
     return res.status(204).end();
 });

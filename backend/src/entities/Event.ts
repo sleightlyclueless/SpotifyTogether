@@ -17,13 +17,13 @@ export class Event {
     @Property()
     locked: boolean;
 
-    @OneToMany(() => EventUser, (EventUser) => EventUser.event)
+    @OneToMany(() => EventUser, (EventUser) => EventUser.event, { orphanRemoval: true })
     users = new Collection<EventUser>(this);
 
-    @OneToMany(() => EventTrack, (EventTrack) => EventTrack.event)
+    @OneToMany(() => EventTrack, (EventTrack) => EventTrack.event, { orphanRemoval: true })
     eventTracks = new Collection<EventTrack>(this);
 
-    @OneToMany(() => Playlist, playlist => playlist.event)
+    @OneToMany(() => Playlist, playlist => playlist.event, { orphanRemoval: true })
     playlists = new Collection<Playlist>(this);
 
     constructor(EventID: string, EventName: string, EventDate: Date) {

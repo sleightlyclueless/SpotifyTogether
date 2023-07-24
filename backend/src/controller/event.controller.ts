@@ -9,6 +9,7 @@ import { EventParticipantsController } from "./event.participants.controller";
 import { TracksController } from "./event.tracks.controller";
 import { EventAlgorithmController } from "./event.algorithm.controller";
 import { EventTrack } from "../entities/EventTrack";
+import util from "util";
 
 export const EVENT_ID_LENGTH: number = 6;
 export const MAX_EVENT_ID_GENERATION_RETRIES: number = 1000;
