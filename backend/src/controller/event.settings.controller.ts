@@ -60,6 +60,12 @@ router.put("/id/:newId", async (req, res) => {
     await DI.em.persistAndFlush(eventUser);
   }
 
+  const eventTracks = await DI.em.find(EventUser, { event: req.event });
+  for (const eventTrack of eventTracks) {
+    eventTrack.event = newEvent;
+    await DI.em.persistAndFlush(eventTrack);
+  }
+
   // Remove the old Event entity from the database
   await DI.em.removeAndFlush(req.event!);
 

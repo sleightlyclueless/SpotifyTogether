@@ -13,7 +13,7 @@ router.get('/login', async (req, res) => {
     const state = randomstring.generate(16);
     let scope = ""; // https://developer.spotify.com/documentation/web-api/concepts/scopes
     // backend scopes // TODO: rework scopes and check whats really needed
-    scope += " playlist-read-private playlist-read-collaborative playlist-modify-public"; // Playlists
+    scope += " playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private"; // Playlists
     scope += " user-read-playback-position user-top-read user-read-recently-played"; // Listening History
     scope += " user-read-email user-read-private"; // Users // TODO: email and subscription ? needed ?
     // frontend spotify playback scopes

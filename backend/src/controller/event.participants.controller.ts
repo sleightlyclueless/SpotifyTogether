@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 import { DI } from "../index";
 import { EventUser, Permission } from "../entities/EventUser";
-import { TrackStatus } from "../entities/EventTrack";
+import { Auth } from "../middleware/auth.middleware";
 
 const router = Router({ mergeParams: true });
 
@@ -23,6 +23,7 @@ router.get("/", async (req, res) => {
 // kick user out of event
 router.put(
   "/:spotifyUserId",
+  Auth.verifyEventAdminAccess,
   async (
     req: express.Request<{
       eventId: string;
@@ -56,6 +57,7 @@ router.put(
 // change user permissions
 router.put(
   "/:spotifyUserId/:permissions",
+  Auth.verifyEventAdminAccess,
   async (
     req: express.Request<{
       eventId: string;

@@ -13,6 +13,7 @@ const router = Router({ mergeParams: true });
 // TODO: add query parameters for searching, filtering, limit & offset etc. (if required by frontend)
 router.get("/", async (req, res) => {
   let eventTracks = new Collection<EventTrack>(req.event!);
+  console.log("route/" + req.event!.eventTracks);
   if (req.event!.eventTracks) {
     if (!req.event!.eventTracks.isInitialized()) req.event!.eventTracks.init();
     eventTracks = req.event!.eventTracks;
@@ -25,37 +26,30 @@ router.get("/", async (req, res) => {
 
 router.get("/search", async (req, res) => {
   const { query } = req.query;
-  console.log("1: " + query);
 
-  // Make a request to the Spotify API to search for tracks
   axios
     .get("https://api.spotify.com/v1/search", {
       params: {
         q: query,
         type: "track",
-        limit: 10, // You can adjust the number of results here
+        limit: 10,
       },
       headers: {
         Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
       },
     })
     .then((response) => {
-      console.log("2: " + response.data);
       const tracks = response.data.tracks.items.map((item: any) => ({
         id: item.id,
         name: item.name,
         artist: item.artists.map((artist: any) => artist.name).join(", "),
+        albumImage: item.album.images[0]?.url || "",
       }));
 
-      if (tracks.length === 0) {
-        // No tracks found for the given search query
-        return res.status(200).json([]); // Return an empty array to the frontend
-      }
-
+      if (tracks.length === 0) return res.status(200).json([]);
       return res.status(200).json(tracks);
     })
     .catch(function (error) {
-      console.log("3: " + error);
       return res.status(error.status).send(error);
     });
 });
@@ -93,36 +87,42 @@ router.post(
   Auth.verifyUnlockedEventParticipantAccess,
   async (req, res) => {
     let track = await DI.em.findOne(SpotifyTrack, req.params.spotifyTrackId);
-    if (track == undefined) {
+    if (track == undefined || track == null) {
       axios
-        .get("https://api.spotify.com/v1/tracks" + req.params.spotifyTrackId, {
+        .get("https://api.spotify.com/v1/tracks/" + req.params.spotifyTrackId, {
           headers: {
             Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
           },
         })
-        .then(async (trackResponse) => {
-          // push track to events
-          track = new SpotifyTrack(
-            trackResponse.data.id,
-            trackResponse.data.duration,
-            trackResponse.data.genre,
-            trackResponse.data.artist
-          );
-          await DI.em.persist(track);
-        })
-        .catch(function (error) {
-          return res.status(error.status).send(error);
-        });
-    }
+        .then((trackResponse) => {
+          // Extract relevant data from trackResponse.data
+          const {
+            id,
+            duration_ms: duration,
+            album: { name: genre, artists },
+          } = trackResponse.data;
 
-    // create & persist new event track
-    const newEventTrack = new EventTrack(
-      TrackStatus.PROPOSED,
-      track!,
-      req.event!
-    );
-    await DI.em.persistAndFlush(newEventTrack);
-    return res.status(201).json(newEventTrack);
+          const artistNames = artists
+            .map((artist: any) => artist.name)
+            .join(", ");
+          // push track to events
+          track = new SpotifyTrack(id, duration, genre, artistNames);
+          DI.em.persist(track);
+        })
+        .then(() => {
+          // create & persist new event track
+          const newEventTrack = new EventTrack(
+            TrackStatus.PROPOSED,
+            track!,
+            req.event!
+          );
+          DI.em.persistAndFlush(newEventTrack);
+          return res.status(201).json(newEventTrack);
+        })
+        .catch((error) => {
+          return res.status(error.response?.status || 500).send(error.message);
+        });
+    } else return res.status(201).json(track);
   }
 );
 
