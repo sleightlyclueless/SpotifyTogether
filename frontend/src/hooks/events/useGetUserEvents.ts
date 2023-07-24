@@ -19,6 +19,7 @@ export const useGetUserEvents = () => {
         setEvents(response.data);
       })
       .catch((error) => {
+        toast.error("Failed to fetch events");
         console.log(error);
       });
   };

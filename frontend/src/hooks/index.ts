@@ -21,5 +21,6 @@ export * from "./events/playlist/useGeneratePlaylist";
 export * from "./events/playlist/useProposeNewEventTrack";
 export * from "./events/playlist/useProposePlaylist";
 export * from "./events/playlist/useRemovePlaylist";
+export * from "./events/playlist/useSearchSpotifyTrack";
 
 export * from "./events/settings/useUpdateEvent";

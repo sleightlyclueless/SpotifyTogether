@@ -1,20 +1,13 @@
 import axios from "axios";
-import { useState } from "react";
 
 export const useProposeNewEventTrack = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const proposeNewEventTrack = async (
     eventId: string,
-    spotifyTrackId: string,
-    onError: (error: string | null) => void
+    spotifyTrackId: string
   ) => {
     try {
-      setIsLoading(true);
-      setError(null);
-
       const response = await axios.post(
         `http://localhost:4000/events/${eventId}/tracks/${spotifyTrackId}`,
         null,
@@ -24,21 +17,12 @@ export const useProposeNewEventTrack = () => {
           },
         }
       );
-
-      setIsLoading(false);
-      onError(null);
+      return response.data;
     } catch (error) {
-      setError(
-        (error as Error).message ||
-          "An error occurred while proposing a new event track."
-      );
-      setIsLoading(false);
-      onError(
-        (error as Error).message ||
-          "An error occurred while proposing a new event track."
-      );
+      console.error("Error proposing a new event track:", error);
+      return null;
     }
   };
 
-  return { isLoading, error, proposeNewEventTrack };
+  return { proposeNewEventTrack };
 };

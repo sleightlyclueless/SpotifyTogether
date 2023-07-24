@@ -13,7 +13,7 @@ export const JoinEventByQr = (): JSX.Element | null => {
   const urlParams = new URLSearchParams(window.location.search);
   const eventID = urlParams.get("event") || null;
 
-  useJoinEventByQr(eventID);
+  const isUserJoined = useJoinEventByQr(eventID);
 
-  return <TextContainer>Joining event...</TextContainer>;
+  return isUserJoined ? null : <TextContainer>Joining event...</TextContainer>;
 };

@@ -1,21 +1,12 @@
 import axios from "axios";
-import { useState } from "react";
 import { Playlist } from "../../../constants";
 
 export const useFetchSpotifyPlaylistIds = () => {
-  const [spotifyPlaylistIds, setSpotifyPlaylistIds] = useState<Playlist[]>(
-    []
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
 
   const fetchSpotifyPlaylistIds = async (eventId: string) => {
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await axios.get(
+      const response = await axios.get<Playlist[]>(
         `http://localhost:4000/events/${eventId}/tracks/spotifyPlaylistIds`,
         {
           headers: {
@@ -23,17 +14,12 @@ export const useFetchSpotifyPlaylistIds = () => {
           },
         }
       );
-
-      setSpotifyPlaylistIds(response.data);
-      setIsLoading(false);
+      return response.data;
     } catch (error) {
-      setError(
-        (error as Error).message ||
-          "An error occurred while fetching Spotify playlist ids."
-      );
-      setIsLoading(false);
+      console.error("Error fetching Spotify playlist ids:", error);
+      return null;
     }
   };
 
-  return { spotifyPlaylistIds, isLoading, error, fetchSpotifyPlaylistIds };
+  return { fetchSpotifyPlaylistIds };
 };

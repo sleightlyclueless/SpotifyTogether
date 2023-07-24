@@ -110,3 +110,26 @@ export const SubmitButton = styled.div`
     background: ${COLORS.buttonHover};
   }
 `;
+
+export const StyledSelectSong = styled.div`
+    max-width: 100%;
+    background: ${COLORS.font};
+`;
+
+export const StyledSelectSongOption = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-radius: 8px;
+    background: ${COLORS.font};
+    border: none;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+    margin-bottom: 8px;
+    transition: all 0.5s;
+
+    &:hover {
+        cursor: pointer;
+        background: ${COLORS.buttonHover};
+    }
+`;
