@@ -2,19 +2,16 @@ import { Router } from "express";
 import { Event } from "../entities/Event";
 import { User } from "../entities/User";
 import { EventUser, Permission } from "../entities/EventUser";
-import { DI } from "../index";
-import axios from "axios";
 import { SpotifyTrack } from "../entities/SpotifyTrack";
 import { EventTrack, TrackStatus } from "../entities/EventTrack";
+import { DI } from "../index";
+import axios from "axios";
 import util from "util";
 
-const RELATED_ARTIST_WEIGHT = 1;
-const FOLLOWED_ARTIST_WEIGHT = 6;
-const TOP_ARTIST_WEIGHT = 15;
-
-const AMOUNT_ARTISTS = 10;
+const AMOUNT_ARTISTS = 20;
 const AMOUNT_TRACKS_PER_ARTIST = 3;
-const AMOUNT_RECOMMENDATIONS = 2;
+const AMOUNT_RECOMMENDATIONS = 50;
+const PLAYLIST_SIZE = 100;
 
 class Artist {
   id: string;
@@ -26,6 +23,12 @@ class Artist {
     this.highestWeight = startWeight;
     this.genres = genres;
   }
+}
+
+interface SongPlaylist {
+  id: string;
+  name: string;
+  href: string;
 }
 
 const router = Router({ mergeParams: true });
@@ -51,105 +54,88 @@ router.put("/generate", async (req, res) => {
       populate: ["user"],
     }
   );
-  if (eventUserOwner) {
-    // fetch owner info
-    const owner = eventUserOwner.user;
-    const owner_access_token = await generateAccessToken(owner);
-    if (owner_access_token == null)
-      return res
-        .status(500)
-        .send("Server failed to generate new token for owner");
+  if (!eventUserOwner)
+    return res.status(404).json({ message: "Owner not found." });
 
-    // fetch event users
-    const eventUsers = await DI.em.find(
-      EventUser,
-      {
-        event: { id: req.event!.id },
-      },
-      {
-        populate: ["user"],
-      }
-    );
-    console.log(
-      "1: Generating playlist for event " +
-        req.event!.id +
-        " from owner " +
-        eventUserOwner.user.spotifyId +
-        " with " +
-        eventUsers.length +
-        " users."
-    );
+  // fetch owner info
+  const owner = eventUserOwner.user;
+  const owner_access_token = await generateAccessToken(eventUserOwner.user);
 
-    if (eventUsers) {
-      // data structures
-      let artists = new Map<string, number>();
-      let genres = new Map<string, number>();
+  let access_token_array = new Array<string>();
+  access_token_array.push(owner_access_token);
+  const maxSongsPerUser = Math.floor(
+    (PLAYLIST_SIZE - 50) / access_token_array.length
+  );
 
-      // collect data for every user
-      for (const eventUser of eventUsers) {
-        // generate new access_token (old one is not invalidated)
-        let access_token = owner_access_token;
-        if (eventUser.permission != Permission.OWNER)
-          access_token = await generateAccessToken(eventUser.user);
-        if (access_token == null) continue;
+  if (owner_access_token == null)
+    return res
+      .status(500)
+      .json({ message: "Server failed to generate new token for owner" });
 
-        // fetch user top & followed artists
-        const userArtists: Map<string, Artist> = new Map();
-        await fetchUserArtists(access_token, userArtists);
-        await evaluateUserArtists(artists, genres, userArtists);
-      }
+  // fetch event users
+  const eventUsers = await DI.em.find(
+    EventUser,
+    {
+      event: { id: req.event!.id },
+    },
+    {
+      populate: ["user"],
+    }
+  );
+  for (const eventUser of eventUsers)
+    if (eventUser != eventUserOwner)
+      access_token_array.push(await generateAccessToken(eventUser.user));
 
-      // sort artists and genres by weight
-      const sortedArtists: [string, number][] = [...artists.entries()].sort(
-        ([artistId1, artistWeight1], [artistId2, artistWeight2]) => {
-          if (artistWeight1 < artistWeight2) return 1;
-          else if (artistWeight1 > artistWeight2) return -1;
-          else return 0;
-        }
-      );
-      console.log(
-        "2: Artists: " + util.inspect(sortedArtists, { maxArrayLength: null })
-      );
+  console.log(
+    "0: Generating playlist for event " +
+      req.event!.id +
+      " from owner " +
+      eventUserOwner.user.spotifyId +
+      " with " +
+      access_token_array.length +
+      " users"
+  );
 
-      const sortedGenres: [string, number][] = [...genres.entries()].sort(
-        ([genreId1, genreWeight1], [genreId2, genreWeight2]) => {
-          if (genreWeight1 < genreWeight2) return 1;
-          else if (genreWeight1 > genreWeight2) return -1;
-          else return 0;
-        }
-      );
-      console.log(
-        "3: Genres: " + util.inspect(sortedGenres, { maxArrayLength: null })
-      );
+  // START GENERATING PLAYLIST
+  // ====================================================================================================
+  // 1. All users:
+  // Find common songs between all playlists of users and add them to the playlist
+  // ====================================================================================================
+  await findCommonSongsBetweenPlaylists(
+    req.event!,
+    access_token_array,
+    maxSongsPerUser
+  );
 
-      // fetch top tracks for top artist with the largest weight ?
-      // -> add to playlist
-      // get & add new songs to event
-      await addArtistTopTracksToEvent(
-        req.event!,
-        sortedArtists,
-        owner_access_token
-      );
+  // ====================================================================================================
+  // 2. Each user:
+  // Find top artists of each user and add their top tracks to the playlist
+  // ====================================================================================================
+  await addTopTracksForEachUser(
+    req.event!,
+    access_token_array,
+    maxSongsPerUser
+  );
 
-      // get recommendations from spotify for top 5 artists and genres
-      await getRecommendation(
-        req.event!,
-        owner_access_token,
-        sortedArtists,
-        sortedGenres
-      );
+  // ====================================================================================================
+  // 3. All users:
+  // Find common genres between users and add recommendations to the playlist (if playlist less than 200 songs)
+  // ====================================================================================================
+  while (req.event!.eventTracks.length < PLAYLIST_SIZE)
+    await addCommonGenresRecommendations(req.event!, access_token_array);
 
-      // export playlist to spotify
-      const playlistResult = await createSpotifyPlaylistFromEvent(
-        req.event!,
-        owner
-      );
-      return res.status(200).end();
-    } else
-      return res.status(404).json({ message: "Failed to load event users." });
-  }
+  // ====================================================================================================
+  // 4. Create Spotify playlist from event
+  // ====================================================================================================
+  await createSpotifyPlaylistFromEvent(req.event!, owner);
+
+  return res
+    .status(200)
+    .json({ message: "Successfully created playlist!" })
+    .end();
 });
 
+// ====================================================================================================
 function generateAccessToken(user: User): Promise<string> {
   return axios
     .post(
@@ -177,166 +163,69 @@ function generateAccessToken(user: User): Promise<string> {
       return "undefined";
     });
 }
+// ====================================================================================================
 
-async function fetchUserArtists(
-  user_access_token: string,
-  mainUserArtists: Map<string, Artist> // Additional parameter to accumulate artists
-): Promise<void> {
-  await axios
-    .get("https://api.spotify.com/v1/me/top/artists?limit=" + AMOUNT_ARTISTS, {
-      headers: {
-        Authorization: "Bearer " + user_access_token,
-      },
-    })
-    .then(async (response) => {
-      for (const artist of response.data.items) {
-        const artistId = artist.id;
-        const startWeight = mainUserArtists.has(artistId) // Use mainUserArtists instead of userArtists
-          ? mainUserArtists.get(artistId)!.highestWeight
-          : RELATED_ARTIST_WEIGHT;
-        const genres = artist.genres || [];
-        if (!mainUserArtists.has(artistId)) {
-          mainUserArtists.set(
-            artistId,
-            new Artist(artistId, startWeight, genres)
-          );
-        } else {
-          const existingArtist = mainUserArtists.get(artistId)!;
-          existingArtist.genres = [
-            ...new Set(existingArtist.genres.concat(genres)),
-          ];
-          if (startWeight > existingArtist.highestWeight) {
-            existingArtist.highestWeight = startWeight;
-          }
-        }
-      }
-    })
-    .catch((error) => {
-      console.log("fetchUserArtists() " + error.message);
-    });
-
-  await axios
-    .get("https://api.spotify.com/v1/me/following?type=artist&limit=" + AMOUNT_ARTISTS, {
-      headers: {
-        Authorization: "Bearer " + user_access_token,
-      },
-    })
-    .then(async (response) => {
-      for (const artist of response.data.items) {
-        const artistId = artist.id;
-        const startWeight = mainUserArtists.has(artistId) // Use mainUserArtists instead of userArtists
-          ? mainUserArtists.get(artistId)!.highestWeight
-          : RELATED_ARTIST_WEIGHT;
-        const genres = artist.genres || [];
-        if (!mainUserArtists.has(artistId)) {
-          mainUserArtists.set(
-            artistId,
-            new Artist(artistId, startWeight, genres)
-          );
-        } else {
-          const existingArtist = mainUserArtists.get(artistId)!;
-          existingArtist.genres = [
-            ...new Set(existingArtist.genres.concat(genres)),
-          ];
-          if (startWeight > existingArtist.highestWeight) {
-            existingArtist.highestWeight = startWeight;
-          }
-        }
-      }
-    })
-    .catch((error) => {
-      console.log("fetchUserArtists() " + error.message);
-    });
-
-  // TODO: fetch related artists for top artists? or else remove
-  // -> collect names -> weight: RELATED_ARTIST_WEIGHT
-  // -> collect genre -> weight: 1
-}
-
-async function evaluateUserArtists(
-  artists: Map<string, number>,
-  genres: Map<string, number>,
-  userArtists: Map<string, Artist>
-) {
-  // add user artist names to artists map
-  for (const [id, artist] of userArtists) {
-    if (artists.has(artist.id))
-      artists.set(
-        artist.id,
-        (artists.get(artist.id) ?? 0) + artist.highestWeight
-      );
-    else artists.set(artist.id, artist.highestWeight);
-  }
-
-  // collect user genres, filter duplicates, find the highest weight
-  const userGenres = new Map<string, number>();
-  for (const [artistId, artist] of userArtists) {
-    for (const genreId of artist.genres) {
-      if (userGenres.has(genreId)) {
-        let userGenreWeight = userGenres.get(genreId);
-        if (userGenreWeight && userGenreWeight < artist.highestWeight)
-          userGenreWeight = artist.highestWeight;
-      } else userGenres.set(genreId, artist.highestWeight);
-    }
-  }
-
-  // add user genres & highest weights to collected genre data
-  for (const [userGenreId, userHighestWeight] of userGenres) {
-    if (genres.has(userGenreId)) {
-      let genreWeight = genres.get(userGenreId);
-      if (genreWeight) genreWeight += userHighestWeight;
-    } else genres.set(userGenreId, userHighestWeight);
-  }
-}
-
-async function addArtistTopTracksToEvent(
+async function findCommonSongsBetweenPlaylists(
   event: Event,
-  sortedArtists: [string, number][],
-  owner_access_token: string
+  accessTokens: string[],
+  maxSongsPerUser: number
 ) {
-  // if less than 10 artists use all, else only top 20%
-  const percentage = sortedArtists.length <= 10 ? 1 : 0.2;
+  // Data structure to store common song IDs
+  let commonSongIds: Set<string> | null = null;
 
-  console.log("4: Adding 3 Songs for each Artist");
-  for (let i = 0; i < sortedArtists.length * percentage; i++) {
-    const artistId = sortedArtists[i][0];
-    const artistDetails = await getArtistDetails(artistId, owner_access_token);
+  // Iterate through each user's playlist and find common song IDs
+  for (const access_token of accessTokens) {
+    if (access_token == null) continue;
 
-    if (artistDetails) {
-      const genres = artistDetails.genres?.join(",") || "Unknown";
+    const userPlaylists = await fetchUserPlaylists(access_token);
+    if (userPlaylists && userPlaylists.items) {
+      const playlistSongIds = new Set<string>();
 
-      await axios
-        .get(
-          "https://api.spotify.com/v1/artists/" +
-            artistId +
-            "/top-tracks?country=DE&limit=" + AMOUNT_TRACKS_PER_ARTIST,
-          {
-            headers: {
-              Authorization: "Bearer " + owner_access_token,
-            },
+      for (const playlist of userPlaylists.items) {
+        const playlistTracks = await fetchPlaylistTracks(
+          access_token,
+          playlist.id
+        );
+        if (playlistTracks && playlistTracks.items) {
+          for (const track of playlistTracks.items) {
+            playlistSongIds.add(track.track.id);
           }
-        )
-        .then(async (trackResponse) => {
-          for (const track of trackResponse.data.tracks) {
-            await addTrackToEvent(
-              event,
-              track.id,
-              track.duration_ms,
-              genres,
-              track.artists[0].name
-            );
-          }
-        })
-        .catch(function (error: Error) {
-          console.log("addArtistTopTracksToEvent() " + error.message);
-        });
+        }
+      }
+
+      if (commonSongIds === null) {
+        commonSongIds = playlistSongIds;
+      } else {
+        commonSongIds = new Set<string>(
+          [...commonSongIds].filter((songId: string) =>
+            playlistSongIds.has(songId)
+          )
+        );
+      }
     }
   }
+
+  if (commonSongIds && commonSongIds.size > 0) {
+    // console.log("1: Common songs between all users: " + util.inspect(commonSongIds, false, null, true));
+    console.log("1: Common songs between all users: " + commonSongIds.size);
+    const tracksToAdd: string[] = [];
+    for (const songId of commonSongIds) {
+      if (tracksToAdd.length >= maxSongsPerUser * accessTokens.length) break; // Check if the song amount limit is reached
+      tracksToAdd.push(songId);
+    }
+    for (const songId of tracksToAdd)
+      await addTrackToEvent(event, accessTokens, songId);
+  } else
+    console.log(
+      "findCommonSongsBetweenPlaylists(): No common songs found between all users."
+    );
 }
 
-function getArtistDetails(artistId: string, access_token: string) {
-  return axios
-    .get("https://api.spotify.com/v1/artists/" + artistId, {
+async function fetchUserPlaylists(
+  access_token: string
+): Promise<{ items: SongPlaylist[] } | null> {
+  const response = await axios
+    .get("https://api.spotify.com/v1/me/playlists", {
       headers: {
         Authorization: "Bearer " + access_token,
       },
@@ -345,143 +234,229 @@ function getArtistDetails(artistId: string, access_token: string) {
       return response.data;
     })
     .catch((error) => {
-      console.log("getArtistDetails=" + error.message);
+      console.log("fetchUserPlaylists() " + error.message);
+      return null;
+    });
+  return response;
+}
+
+async function fetchPlaylistTracks(
+  access_token: string,
+  playlistId: string
+): Promise<{ items: { track: { id: string } }[] } | null> {
+  const response = await axios
+    .get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+      headers: {
+        Authorization: "Bearer " + access_token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.log("fetchPlaylistTracks() " + error.message);
+      return null;
+    });
+  return response;
+}
+// ====================================================================================================
+
+async function addTopTracksForEachUser(
+  event: Event,
+  accessTokens: string[],
+  maxSongsPerUser: number
+) {
+  // Step 1: Fetch top artists for all users concurrently
+  const topArtistsArray: string[][] = await Promise.all(
+    accessTokens.map(async (access_token) => {
+      if (access_token == null) return [];
+
+      const response = await axios.get(
+        `https://api.spotify.com/v1/me/top/artists?limit=${AMOUNT_ARTISTS}`,
+        {
+          headers: {
+            Authorization: "Bearer " + access_token,
+          },
+        }
+      );
+
+      const topArtists: string[] = response.data.items.map(
+        (artist: Artist) => artist.id
+      );
+      return topArtists;
+    })
+  );
+
+  // Step 2: Collect the top artists for each user in an array for comparison
+  const allTopArtists: string[] = topArtistsArray.reduce(
+    (commonArtists, topArtists) => {
+      return commonArtists.filter((artist) => topArtists.includes(artist));
+    }
+  );
+
+  // Step 3: Find the common top artists among all users
+  const commonTopArtists: Set<string> = new Set(allTopArtists);
+
+  // Step 4: Get the top tracks for the common top artists
+  const commonTopTracks: string[] = [];
+  for (const artistId of commonTopArtists) {
+    const topTrackIds = await fetchArtistTopTrackIds(accessTokens[0], artistId);
+    if (topTrackIds) {
+      for (const trackId of topTrackIds) {
+        if (commonTopTracks.length >= maxSongsPerUser * accessTokens.length) {
+          break; // Check if the limit is reached
+        }
+        commonTopTracks.push(trackId);
+      }
+    }
+  }
+
+  //console.log("2: Common top tracks: " + util.inspect(commonTopTracks, false, null, true));
+  console.log("2: Common top tracks: " + commonTopTracks.length);
+
+  // Step 5: Add the common top tracks to the event playlist
+  for (const trackId of commonTopTracks) {
+    await addTrackToEvent(event, accessTokens, trackId);
+  }
+}
+
+async function fetchArtistTopTrackIds(
+  access_token: string,
+  artistId: string
+): Promise<string[] | null> {
+  const response = await axios
+    .get(
+      `https://api.spotify.com/v1/artists/${artistId}/top-tracks?country=DE&limit=${AMOUNT_TRACKS_PER_ARTIST}`,
+      {
+        headers: {
+          Authorization: "Bearer " + access_token,
+        },
+      }
+    )
+    .then((response) => {
+      const topTracks = response.data.tracks;
+      return topTracks.map((track: any) => track.id);
+    })
+    .catch((error) => {
+      console.log("fetchArtistTopTracks() " + error.message);
+      return null;
+    });
+  return response;
+}
+
+// ====================================================================================================
+
+async function addCommonGenresRecommendations(
+  event: Event,
+  accessTokens: string[]
+) {
+  // Data structure to store common genres
+  const commonGenres = new Map<string, number>();
+
+  // Collect user genres and find the common genres
+  for (const access_token of accessTokens) {
+    if (access_token == null) continue;
+
+    let userTopGenres: string[] = [];
+
+    await axios
+      .get(`https://api.spotify.com/v1/me/top/artists?limit=50`, {
+        headers: {
+          Authorization: "Bearer " + access_token,
+        },
+      })
+      .then(async (response) => {
+        if (response.data && response.data.items) {
+          // Check if response.data and response.data.items exist
+          for (const artist of response.data.items) {
+            if (artist.genres) {
+              artist.genres.forEach((genre: string) => {
+                if (commonGenres.has(genre)) {
+                  commonGenres.set(genre, commonGenres.get(genre)! + 1);
+                } else {
+                  commonGenres.set(genre, 1);
+                }
+              });
+            }
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("fetchUserArtists() " + error.message);
+      });
+  }
+
+  // Filter genres to get the most common ones up to a maximum of 5
+  const sortedGenres = Array.from(commonGenres.entries()).sort(
+    (a, b) => b[1] - a[1]
+  );
+  const filteredGenres = sortedGenres.slice(0, 5).map((entry) => entry[0]);
+
+  // Add recommendations based on common genres
+  if (filteredGenres.length > 0) {
+    const formattedGenres = filteredGenres.map((genre) =>
+      genre.replace(/\s+/g, "+")
+    );
+
+    const recommendations = await getRecommendationsByGenres(
+      accessTokens[0],
+      formattedGenres
+    );
+
+    // console.log("3: Got " + util.inspect(recommendations, false, null, true));
+    console.log("3: Got " + recommendations?.length + " recommendations.");
+    if (recommendations == null) return;
+    for (const track of recommendations)
+      await addTrackToEvent(event, accessTokens, track.id);
+  }
+}
+
+async function getRecommendationsByGenres(
+  access_token: string,
+  genres: string[]
+): Promise<
+  { id: string; duration_ms: number; artists: { name: string }[] }[] | null
+> {
+  const query =
+    "https://api.spotify.com/v1/recommendations" +
+    "?seed_genres=" +
+    genres.join("%2C") +
+    "&limit=" +
+    AMOUNT_RECOMMENDATIONS;
+
+  return axios
+    .get(query, {
+      headers: {
+        Authorization: "Bearer " + access_token,
+      },
+    })
+    .then((response) => {
+      const tracks = response.data.tracks;
+      const returnTracks = tracks.map((track: any) => ({
+        id: track.id,
+        duration_ms: track.duration_ms,
+        artists: track.artists,
+      }));
+
+      return returnTracks;
+    })
+    .catch((error) => {
+      console.log("getRecommendationsByGenres() " + error.message);
       return null;
     });
 }
-async function getRecommendation(
-  event: Event,
-  owner_access_token: string,
-  sortedArtists: [string, number][],
-  sortedGenres: [string, number][]
-) {
-  // get top 2 artists
-  let toBeRecommendedArtists = new Array<string>();
-  for (const artist of sortedArtists.slice(
-    0,
-    sortedArtists.length < 2 ? sortedArtists.length : 2
-  )) {
-    const test: string = artist[0];
-    if (test) toBeRecommendedArtists.push(test);
-  }
 
-  // get top 3 genres
-  let toBeRecommendedGenres = new Array<string>();
-  for (const genre of sortedGenres.slice(
-    0,
-    sortedGenres.length < 3 ? sortedGenres.length : 3
-  )) {
-    const test: string = genre[0];
-    if (test) toBeRecommendedGenres.push(test);
-  }
-
-  const formattedGenres = toBeRecommendedGenres.map((genre) =>
-    genre.replace(/\s+/g, "+")
-  );
-
-  console.log(
-    "5: Getting 5 Recommendations for " +
-      toBeRecommendedArtists.length +
-      " Artists and " +
-      formattedGenres.length +
-      " Genres"
-  );
-  // Construct the query with the correct URL
-  const query =
-    "https://api.spotify.com/v1/recommendations" +
-    "?seed_artists=" +
-    toBeRecommendedArtists.join("%2C") +
-    "&seed_genres=" +
-    formattedGenres.join("%2C") +
-    "&limit=" + AMOUNT_RECOMMENDATIONS;
-
-  await axios
-    .get(query, {
-      headers: {
-        Authorization: "Bearer " + owner_access_token,
-      },
-    })
-    .then(async function (response) {
-      for (const track of response.data.tracks) {
-        // Get the first artist's ID from the track data
-        const artistId = track.artists[0].id;
-
-        // Make a new API call to get the artist's details
-        const artistResponse = await axios.get(
-          `https://api.spotify.com/v1/artists/${artistId}`,
-          {
-            headers: {
-              Authorization: "Bearer " + owner_access_token,
-            },
-          }
-        );
-        const artistGenres = artistResponse.data.genres.join(",") || "Unknown";
-
-        await addTrackToEvent(
-          event,
-          track.id,
-          track.duration_ms,
-          artistGenres,
-          track.artists[0].name
-        );
-      }
-    })
-    .catch(function (error) {
-      console.log("getRecommendation() " + error.message);
-    });
-}
-
-async function addTrackToEvent(
-  event: Event,
-  trackId: string,
-  duration: number,
-  genres: string,
-  artist: string
-) {
-  // check if track exists
-  let topTrack = await DI.em.findOne(SpotifyTrack, {
-    id: trackId,
-  });
-
-  // else create new track
-  if (!topTrack) {
-    topTrack = new SpotifyTrack(trackId, duration, genres.toString(), artist);
-    await DI.em.persist(topTrack);
-  }
-
-  // check if event track exists
-  let trackInEvent = await DI.em.findOne(EventTrack, {
-    event: { id: event.id },
-    track: { id: topTrack.id },
-  });
-
-  if (!trackInEvent) {
-    let insertEventTrack = new EventTrack(
-      TrackStatus.GENERATED,
-      topTrack,
-      event
-    );
-    event.eventTracks.add(insertEventTrack);
-    await DI.em.persist(insertEventTrack);
-  } else {
-    if (
-      trackInEvent.status != TrackStatus.DENIED &&
-      trackInEvent.status < TrackStatus.GENERATED
-    )
-      trackInEvent.status = TrackStatus.GENERATED;
-  }
-}
-
-async function createSpotifyPlaylistFromEvent(
-  event: Event,
-  owner: User
-): Promise<boolean> {
+// ====================================================================================================
+async function createSpotifyPlaylistFromEvent(event: Event, owner: User) {
   let success: boolean = false;
   console.log(
-    "6: Creating Playlist for Event " +
+    "4: Creating Playlist for Event " +
       event.id +
       " from owner " +
-      owner.spotifyId
+      owner.spotifyId +
+      " with " +
+      event.eventTracks.length +
+      " tracks "
   );
   const query =
     "https://api.spotify.com/v1/users/" + owner.spotifyId + "/playlists";
@@ -505,6 +480,9 @@ async function createSpotifyPlaylistFromEvent(
     )
     .then(async function (response) {
       const playlistId = response.data.id;
+      console.log(
+        "createSpotifyPlaylistFromEvent(): Playlist ID: " + playlistId
+      );
       let batch = new Array<string>();
       for (const batchTrack of event.eventTracks) {
         if (
@@ -513,8 +491,10 @@ async function createSpotifyPlaylistFromEvent(
           batchTrack.status == TrackStatus.ACCEPTED
         )
           batch.push("spotify:track:" + batchTrack.track.id);
-        if (batch.length >= 25)
+        if (batch.length >= 25) {
           await pushTracksToSpotifyPlaylist(owner, playlistId, batch);
+          batch.length = 0; // Clear the batch after each function call
+        }
       }
       if (batch.length > 0)
         await pushTracksToSpotifyPlaylist(owner, playlistId, batch);
@@ -526,8 +506,6 @@ async function createSpotifyPlaylistFromEvent(
       success = false;
     });
   console.log("createSpotifyPlaylistFromEvent(): Done! " + success);
-
-  return success;
 }
 
 async function pushTracksToSpotifyPlaylist(
@@ -556,6 +534,108 @@ async function pushTracksToSpotifyPlaylist(
     .catch(function (error) {
       //console.log("pushTracksToSpotifyPlaylist() " + error.message);
     });
+}
+// ====================================================================================================
+
+async function addTrackToEvent(
+  event: Event,
+  accessTokens: string[],
+  trackId: string
+) {
+  // check if track exists
+  let topTrack = await DI.em.findOne(SpotifyTrack, {
+    id: trackId,
+  });
+
+  // else create new track
+  if (!topTrack) {
+    await axios
+      .get(`https://api.spotify.com/v1/tracks/${trackId}`, {
+        headers: {
+          Authorization: "Bearer " + accessTokens[0],
+        },
+      })
+      .then(async (response) => {
+        const genreString = await getGenreString(
+          response.data.artists[0].id,
+          accessTokens[0]
+        );
+        topTrack = new SpotifyTrack(
+          response.data.id,
+          response.data.duration_ms,
+          genreString,
+          response.data.artists[0].id
+        );
+        await DI.em.persist(topTrack);
+        // check if event track exists
+        let trackInEvent = await DI.em.findOne(EventTrack, {
+          event: { id: event.id },
+          track: { id: topTrack.id },
+        });
+
+        if (!trackInEvent) {
+          let insertEventTrack = new EventTrack(
+            TrackStatus.GENERATED,
+            topTrack,
+            event
+          );
+          event.eventTracks.add(insertEventTrack);
+          await DI.em.persist(insertEventTrack);
+        } else {
+          if (
+            trackInEvent.status != TrackStatus.DENIED &&
+            trackInEvent.status < TrackStatus.GENERATED
+          )
+            trackInEvent.status = TrackStatus.GENERATED;
+        }
+      })
+      .catch((error) => {
+        console.log("addTrackToEvent() " + error.message);
+      });
+  } else {
+    // Handle the case when the track already exists
+    let trackInEvent = await DI.em.findOne(EventTrack, {
+      event: { id: event.id },
+      track: { id: topTrack.id },
+    });
+
+    if (!trackInEvent) {
+      // Create a new EventTrack and add it to the event
+      let insertEventTrack = new EventTrack(
+        TrackStatus.GENERATED,
+        topTrack,
+        event
+      );
+      event.eventTracks.add(insertEventTrack);
+      await DI.em.persist(insertEventTrack);
+    } else {
+      // Update the status of the existing EventTrack if needed
+      if (
+        trackInEvent.status != TrackStatus.DENIED &&
+        trackInEvent.status < TrackStatus.GENERATED
+      )
+        trackInEvent.status = TrackStatus.GENERATED;
+    }
+  }
+}
+
+async function getGenreString(artistId: string, access_token: string) {
+  const artistResponse = await axios
+    .get(`https://api.spotify.com/v1/artists/${artistId}`, {
+      headers: {
+        Authorization: "Bearer " + access_token,
+      },
+    })
+    .then((response) => {
+      return response.data.genres && response.data.genres.length > 0
+        ? response.data.genres.join(",")
+        : "Unknown";
+    })
+    .catch((error) => {
+      console.log("getGenreString() " + error.message);
+      return "Unknown";
+    });
+  return artistResponse;
 }
 
 export const EventAlgorithmController = router;
