@@ -1,10 +1,5 @@
 import { FunctionComponent, useEffect, useState } from "react";
-import {
-  EventTrack,
-  TrackStatus,
-  Playlist,
-  SpotifyTrack,
-} from "../../constants";
+import { EventTrack, SpotifyTrack, TrackStatus } from "../../constants";
 import { FormContainer } from "../../styles";
 import {
   useAcceptPlaylistTracks,
@@ -14,13 +9,36 @@ import {
   useFetchTracksOfPlaylist,
   useGeneratePlaylist,
   useProposeNewEventTrack,
-  useProposePlaylist,
   useRemovePlaylist,
   useSearchTracks,
 } from "../../hooks";
-import axios from "axios";
 import { COLORS } from "../../styles/colors";
 import styled from "styled-components";
+
+const LoadingContainer = styled.div`
+  display: flex;
+  height: 80%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+`;
+
+const LoadingSpinner = styled.div`
+  top: 50%;
+  width: 50px;
+  height: 50px;
+  border: 10px solid #f3f3f3; /* Light grey */
+  border-top: 10px solid #383636; /* Black */
+  border-radius: 50%;
+  animation: spinner 1.5s linear infinite;
+  @keyframes spinner {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+`;
 
 const SearchResultsContainer = styled.div`
   max-width: 100%;
@@ -63,6 +81,11 @@ const SearchItemText = styled.div`
   text-overflow: ellipsis;
 `;
 
+const StyledText = styled.div`
+  color: ${COLORS.font};
+  font-size: 16px;
+`;
+
 type EditEventPlaylistProps = {
   eventId: string;
 };
@@ -72,6 +95,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
 }) => {
   const { fetchEventTracks } = useFetchEventTracks({ eventId });
   const [playlistTracks, setPlaylistTracks] = useState<EventTrack[]>([]); // Fix: Add state for playlistTracks
+  const [isLoading, setIsLoading] = useState(false);
 
   const { fetchTracksOfPlaylist } = useFetchTracksOfPlaylist();
   const { acceptPlaylistTracks } = useAcceptPlaylistTracks();
@@ -178,11 +202,14 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   };
 
   const handleGeneratePlaylist = async () => {
+    setIsLoading(true);
     try {
       const response = await generatePlaylist(eventId);
       console.log("Generate playlist response:", response);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error generating playlist:", error);
+      setIsLoading(false);
     }
   };
 
@@ -204,13 +231,20 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
     }
   };
 
+  if (isLoading)
+    return (
+      <LoadingContainer>
+        <LoadingSpinner />
+      </LoadingContainer>
+    );
+
   return (
     <FormContainer>
-      <h1>Edit Event Playlist</h1>
+      <StyledText>Edit Event Playlist</StyledText>
 
       {/* Display Current Event Tracks */}
       <div>
-        <h2>Current Event Tracks</h2>
+        <StyledText>Current Event Tracks</StyledText>
         {fetchingEventTracks ? (
           <p>Loading current event tracks...</p>
         ) : (
@@ -227,7 +261,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
 
       {/* Fetch Spotify Playlists */}
       <div>
-        <h2>Spotify Playlists</h2>
+        <StyledText>Spotify Playlists</StyledText>
         <button onClick={handleFetchSpotifyPlaylists}>
           Fetch Spotify Playlists
         </button>
@@ -288,7 +322,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
 
       {/* Display Playlist Tracks */}
       <div>
-        <h2>Playlist Tracks</h2>
+        <StyledText>Playlist Tracks</StyledText>
         <ul>
           {playlistTracks.map((eventTrack: EventTrack) => (
             <li key={eventTrack.track.id}>
@@ -346,13 +380,13 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
 
       {/* Generate Playlist */}
       <div>
-        <h2>Generate Playlist</h2>
+        <StyledText>Generate Playlist</StyledText>
         <button onClick={handleGeneratePlaylist}>Generate Playlist</button>
       </div>
 
       {/* New section for proposing a track */}
       <div>
-        <h2>Search for a Song</h2>
+        <StyledText>Search for a Song</StyledText>
         <input
           type="text"
           value={searchQuery}
@@ -364,7 +398,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
         />
         {showDropdown && (
           <div>
-            <h2>Search Results</h2>
+            <StyledText>Search Results</StyledText>
             <SearchResultsContainer>
               {searchResults.map((track: SpotifyTrack) => (
                 <SearchItemContainer
