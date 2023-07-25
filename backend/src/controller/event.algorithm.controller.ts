@@ -127,11 +127,11 @@ router.put("/generate", async (req, res) => {
   // ====================================================================================================
   // 4. Create Spotify playlist from event
   // ====================================================================================================
-  await createSpotifyPlaylistFromEvent(req.event!, owner);
+  const playlistID = await createSpotifyPlaylistFromEvent(req.event!, owner);
 
   return res
     .status(200)
-    .json({ message: "Successfully created playlist!" })
+    .json({ message: "Successfully created playlist!", playlistID: playlistID })
     .end();
 });
 
@@ -447,8 +447,10 @@ async function getRecommendationsByGenres(
 }
 
 // ====================================================================================================
-async function createSpotifyPlaylistFromEvent(event: Event, owner: User) {
-  let success: boolean = false;
+async function createSpotifyPlaylistFromEvent(
+  event: Event,
+  owner: User
+): Promise<string> {
   console.log(
     "4: Creating Playlist for Event " +
       event.id +
@@ -464,7 +466,7 @@ async function createSpotifyPlaylistFromEvent(event: Event, owner: User) {
   // Initialize the eventTracks collection before querying the database
   await event.eventTracks.init();
 
-  axios
+  return axios
     .post(
       query,
       {
@@ -489,23 +491,23 @@ async function createSpotifyPlaylistFromEvent(event: Event, owner: User) {
           batchTrack.status == TrackStatus.GENERATED ||
           batchTrack.status == TrackStatus.ACCEPTED_PLAYLIST ||
           batchTrack.status == TrackStatus.ACCEPTED
-        )
+        ) {
           batch.push("spotify:track:" + batchTrack.track.id);
+        }
         if (batch.length >= 25) {
           await pushTracksToSpotifyPlaylist(owner, playlistId, batch);
           batch.length = 0; // Clear the batch after each function call
         }
       }
-      if (batch.length > 0)
+      if (batch.length > 0) {
         await pushTracksToSpotifyPlaylist(owner, playlistId, batch);
-
-      success = true;
+      }
+      return playlistId;
     })
     .catch(function (error) {
       console.log("createSpotifyPlaylistFromEvent() " + error.message);
-      success = false;
+      return "undefined";
     });
-  console.log("createSpotifyPlaylistFromEvent(): Done! " + success);
 }
 
 async function pushTracksToSpotifyPlaylist(
