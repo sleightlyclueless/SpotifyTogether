@@ -19,9 +19,7 @@ export const GenerateEventQr = () => {
     <PageContainer>
       <Header userName={userName || undefined} />
       <EventQRContainer>
-        <IntroText>
-          <h1>Join Event: {eventID}</h1>
-        </IntroText>
+        <IntroText>Join Event: {eventID}</IntroText>
         <QrOverlay>
           <QRCode value={`/join?event=${eventID}`} />
         </QrOverlay>

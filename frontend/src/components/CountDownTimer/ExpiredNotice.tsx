@@ -1,6 +1,6 @@
 export const ExpiredNotice = () => {
   return (
-    <div className="expired-notice">
+    <div>
       <span>Party started!</span>
     </div>
   );

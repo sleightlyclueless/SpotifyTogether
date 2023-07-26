@@ -2,6 +2,7 @@ import { FunctionComponent, useEffect, useState } from "react";
 import { SpotifyTrack } from "../../constants";
 import {
   Button,
+  ButtonContainer,
   DeleteIcon,
   FormContainer,
   LoadingContainer,
@@ -153,10 +154,6 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   // If there is a playlist, display the tracks and the search functionality
   return (
     <FormContainer>
-      {/* Generate Playlist Button */}
-      <StyledText>Regenerate Playlist</StyledText>
-      <Button onClick={handleGeneratePlaylist}>Regenerate Playlist</Button>
-
       {/* Display Current Event Tracks */}
       <StyledText>Current Event Tracks</StyledText>
       <SongContainer>
@@ -164,7 +161,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
           <SongItemContainer key={track.id}>
             <SongItemImage src={track.albumImage} alt={track.name} />
             <SongItemText>
-              {track.name} - {track.artistName}
+              {track.artistName} - {track.name}
             </SongItemText>
             <StyledDeleteButton
               onClick={() => handleDeleteProposedTrack(track.id)}
@@ -187,7 +184,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
         placeholder="Enter a song name or artist"
       />
       {showDropdown && (
-        <div>
+        <>
           <StyledText>Search Results</StyledText>
           <SearchResultsContainer>
             {searchResults.map((track: SpotifyTrack) => (
@@ -202,11 +199,14 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
               </SearchItemContainer>
             ))}
           </SearchResultsContainer>
-        </div>
+        </>
       )}
       {/* Save Playlist Button */}
       {currentPlaylistId && !isLoading && (
-        <Button onClick={() => handleSavePlaylist()}>Save Playlist</Button>
+        <ButtonContainer>
+          <Button onClick={handleGeneratePlaylist}>Regenerate Playlist</Button>
+          <Button onClick={() => handleSavePlaylist()}>Save Playlist</Button>
+        </ButtonContainer>
       )}
     </FormContainer>
   );

@@ -40,9 +40,11 @@ import {
   TimerText,
 } from "../../styles";
 
+type EditEventType = "none" | "editEvent" | "editPlaylist";
+
 export const EventOverview: FunctionComponent = () => {
   // 0: Normal content; 1: EditEventForm; 2: EditEventPlaylist
-  const [contentMode, setContentMode] = useState<number>(0);
+  const [contentMode, setContentMode] = useState<EditEventType>("none");
   const events: Event[] = useGetUserEvents();
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
@@ -112,25 +114,25 @@ export const EventOverview: FunctionComponent = () => {
                 >
                   {isOwner && (
                     <>
-                      {contentMode != 0 ? (
+                      {contentMode !== "none" ? (
                         // Show EditEventForm
                         <StyledLuClose
-                          onClick={(): void => setContentMode(0)}
+                          onClick={(): void => setContentMode("none")}
                         />
                       ) : (
                         // Show EditEventPlaylist
                         <StyledLuEdit2
-                          onClick={(): void => setContentMode(1)}
+                          onClick={(): void => setContentMode("editEvent")}
                         />
                       )}
                     </>
                   )}
-                  {contentMode ? (
+                  {contentMode !== "none" ? (
                     <>
-                      {contentMode === 1 ? (
+                      {contentMode === "editEvent" ? (
                         // Show EditEventForm
                         <EditEventForm event={event} />
-                      ) : contentMode === 2 ? (
+                      ) : contentMode === "editPlaylist" ? (
                         // Show EditEventPlaylist
                         <EditEventPlaylist eventId={event.id} />
                       ) : null}
@@ -243,7 +245,9 @@ export const EventOverview: FunctionComponent = () => {
                             Invite People
                           </EventButtons>
 
-                          <EventButtons onClick={(): void => setContentMode(2)}>
+                          <EventButtons
+                            onClick={(): void => setContentMode("editPlaylist")}
+                          >
                             Manage Playlist
                           </EventButtons>
                           <StyledIonPopover
@@ -270,7 +274,9 @@ export const EventOverview: FunctionComponent = () => {
                           <EventButtons id={"generate-code"}>
                             Invite People
                           </EventButtons>
-                          <EventButtons onClick={(): void => setContentMode(2)}>
+                          <EventButtons
+                            onClick={(): void => setContentMode("editPlaylist")}
+                          >
                             View Playlist
                           </EventButtons>
                           <Button onClick={(): void => handleDelete(event.id)}>

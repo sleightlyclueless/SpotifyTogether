@@ -15,7 +15,7 @@ export const ShowCounter: FunctionComponent<ShowCounterProps> = ({
   seconds,
 }) => {
   return (
-    <ShowCounterContainer className="show-counter">
+    <ShowCounterContainer>
       {days}:{hours}:{minutes}:{seconds}
     </ShowCounterContainer>
   );

@@ -27,7 +27,7 @@ export const LoadingSpinner = styled.div`
 `;
 
 export const SearchResultsContainer = styled.div`
-  max-width: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,15 +40,15 @@ export const SongContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-height: 500px;
+  max-height: 50%;
   overflow-y: scroll;
 `;
 
 export const SongItemContainer = styled.div`
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 400px; /* You can adjust the maximum width as needed */
+  width: 95%;
+  max-width: 400px;
   min-height: 40px;
   padding: 8px;
   border-radius: 8px;
@@ -63,8 +63,8 @@ export const SongItemContainer = styled.div`
 export const SearchItemContainer = styled.div`
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 400px; /* You can adjust the maximum width as needed */
+  width: 95%;
+  max-width: 400px;
   min-height: 40px;
   padding: 8px;
   border-radius: 8px;

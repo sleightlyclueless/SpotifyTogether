@@ -3,28 +3,20 @@ import { COLORS } from "../colors";
 
 export const EventQRContainer = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  flex-wrap: wrap;
-  padding: 16px;
-  gap: 16px;
   height: 100%;
-  widht: 100%;
   background-color: ${COLORS.backgroundLight};
   color: ${COLORS.font};
 `;
 
 export const IntroText = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  flex-wrap: wrap;
-  padding: 16px;
-  gap: 16px;
-  width: 100%;
-  height: auto;
+  font-size: 28px;
 `;
 
 export const QrOverlay = styled.div`
@@ -36,7 +28,7 @@ export const QrOverlay = styled.div`
   align-items: center;
   flex-direction: column;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  background: rgba(${COLORS.buttonRGB}, 0.8);
+  background: ${COLORS.background};
 `;
 
 export const TextContainer = styled.div`
@@ -48,7 +40,7 @@ export const TextContainer = styled.div`
   padding: 16px;
   gap: 16px;
   height: 100%;
-  widht: 100%;
+  width: 100%;
   background-color: ${COLORS.backgroundLight};
   color: ${COLORS.font};
 `;

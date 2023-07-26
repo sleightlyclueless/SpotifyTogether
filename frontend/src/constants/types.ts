@@ -24,8 +24,6 @@ export type Participant = {
   permission: string;
 };
 
-// TODO: Track type with event
-
 export type EventTrack = {
   track: SpotifyTrack;
   event: Event;
