@@ -1,16 +1,20 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import { EventTrack, SpotifyTrack, TrackStatus } from "../../constants";
-import { FormContainer } from "../../styles";
 import {
-  useAcceptPlaylistTracks,
-  useChangeEventTrackStatus,
-  useFetchEventTracks,
-  useFetchSpotifyPlaylistIds,
-  useFetchTracksOfPlaylist,
-  useGeneratePlaylist,
-  useProposeNewEventTrack,
-  useRemovePlaylist,
-  useSearchTracks,
+  FormContainer,
+  Button,
+  TextContainer,
+  StyledEventIdInput,
+} from "../../styles";
+import {
+  useFetchSpotifyPlaylistIds, // 1. Check if a playlist already exists
+  useGeneratePlaylist, // 1.1 If it does not - generate a playlist
+  useFetchTracksOfPlaylist, // 1.2 If it does - fetch the tracks of the playlist
+  // Note: Keep useGeneratePlaylist to start over
+  useSearchTracks, // 1.3 If playlist exists provide functions to search and
+  useProposeNewEventTrack, // Add a new track to the playlist
+  //useRemoveEventTrack,          // Remove a track from the playlist
+  //useSavePlaylist
 } from "../../hooks";
 import { COLORS } from "../../styles/colors";
 import styled from "styled-components";
@@ -45,13 +49,25 @@ const SearchResultsContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-height: 100px;
+  overflow-y: scroll;
 `;
 
-const SearchItemContainer = styled.div`
+const SongContainer = styled.div`
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 500px;
+  overflow-y: scroll;
+`;
+
+const SongItemContainer = styled.div`
   display: flex;
   align-items: center;
   width: 100%;
   max-width: 400px; /* You can adjust the maximum width as needed */
+  min-height: 40px;
   padding: 8px;
   border-radius: 8px;
   background: ${COLORS.font};
@@ -67,14 +83,14 @@ const SearchItemContainer = styled.div`
   }
 `;
 
-const SearchItemImage = styled.img`
+const SongItemImage = styled.img`
   width: 40px;
   height: 40px;
   border-radius: 50%;
   margin-right: 8px;
 `;
 
-const SearchItemText = styled.div`
+const SongItemText = styled.div`
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -93,119 +109,45 @@ type EditEventPlaylistProps = {
 export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   eventId,
 }) => {
-  const { fetchEventTracks } = useFetchEventTracks({ eventId });
-  const [playlistTracks, setPlaylistTracks] = useState<EventTrack[]>([]); // Fix: Add state for playlistTracks
   const [isLoading, setIsLoading] = useState(false);
-
-  const { fetchTracksOfPlaylist } = useFetchTracksOfPlaylist();
-  const { acceptPlaylistTracks } = useAcceptPlaylistTracks();
-  const { removePlaylist } = useRemovePlaylist();
-  const { proposeNewEventTrack } = useProposeNewEventTrack();
-  const { generatePlaylist } = useGeneratePlaylist();
-  const { changeEventTrackStatus } = useChangeEventTrackStatus();
-  const { fetchSpotifyPlaylistIds } = useFetchSpotifyPlaylistIds();
-
-  const [currentEventTracks, setCurrentEventTracks] = useState<
-    EventTrack[] | null
+  const [currentPlaylistId, setCurrentPlaylistId] = useState<string | null>(
+    null
+  );
+  const [currentPlaylistTracks, setCurrentPlaylistTracks] = useState<
+    SpotifyTrack[] | null
   >(null);
+
+  const { generatePlaylist } = useGeneratePlaylist();
+  const { fetchSpotifyPlaylistIds } = useFetchSpotifyPlaylistIds();
+  const { fetchTracksOfPlaylist } = useFetchTracksOfPlaylist();
+  const { proposeNewEventTrack } = useProposeNewEventTrack();
+
   const { searchResults, showDropdown, searchTracks } = useSearchTracks();
-  const [proposingTrackId, setProposingTrackId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [fetchingEventTracks, setFetchingEventTracks] = useState(false);
 
   useEffect(() => {
-    const fetchCurrentEventTracks = async () => {
+    const fetchPlaylistIds = async () => {
       try {
-        setFetchingEventTracks(true);
-        const eventTracks = await fetchEventTracks();
-        //console.log("Current event tracks:", eventTracks);
-        setCurrentEventTracks(eventTracks || []); // Handle the case when eventTracks is null
-        setFetchingEventTracks(false);
+        const playlistIds = await fetchSpotifyPlaylistIds(eventId);
+        if (playlistIds && playlistIds.length > 0) {
+          setCurrentPlaylistId(playlistIds[0]);
+          const tracks = await fetchTracksOfPlaylist(eventId, playlistIds[0]);
+          if (tracks) setCurrentPlaylistTracks(tracks);
+        }
       } catch (error) {
-        console.error("Error fetching current event tracks:", error);
-        setFetchingEventTracks(false);
+        console.error("Error generating playlist:", error);
+        setIsLoading(false);
       }
     };
-
-    fetchCurrentEventTracks();
-  }, [eventId]); // Fetch current event tracks on component mount and whenever the eventId changes
-
-  useEffect(() => {
-    fetchEventTracks();
-  }, [fetchEventTracks]);
-
-  const handleSearch = async () => {
-    // Update the searchTracks function to use the hook
-    try {
-      await searchTracks(eventId, searchQuery);
-    } catch (error) {
-      console.error("Error searching for tracks:", error);
-    }
-  };
-
-  const handleAcceptPlaylistTracks = async (spotifyPlaylistId: string) => {
-    try {
-      const response = await acceptPlaylistTracks(eventId, spotifyPlaylistId);
-      console.log("Accepted playlist tracks response:", response);
-    } catch (error) {
-      console.error("Error accepting playlist tracks:", error);
-    }
-  };
-
-  const handleRemovePlaylist = async (spotifyPlaylistId: string) => {
-    try {
-      const response = await removePlaylist(eventId, spotifyPlaylistId);
-      console.log("Remove playlist response:", response);
-    } catch (error) {
-      console.error("Error removing playlist:", error);
-    }
-  };
-
-  const handleProposeNewTrack = async (spotifyTrackId: string) => {
-    try {
-      if (!spotifyTrackId) return; // Use the received spotifyTrackId directly
-
-      // Check if the SpotifyTrack with the given ID exists
-      const spotifyTrackExists = searchResults.some(
-        (track) => track.id === spotifyTrackId
-      );
-
-      if (!spotifyTrackExists) {
-        console.error("SpotifyTrack with ID does not exist:", spotifyTrackId);
-        return;
-      }
-
-      const response = await proposeNewEventTrack(eventId, spotifyTrackId);
-
-      console.log("Propose new event track response:", response);
-      // Clear the proposingTrackId after successfully proposing the track
-      setProposingTrackId("");
-    } catch (error) {
-      console.error("Error proposing new event track:", error);
-    }
-  };
-
-  const handleChangeTrackStatus = async (
-    spotifyTrackId: string,
-    newStatus: TrackStatus
-  ) => {
-    try {
-      const response = await changeEventTrackStatus(
-        eventId,
-        spotifyTrackId,
-        newStatus.toString() // Fix 2: Convert TrackStatus to string
-      );
-      console.log("Change event track status response:", response);
-    } catch (error) {
-      console.error("Error changing event track status:", error);
-    }
-  };
+    fetchPlaylistIds();
+  }, [eventId]);
 
   const handleGeneratePlaylist = async () => {
     setIsLoading(true);
     try {
       const response = await generatePlaylist(eventId);
-      console.log("Generate playlist response:", response);
+      if (response && response.playlistId)
+        setCurrentPlaylistId(response.playlistId);
       setIsLoading(false);
     } catch (error) {
       console.error("Error generating playlist:", error);
@@ -213,21 +155,24 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
     }
   };
 
-  const handleFetchTracksOfPlaylist = async (spotifyPlaylistId: string) => {
-    try {
-      const response = await fetchTracksOfPlaylist(eventId, spotifyPlaylistId);
-      console.log("Fetch tracks of playlist response:", response);
-    } catch (error) {
-      console.error("Error fetching tracks of playlist:", error);
-    }
+  const handleSearch = async () => {
+    await searchTracks(eventId, searchQuery);
   };
 
-  const handleFetchSpotifyPlaylists = async () => {
+  const handleProposeNewTrack = async (spotifyTrackId: string) => {
     try {
-      const response = await fetchSpotifyPlaylistIds(eventId);
-      console.log("Fetch Spotify playlists response:", response);
+      if (!currentPlaylistId) return;
+      if (!spotifyTrackId) return;
+
+      // Propose the new track using the hook
+      const response = await proposeNewEventTrack(eventId, spotifyTrackId);
+      console.log("Propose new event track response:", response);
+
+      // Reload the playlist and songs after adding the new track
+      const tracks = await fetchTracksOfPlaylist(eventId, currentPlaylistId);
+      if (tracks) setCurrentPlaylistTracks(tracks);
     } catch (error) {
-      console.error("Error fetching Spotify playlists:", error);
+      console.error("Error proposing new event track:", error);
     }
   };
 
@@ -237,184 +182,67 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
         <LoadingSpinner />
       </LoadingContainer>
     );
+  // If there are no playlists, show the generate playlist button
+  if (!currentPlaylistId) {
+    return (
+      <FormContainer>
+        {/* Generate Playlist Button */}
+        <StyledText>Generate Playlist</StyledText>
+        <Button onClick={handleGeneratePlaylist}>Generate Playlist</Button>
+        <StyledText>No playlist found.</StyledText>
+      </FormContainer>
+    );
+  }
 
+  // If there is a playlist, display the tracks and the search functionality
   return (
     <FormContainer>
-      <StyledText>Edit Event Playlist</StyledText>
+      {/* Generate Playlist Button */}
+      <StyledText>Generate Playlist</StyledText>
+      <Button onClick={handleGeneratePlaylist}>Generate Playlist</Button>
 
       {/* Display Current Event Tracks */}
-      <div>
-        <StyledText>Current Event Tracks</StyledText>
-        {fetchingEventTracks ? (
-          <p>Loading current event tracks...</p>
-        ) : (
-          <ul>
-            {currentEventTracks?.map((eventTrack) => (
-              <li key={eventTrack.track.id}>
-                {eventTrack.track.name} - {eventTrack.track.artist} - Status:{" "}
-                {TrackStatus[eventTrack.status]}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Fetch Spotify Playlists */}
-      <div>
-        <StyledText>Spotify Playlists</StyledText>
-        <button onClick={handleFetchSpotifyPlaylists}>
-          Fetch Spotify Playlists
-        </button>
-        <ul>
-          {playlistTracks.map((eventTrack: EventTrack) => (
-            <li key={eventTrack.track.id}>
-              {eventTrack.track.name} - {eventTrack.track.artist} - Status:{" "}
-              {TrackStatus[eventTrack.status]}
-              <button
-                onClick={() => handleProposeNewTrack(eventTrack.track.id)}
-              >
-                Propose Track
-              </button>
-              <button
-                onClick={() =>
-                  handleChangeTrackStatus(
-                    eventTrack.track.id,
-                    TrackStatus.DENIED
-                  )
-                }
-              >
-                Deny
-              </button>
-              <button
-                onClick={() =>
-                  handleChangeTrackStatus(
-                    eventTrack.track.id,
-                    TrackStatus.ACCEPTED_PLAYLIST
-                  )
-                }
-              >
-                Accept Playlist
-              </button>
-              <button
-                onClick={() =>
-                  handleChangeTrackStatus(
-                    eventTrack.track.id,
-                    TrackStatus.GENERATED
-                  )
-                }
-              >
-                Generate
-              </button>
-              <button
-                onClick={() =>
-                  handleChangeTrackStatus(
-                    eventTrack.track.id,
-                    TrackStatus.ACCEPTED
-                  )
-                }
-              >
-                Accept
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Display Playlist Tracks */}
-      <div>
-        <StyledText>Playlist Tracks</StyledText>
-        <ul>
-          {playlistTracks.map((eventTrack: EventTrack) => (
-            <li key={eventTrack.track.id}>
-              {eventTrack.track.name} - {eventTrack.track.artist} - Status:{" "}
-              {TrackStatus[eventTrack.status]}
-              <button
-                onClick={() => handleProposeNewTrack(eventTrack.track.id)}
-              >
-                Propose Track
-              </button>
-              <button
-                onClick={() =>
-                  handleChangeTrackStatus(
-                    eventTrack.track.id,
-                    TrackStatus.DENIED
-                  )
-                }
-              >
-                Deny
-              </button>
-              <button
-                onClick={() =>
-                  handleChangeTrackStatus(
-                    eventTrack.track.id,
-                    TrackStatus.ACCEPTED_PLAYLIST
-                  )
-                }
-              >
-                Accept Playlist
-              </button>
-              <button
-                onClick={() =>
-                  handleChangeTrackStatus(
-                    eventTrack.track.id,
-                    TrackStatus.GENERATED
-                  )
-                }
-              >
-                Generate
-              </button>
-              <button
-                onClick={() =>
-                  handleChangeTrackStatus(
-                    eventTrack.track.id,
-                    TrackStatus.ACCEPTED
-                  )
-                }
-              >
-                Accept
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Generate Playlist */}
-      <div>
-        <StyledText>Generate Playlist</StyledText>
-        <button onClick={handleGeneratePlaylist}>Generate Playlist</button>
-      </div>
+      <StyledText>Current Event Tracks</StyledText>
+      <SongContainer>
+        {currentPlaylistTracks?.map((track: SpotifyTrack) => (
+          <SongItemContainer key={track.id}>
+            <SongItemImage src={track.albumImage} alt={track.name} />
+            <SongItemText>
+              {track.name} - {track.artist}
+            </SongItemText>
+          </SongItemContainer>
+        ))}
+      </SongContainer>
 
       {/* New section for proposing a track */}
-      <div>
-        <StyledText>Search for a Song</StyledText>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            handleSearch();
-          }}
-          placeholder="Enter a song name or artist"
-        />
-        {showDropdown && (
-          <div>
-            <StyledText>Search Results</StyledText>
-            <SearchResultsContainer>
-              {searchResults.map((track: SpotifyTrack) => (
-                <SearchItemContainer
-                  key={track.id}
-                  onClick={() => handleProposeNewTrack(track.id)}
-                >
-                  <SearchItemImage src={track.albumImage} alt={track.name} />
-                  <SearchItemText>
-                    {track.name} - {track.artist}
-                  </SearchItemText>
-                </SearchItemContainer>
-              ))}
-            </SearchResultsContainer>
-          </div>
-        )}
-      </div>
+      <StyledText>Search for a Song</StyledText>
+      <StyledEventIdInput
+        type="text"
+        value={searchQuery}
+        onChange={(e: any) => {
+          setSearchQuery(e.target.value);
+          handleSearch();
+        }}
+        placeholder="Enter a song name or artist"
+      />
+      {showDropdown && (
+        <div>
+          <StyledText>Search Results</StyledText>
+          <SearchResultsContainer>
+            {searchResults.map((track: SpotifyTrack) => (
+              <SongItemContainer
+                key={track.id}
+                onClick={() => handleProposeNewTrack(track.id)}
+              >
+                <SongItemImage src={track.albumImage} alt={track.name} />
+                <SongItemText>
+                  {track.name} - {track.artist}
+                </SongItemText>
+              </SongItemContainer>
+            ))}
+          </SearchResultsContainer>
+        </div>
+      )}
     </FormContainer>
   );
 };

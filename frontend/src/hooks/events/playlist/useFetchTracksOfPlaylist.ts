@@ -1,5 +1,5 @@
 import axios from "axios";
-import { EventTrack } from "../../../constants";
+import { EventTrack, SpotifyTrack } from "../../../constants";
 
 export const useFetchTracksOfPlaylist = () => {
   const accessToken = localStorage.getItem("accessToken") || undefined;
@@ -9,7 +9,7 @@ export const useFetchTracksOfPlaylist = () => {
     spotifyPlaylistId: string
   ) => {
     try {
-      const response = await axios.get<EventTrack[]>(
+      const response = await axios.get<SpotifyTrack[]>(
         `http://localhost:4000/events/${eventId}/tracks/${spotifyPlaylistId}`,
         {
           headers: {
@@ -17,6 +17,7 @@ export const useFetchTracksOfPlaylist = () => {
           },
         }
       );
+      console.log("response.data", response.data);
       return response.data;
     } catch (error) {
       console.error("Error fetching tracks of the playlist:", error);

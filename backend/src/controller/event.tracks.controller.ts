@@ -3,26 +3,45 @@ import { DI } from "../index";
 import axios from "axios";
 import { Auth } from "../middleware/auth.middleware";
 import { EventTrack, TrackStatus } from "../entities/EventTrack";
+import { Event } from "../entities/Event";
 import { SpotifyTrack } from "../entities/SpotifyTrack";
 import { Playlist } from "../entities/Playlist";
 import { Collection } from "@mikro-orm/core";
+import util from "util";
 
 const router = Router({ mergeParams: true });
 
 // fetch all event tracks
 // TODO: add query parameters for searching, filtering, limit & offset etc. (if required by frontend)
-router.get("/", async (req, res) => {
-  let eventTracks = new Collection<EventTrack>(req.event!);
-  console.log("route/" + req.event!.eventTracks);
-  if (req.event!.eventTracks) {
-    if (!req.event!.eventTracks.isInitialized()) req.event!.eventTracks.init();
-    eventTracks = req.event!.eventTracks;
-  } else {
-    req.event!.eventTracks = eventTracks;
-  }
 
-  res.status(200).json(eventTracks);
-});
+/*router.get("/", async (req, res) => {
+  const eventId = req.event?.id;
+  if (!eventId) return res.status(400).json({ error: "Event ID not provided" });
+
+  // Fetch all event tracks for the given event
+  const eventTracks = await DI.em.find(
+    EventTrack,
+    { event: { id: eventId } },
+    { populate: ["track"] } // Populating the "track" property of EventTrack with SpotifyTrack entities
+  );
+
+  // Map the event tracks to include all the data from the SpotifyTrack entities
+  const tracksWithInfo = eventTracks.map((eventTrack) => {
+    const spotifyTrack = eventTrack.track;
+    return {
+      id: spotifyTrack.id,
+      name: spotifyTrack.trackName,
+      duration: spotifyTrack.duration,
+      genre: spotifyTrack.genre,
+      artist: spotifyTrack.artist,
+      artistName: spotifyTrack.artistName,
+      albumImage: spotifyTrack.albumImage,
+      status: eventTrack.status,
+    };
+  });
+
+  res.status(200).json(tracksWithInfo);
+});*/
 
 router.get("/search", async (req, res) => {
   const { query } = req.query;
@@ -56,15 +75,11 @@ router.get("/search", async (req, res) => {
 
 // fetch ids of all playlists
 router.get("/spotifyPlaylistIds", async (req, res) => {
-  let playlists = new Collection<Playlist>(req.event!);
-  if (req.event!.playlists) {
-    if (!req.event!.playlists.isInitialized()) {
-      req.event!.playlists.init();
-      playlists = req.event!.playlists;
-    }
-  }
-
-  res.status(200).json(playlists);
+  const eventId = req.event?.id;
+  if (!eventId) return res.status(400).json({ error: "Event ID not provided" });
+  const playlists = await DI.em.find(Playlist, { event: { id: eventId } });
+  const playlistIds = playlists.map((playlist) => playlist.id);
+  res.status(200).json(playlistIds);
 });
 
 // fetch all tracks of playlist
@@ -75,59 +90,114 @@ router.get("/:spotifyPlaylistId", async (req, res) => {
       id: req.params.spotifyPlaylistId,
       event: { id: req.event!.id },
     },
-    { populate: ["eventTracks"] }
+    { populate: ["eventTracks", "eventTracks.track"] } // Include the "track" property of EventTrack
   );
-  if (playlist) return res.status(200).json(playlist.eventTracks);
-  else return res.status(404).end();
+  if (!playlist) return res.status(404).end();
+
+  const tracksWithInfo = playlist.eventTracks
+    .getItems()
+    .map((eventTrack: EventTrack) => {
+      const spotifyTrack = eventTrack.track;
+      return {
+        id: spotifyTrack.id,
+        name: spotifyTrack.trackName,
+        duration: spotifyTrack.duration,
+        genre: spotifyTrack.genre,
+        artist: spotifyTrack.artist,
+        artistName: spotifyTrack.artistName,
+        albumImage: spotifyTrack.albumImage,
+        status: eventTrack.status,
+      };
+    });
+
+  res.status(200).json(tracksWithInfo);
 });
 
+// ==================================================================================
 // propose new event track
 router.post(
   "/:spotifyTrackId",
   Auth.verifyUnlockedEventParticipantAccess,
   async (req, res) => {
-    let track = await DI.em.findOne(SpotifyTrack, req.params.spotifyTrackId);
-    if (track == undefined || track == null) {
-      axios
-        .get("https://api.spotify.com/v1/tracks/" + req.params.spotifyTrackId, {
-          headers: {
-            Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
-          },
-        })
-        .then((trackResponse) => {
-          // Extract relevant data from trackResponse.data
-          const {
-            id,
-            duration_ms: duration,
-            album: { name: genre, artists },
-          } = trackResponse.data;
+    // check if eventrack already in event
+    const eventTrack = await DI.em.findOne(EventTrack, {
+      track: { id: req.params.spotifyTrackId },
+      event: { id: req.event!.id },
+    });
+    if (eventTrack)
+      return res.status(400).json({ message: "EventTrack already in event." });
 
-          const artistNames = artists
-            .map((artist: any) => artist.name)
-            .join(", ");
-          // push track to events
-          track = new SpotifyTrack(id, duration, genre, artistNames);
-          DI.em.persist(track);
-        })
-        .then(() => {
-          // create & persist new event track
-          const newEventTrack = new EventTrack(
-            TrackStatus.PROPOSED,
-            track!,
-            req.event!
-          );
-          DI.em.persistAndFlush(newEventTrack);
-          return res.status(201).json(newEventTrack);
-        })
-        .catch((error) => {
-          return res.status(error.response?.status || 500).send(error.message);
-        });
-    } else return res.status(201).json(track);
+    // Find the Event entity
+    const event = await DI.em.findOne(Event, { id: req.event!.id });
+    if (!event) return res.status(404).json({ error: "Event not found" });
+
+    // Check if spotify track already exists in database
+    let track = await DI.em.findOne(SpotifyTrack, req.params.spotifyTrackId);
+    if (!track) {
+      try {
+        // Fetch track information from the Spotify API
+        const response = await axios.get(
+          `https://api.spotify.com/v1/tracks/${req.params.spotifyTrackId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
+            },
+          }
+        );
+
+        const {
+          id,
+          duration_ms: duration,
+          name: trackName,
+          album: { name: genre, images },
+          artists,
+        } = response.data;
+
+        const artistNames = artists
+          .map((artist: any) => artist.name)
+          .join(", ");
+        const albumImage = images.length > 0 ? images[0].url : "";
+
+        track = new SpotifyTrack(
+          id,
+          trackName,
+          duration,
+          genre,
+          artistNames,
+          artistNames,
+          albumImage
+        );
+
+        await DI.em.persistAndFlush(track);
+      } catch (error) {
+        console.error(
+          "Error fetching track information from Spotify API:",
+          error
+        );
+        return res.status(500).json({ error: "Internal server error" });
+      }
+    }
+
+    // Create & persist a new event track
+    const newEventTrack = new EventTrack(TrackStatus.PROPOSED, track!, event); // Use the found event
+    event.eventTracks.add(newEventTrack);
+
+    // Load the playlists collection before adding the event track to it
+    await event.playlists.init();
+    if (event.playlists.isInitialized()) {
+      const playlist = event.playlists.getItems()[0];
+      playlist.eventTracks.add(newEventTrack);
+      await DI.em.persist(playlist);
+    }
+
+    await DI.em.persist(newEventTrack); // Persist the new event track separately
+    await DI.em.flush();
+    return res.status(201).json(newEventTrack);
   }
 );
 
 // change event track status
-router.put(
+/*router.put(
   "/:spotifyTrackId/:status",
   Auth.verifyEventAdminAccess,
   async (req, res) => {
@@ -157,7 +227,7 @@ router.put(
           .json({ message: "Failed to cast status to enum type." });
     } else return res.status(404).json({ message: "EventTrack not found." });
   }
-);
+);*/
 
 // propose playlist
 router.post(
@@ -189,9 +259,12 @@ router.post(
           if (!newTrack) {
             newTrack = new SpotifyTrack(
               trackObject.data.id,
+              trackObject.data.name,
               trackObject.data.duration,
               trackObject.data.genre,
-              trackObject.data.artist
+              trackObject.data.artist,
+              trackObject.data.artistName,
+              trackObject.data.albumImage
             );
             await DI.em.persist(newTrack);
           }
