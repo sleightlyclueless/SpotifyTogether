@@ -1,5 +1,5 @@
 import axios from "axios";
-import { EventTrack, SpotifyTrack } from "../../../constants";
+import { SpotifyTrack } from "../../../constants";
 
 export const useFetchTracksOfPlaylist = () => {
   const accessToken = localStorage.getItem("accessToken") || undefined;

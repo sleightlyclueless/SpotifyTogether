@@ -14,7 +14,7 @@ import {
   useSearchTracks, // 1.3 If playlist exists provide functions to search and
   useProposeNewEventTrack, // Add a new track to the playlist
   useRemoveEventTrack, // Remove a track from the playlist
-  //useSavePlaylist
+  useProposePlaylist,
 } from "../../hooks";
 import { COLORS } from "../../styles/colors";
 import styled from "styled-components";
@@ -154,6 +154,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   const { fetchTracksOfPlaylist } = useFetchTracksOfPlaylist();
   const { proposeNewEventTrack } = useProposeNewEventTrack();
   const { removeEventTrack } = useRemoveEventTrack();
+  const { proposePlaylist } = useProposePlaylist();
 
   const { searchResults, showDropdown, searchTracks } = useSearchTracks();
   const [searchQuery, setSearchQuery] = useState("");
@@ -225,6 +226,17 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
     }
   };
 
+  const handleSavePlaylist = async () => {
+    try {
+      if (!currentPlaylistId) return;
+
+      const response = await proposePlaylist(eventId, currentPlaylistId);
+      console.log("Playlist save response: ", response);
+    } catch (error) {
+      console.error("Error proposing a playlist:", error);
+    }
+  };
+
   if (isLoading)
     return (
       <LoadingContainer>
@@ -247,8 +259,8 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   return (
     <FormContainer>
       {/* Generate Playlist Button */}
-      <StyledText>Generate Playlist</StyledText>
-      <Button onClick={handleGeneratePlaylist}>Generate Playlist</Button>
+      <StyledText>Regenerate Playlist</StyledText>
+      <Button onClick={handleGeneratePlaylist}>Regenerate Playlist</Button>
 
       {/* Display Current Event Tracks */}
       <StyledText>Current Event Tracks</StyledText>
@@ -257,7 +269,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
           <SongItemContainer key={track.id}>
             <SongItemImage src={track.albumImage} alt={track.name} />
             <SongItemText>
-              {track.name} - {track.artist}
+              {track.name} - {track.artistName}
             </SongItemText>
             <StyledDeleteButton
               onClick={() => handleDeleteProposedTrack(track.id)}
@@ -296,6 +308,10 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
             ))}
           </SearchResultsContainer>
         </div>
+      )}
+      {/* Save Playlist Button */}
+      {currentPlaylistId && !isLoading && (
+        <Button onClick={() => handleSavePlaylist()}>Save Playlist</Button>
       )}
     </FormContainer>
   );

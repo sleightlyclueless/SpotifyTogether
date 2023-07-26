@@ -8,40 +8,9 @@ import { SpotifyTrack } from "../entities/SpotifyTrack";
 import { Playlist } from "../entities/Playlist";
 import { Collection } from "@mikro-orm/core";
 import util from "util";
+import { User } from "../entities/User";
 
 const router = Router({ mergeParams: true });
-
-// fetch all event tracks
-// TODO: add query parameters for searching, filtering, limit & offset etc. (if required by frontend)
-
-/*router.get("/", async (req, res) => {
-  const eventId = req.event?.id;
-  if (!eventId) return res.status(400).json({ error: "Event ID not provided" });
-
-  // Fetch all event tracks for the given event
-  const eventTracks = await DI.em.find(
-    EventTrack,
-    { event: { id: eventId } },
-    { populate: ["track"] } // Populating the "track" property of EventTrack with SpotifyTrack entities
-  );
-
-  // Map the event tracks to include all the data from the SpotifyTrack entities
-  const tracksWithInfo = eventTracks.map((eventTrack) => {
-    const spotifyTrack = eventTrack.track;
-    return {
-      id: spotifyTrack.id,
-      name: spotifyTrack.trackName,
-      duration: spotifyTrack.duration,
-      genre: spotifyTrack.genre,
-      artist: spotifyTrack.artist,
-      artistName: spotifyTrack.artistName,
-      albumImage: spotifyTrack.albumImage,
-      status: eventTrack.status,
-    };
-  });
-
-  res.status(200).json(tracksWithInfo);
-});*/
 
 router.get("/search", async (req, res) => {
   const { query } = req.query;
@@ -162,7 +131,7 @@ router.post(
           trackName,
           duration,
           genre,
-          artistNames,
+          artists[0].id,
           artistNames,
           albumImage
         );
@@ -240,8 +209,125 @@ router.delete(
   }
 );
 
+router.post("/save/:spotifyPlaylistId", async (req, res) => {
+  const playlist = await DI.em.findOne(
+    Playlist,
+    {
+      id: req.params.spotifyPlaylistId,
+      event: { id: req.event!.id },
+    }
+  );
+  if (!playlist)
+    return res.status(404).json({ message: "Playlist not found." });
+
+  try {
+    // Initialize the event tracks collection
+    await playlist.eventTracks.init();
+    const eventTracks = playlist.eventTracks.getItems();
+
+    // Filter out event tracks with certain statuses (e.g., proposed, denied)
+    const acceptedEventTracks = eventTracks.filter(
+      (eventTrack) =>
+        eventTrack.status === TrackStatus.GENERATED ||
+        eventTrack.status === TrackStatus.ACCEPTED_PLAYLIST ||
+        eventTrack.status === TrackStatus.ACCEPTED
+    );
+
+    if (acceptedEventTracks.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "No accepted tracks in the playlist." });
+    }
+    console.log(acceptedEventTracks.length + " event tracks found.");
+
+    const trackUris = acceptedEventTracks.map(
+      (trackId) => `spotify:track:${trackId}`
+    );
+    console.log("trackUris", trackUris);
+
+    const deletequery = `https://api.spotify.com/v1/playlists/${req.params.spotifyPlaylistId}/tracks`;
+    console.log("deletequery", deletequery);
+    try {
+      await axios.delete(deletequery, {
+        headers: {
+          Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
+        },
+        data: {
+          tracks: [
+            {
+              uri: trackUris[0],
+            },
+          ],
+        },
+      });
+      console.log("deleted tracks from playlist");
+    } catch (error) {
+      console.error("Error deleting tracks from playlist:", error);
+      return res.status(500).json({
+        error: "Internal server error while deleting tracks from playlist.",
+      });
+    }
+
+    const insertquery = `https://api.spotify.com/v1/playlists/${req.params.spotifyPlaylistId}/tracks`;
+    console.log("insertquery", insertquery);
+    try {
+      await axios.post(
+        insertquery,
+        {
+          uris: trackUris,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
+          },
+        }
+      );
+      console.log("added tracks to playlist");
+      return res.status(200).end();
+    } catch (error) {
+      console.error("Error adding tracks to playlist:", error);
+      return res.status(500).json({
+        error: "Internal server error while adding tracks to playlist.",
+      });
+    }
+  } catch (error) {
+    console.error("Error saving the playlist to Spotify:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+});
 
 // ================================================================================
+
+// ================================================================================
+/*router.get("/", async (req, res) => {
+  const eventId = req.event?.id;
+  if (!eventId) return res.status(400).json({ error: "Event ID not provided" });
+
+  // Fetch all event tracks for the given event
+  const eventTracks = await DI.em.find(
+    EventTrack,
+    { event: { id: eventId } },
+    { populate: ["track"] } // Populating the "track" property of EventTrack with SpotifyTrack entities
+  );
+
+  // Map the event tracks to include all the data from the SpotifyTrack entities
+  const tracksWithInfo = eventTracks.map((eventTrack) => {
+    const spotifyTrack = eventTrack.track;
+    return {
+      id: spotifyTrack.id,
+      name: spotifyTrack.trackName,
+      duration: spotifyTrack.duration,
+      genre: spotifyTrack.genre,
+      artist: spotifyTrack.artist,
+      artistName: spotifyTrack.artistName,
+      albumImage: spotifyTrack.albumImage,
+      status: eventTrack.status,
+    };
+  });
+
+  res.status(200).json(tracksWithInfo);
+});
+
 // change event track status
 router.put(
   "/:spotifyTrackId/:status",
@@ -272,65 +358,6 @@ router.put(
           .status(400)
           .json({ message: "Failed to cast status to enum type." });
     } else return res.status(404).json({ message: "EventTrack not found." });
-  }
-);
-
-
-// propose playlist
-router.post(
-  "/:spotifyPlaylistId",
-  Auth.verifyUnlockedEventParticipantAccess,
-  async (req, res) => {
-    // remove playlists if exists
-    await removePlaylist(req.params.spotifyPlaylistId, req.event!.id);
-
-    // (re-)create playlist
-    axios
-      .get(
-        "https://api.spotify.com/v1/playlists" + req.params.spotifyPlaylistId,
-        {
-          headers: {
-            Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
-          },
-        }
-      )
-      .then(async (listResponse) => {
-        // create new playlist from spotify data
-        const playlist = new Playlist(listResponse.data.id);
-
-        for (const item of listResponse.data.tracks.items) {
-          const trackObject = item.TrackObject;
-
-          // fetch or create SpotifyTrack
-          let newTrack = await DI.em.findOne(SpotifyTrack, trackObject.id);
-          if (!newTrack) {
-            newTrack = new SpotifyTrack(
-              trackObject.data.id,
-              trackObject.data.name,
-              trackObject.data.duration,
-              trackObject.data.genre,
-              trackObject.data.artist,
-              trackObject.data.artistName,
-              trackObject.data.albumImage
-            );
-            await DI.em.persist(newTrack);
-          }
-
-          // create & add EventTrack to Playlist
-          const newEventTrack = new EventTrack(
-            TrackStatus.PROPOSED,
-            newTrack,
-            req.event!
-          );
-          playlist.eventTracks.add(newEventTrack);
-          await DI.em.persist(newEventTrack);
-        }
-        await DI.em.persistAndFlush(playlist);
-        return res.status(201).json(playlist);
-      })
-      .catch(function (error) {
-        return res.status(error.status).send(error);
-      });
   }
 );
 
@@ -373,57 +400,6 @@ router.put(
     if (removedPlaylist) return res.status(200).end();
     else return res.status(404).json({ message: "Playlist not found." });
   }
-);
-
-// helper function to remove one playlist
-async function removePlaylist(spotifyPlaylistId: string, eventId: string) {
-  const playlist = await DI.em.findOne(
-    Playlist,
-    {
-      id: spotifyPlaylistId,
-      event: { id: eventId },
-    },
-    { populate: ["eventTracks"] }
-  );
-  if (playlist) {
-    for (const eventTrack of playlist.eventTracks) {
-      // don't remove if manually accepted / generated / denied
-      if (
-        eventTrack.status == TrackStatus.ACCEPTED ||
-        eventTrack.status == TrackStatus.GENERATED ||
-        eventTrack.status == TrackStatus.DENIED
-      )
-        continue;
-      else {
-        if (eventTrack.playlists.length <= 1) {
-          // track is only in this playlist, remove if not in any other event
-          const eTrack = await DI.em.find(EventTrack, {
-            track: { id: eventTrack.track.id },
-          });
-          if (eTrack && eTrack.length > 1) await DI.em.remove(eventTrack);
-        } else {
-          // track is proposed in multiple playlists (not accepted anywhere)
-          if (eventTrack.status == TrackStatus.PROPOSED) continue;
-          else {
-            // check if track was accepted in any other playlist
-            let found: boolean = false;
-            for (const playlist of eventTrack.playlists) {
-              if (playlist.id != spotifyPlaylistId && playlist.accepted) {
-                found = true;
-                break;
-              }
-            }
-            if (found) break; // keep accepted
-
-            // not accepted in any other playlist -> reset to proposed
-            eventTrack.status = TrackStatus.PROPOSED;
-          }
-        }
-      }
-    }
-    await DI.em.removeAndFlush(playlist);
-    return true;
-  } else return false;
-}
+);*/
 
 export const TracksController = router;

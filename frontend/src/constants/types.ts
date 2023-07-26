@@ -55,6 +55,7 @@ export type SpotifyTrack = {
   genre: string;
   duration: number;
   artist: string;
+  artistName: string;
   eventTracks: EventTrack[];
   albumImage: string;
 };
