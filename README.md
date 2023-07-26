@@ -18,7 +18,6 @@ Björn, Noah und Antoine haben sich ums das Backend, Paul und Sebi nur am Fronte
    - Zusammenarbeit in Jetbrains Webstorm code with me 
 - event.controller-struktur konzept und implementierung
    - auth.spotify.controller.ts
-   - event.controller.ts
    - event.algorithm.controller.ts 
    - event.controller.ts
    - event.settings.controller.ts 
@@ -31,14 +30,26 @@ Björn, Noah und Antoine haben sich ums das Backend, Paul und Sebi nur am Fronte
 - Hilfe bei Integration im Frontend
 - backend readme
 
-Disclaimer Teamarbeit Noah/Björn:
+##### Antoine:
+- Unterstützung von Backend und Frontend über Code with Me
+- Unterstützung bei CORS Problemen zwischen Backend und Frontend
+- Gitlab-CI Pipeline
+- Docker Umgebung inklusive Dockerfile und docker-compose
+- event.controller-struktur konzept und implementierung
+   - event.participants.controller.ts
+   - event.controller.ts
+- Datenbank automatische Erstellung von Tabellen in der Docker Umgebung
+- Entwicklung einer Test Strategie fürs Backend (In der Abschlusspräsentation)
+- Backend readme   
+
+Disclaimer Teamarbeit Noah/Björn/Antoine:
 
 Coden zu zweit ist lustiger, deswegen haben wir das Code-with-me-Feature fleißig benutzt und bessere Ergebnisse abgeliefert,
 da direkte Kommunikation sowie schnelles Troubleshooting für uns wichtiger waren als eigene Bearbeitungszeit.
 Da wir aus vorherigen Modulen zusammen schon ähnliche Codestandards übernommen haben fiel es uns leicht eine gehobene Codequalität abzuliefern.
 
-##### Antoine
-
+Disclaimer Antoine
+In den letzten Wochen vor der Angabe ist bei mir ein nahestehender verstorben. Eigentlich wollte ich das Testing noch möglichst groß behandeln, aber das hat jetzt Sebi aus dem Frontend Team übernommen, um mich ein bisschen zu entlasten.
 
 ## Backend
 - - -
@@ -148,11 +159,12 @@ Note: The status code 429 is returned by spotify if the app has exceeded its rat
 |--------|-----------|--------------------|------------------------|--------------------------------------------|
 | PUT    | /generate | 500, 200, 400, 404 | verifyEventOwnerAccess | Generates songs based on all participants. |
 
-### CI/CD ?
-todo
-
 ### Tests
-todo
+Das Backend und Frontend lässt sich leider nicht leicht per Postman oder automatisierten Tests testen, da alles sehr stark an die Spotify-API angebunden ist und somit auch abhängig von dieser ist. Dies hängt mit der Funktionsweise unserer Anwendung zusammen und hat seine Richtigkeit. Getestet wird also über die live Anwendung. Daher haben wir frühzeitig Kontakt mit unserem Projektbetreuer aufgenommen, nach Rücksprache mit ihm sollen wir in unserer README erwähnen, wie man das Testing mit deutlich mehr Zeit durchführen könnte. Normalerweise, wenn man mehr Zeit für das Projekt hätte, dann würde man die Anwendung und somit auch die Tests unabhängiger von der Spotify-API machen. Die Spotify-API würde von uns Gemockt also im kleinen Nachgebaut werden, sodass diese unsere Automatisierten / Postman Tests nicht mehr behindert. Backend und Frontend sollten möglichst komplett unabhängig voneinander und von anderen getrennt testbar sein.
+
+
+### CI/CD ?
+Eine CI/CD Pipeline ist eingerichtet, diese testet nach jedem Commit und Merge den Code durch. 
 
 ## Frontend
 - - -
