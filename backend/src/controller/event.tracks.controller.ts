@@ -113,7 +113,6 @@ router.get("/:spotifyPlaylistId", async (req, res) => {
   res.status(200).json(tracksWithInfo);
 });
 
-// ==================================================================================
 // propose new event track
 router.post(
   "/:spotifyTrackId",
@@ -196,8 +195,55 @@ router.post(
   }
 );
 
+// Delete a proposed event track from the event playlist
+router.delete(
+  "/:spotifyTrackId",
+  Auth.verifyUnlockedEventParticipantAccess,
+  async (req, res) => {
+    // Find the Event entity
+    const event = await DI.em.findOne(Event, { id: req.event!.id });
+    if (!event) return res.status(404).json({ error: "Event not found" });
+
+    // Check if the event track exists in the event
+    const eventTrack = await DI.em.findOne(EventTrack, {
+      track: { id: req.params.spotifyTrackId },
+      event: { id: req.event!.id },
+    });
+    if (!eventTrack) {
+      return res
+        .status(404)
+        .json({ error: "EventTrack not found in the event" });
+    }
+
+    // Initialize the event playlists collection
+    await event.playlists.init();
+
+    // Remove the event track from the event playlists
+    if (event.playlists.isInitialized()) {
+      const playlist = event.playlists.getItems()[0];
+      await playlist.eventTracks.init();
+      playlist.eventTracks.remove(eventTrack);
+      await DI.em.persist(playlist);
+    }
+
+    // Remove the event track from the event
+    await event.eventTracks.init();
+    event.eventTracks.remove(eventTrack);
+
+    // Remove the event track from the database
+    await DI.em.persist(eventTrack);
+    await DI.em.flush();
+
+    return res
+      .status(200)
+      .json({ message: "EventTrack removed from the event playlist" });
+  }
+);
+
+
+// ================================================================================
 // change event track status
-/*router.put(
+router.put(
   "/:spotifyTrackId/:status",
   Auth.verifyEventAdminAccess,
   async (req, res) => {
@@ -227,7 +273,8 @@ router.post(
           .json({ message: "Failed to cast status to enum type." });
     } else return res.status(404).json({ message: "EventTrack not found." });
   }
-);*/
+);
+
 
 // propose playlist
 router.post(

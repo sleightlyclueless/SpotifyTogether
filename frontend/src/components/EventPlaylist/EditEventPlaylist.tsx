@@ -13,7 +13,7 @@ import {
   // Note: Keep useGeneratePlaylist to start over
   useSearchTracks, // 1.3 If playlist exists provide functions to search and
   useProposeNewEventTrack, // Add a new track to the playlist
-  //useRemoveEventTrack,          // Remove a track from the playlist
+  useRemoveEventTrack, // Remove a track from the playlist
   //useSavePlaylist
 } from "../../hooks";
 import { COLORS } from "../../styles/colors";
@@ -75,6 +75,22 @@ const SongItemContainer = styled.div`
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
   margin-bottom: 8px;
   transition: all 0.5s;
+  overflow: hidden;
+`;
+
+const SearchItemContainer = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 400px; /* You can adjust the maximum width as needed */
+  min-height: 40px;
+  padding: 8px;
+  border-radius: 8px;
+  background: ${COLORS.font};
+  border: none;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  margin-bottom: 8px;
+  transition: all 0.5s;
   cursor: pointer;
   overflow: hidden;
 
@@ -102,6 +118,22 @@ const StyledText = styled.div`
   font-size: 16px;
 `;
 
+const StyledDeleteButton = styled.button`
+  background-color: transparent;
+  border: none;
+`;
+
+const DeleteIcon = styled.span`
+  color: ${COLORS.button};
+  font-size: 30px;
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    color: ${COLORS.link};
+  }
+`;
+
 type EditEventPlaylistProps = {
   eventId: string;
 };
@@ -121,6 +153,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   const { fetchSpotifyPlaylistIds } = useFetchSpotifyPlaylistIds();
   const { fetchTracksOfPlaylist } = useFetchTracksOfPlaylist();
   const { proposeNewEventTrack } = useProposeNewEventTrack();
+  const { removeEventTrack } = useRemoveEventTrack();
 
   const { searchResults, showDropdown, searchTracks } = useSearchTracks();
   const [searchQuery, setSearchQuery] = useState("");
@@ -176,6 +209,22 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
     }
   };
 
+  const handleDeleteProposedTrack = async (spotifyTrackId: string) => {
+    try {
+      if (!currentPlaylistId) return;
+
+      // Delete the proposed track using the hook
+      const response = await removeEventTrack(eventId, spotifyTrackId);
+      console.log("Remove event track response:", response);
+
+      // Reload the playlist and songs after removing the track
+      const tracks = await fetchTracksOfPlaylist(eventId, currentPlaylistId);
+      if (tracks) setCurrentPlaylistTracks(tracks);
+    } catch (error) {
+      console.error("Error removing event track:", error);
+    }
+  };
+
   if (isLoading)
     return (
       <LoadingContainer>
@@ -210,6 +259,11 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
             <SongItemText>
               {track.name} - {track.artist}
             </SongItemText>
+            <StyledDeleteButton
+              onClick={() => handleDeleteProposedTrack(track.id)}
+            >
+              <DeleteIcon>&times;</DeleteIcon>
+            </StyledDeleteButton>
           </SongItemContainer>
         ))}
       </SongContainer>
@@ -230,7 +284,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
           <StyledText>Search Results</StyledText>
           <SearchResultsContainer>
             {searchResults.map((track: SpotifyTrack) => (
-              <SongItemContainer
+              <SearchItemContainer
                 key={track.id}
                 onClick={() => handleProposeNewTrack(track.id)}
               >
@@ -238,7 +292,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
                 <SongItemText>
                   {track.name} - {track.artist}
                 </SongItemText>
-              </SongItemContainer>
+              </SearchItemContainer>
             ))}
           </SearchResultsContainer>
         </div>
