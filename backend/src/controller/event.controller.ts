@@ -10,6 +10,7 @@ import { TracksController } from "./event.tracks.controller";
 import { EventAlgorithmController } from "./event.algorithm.controller";
 import { EventTrack } from "../entities/EventTrack";
 import util from "util";
+import { Playlist } from "../entities/Playlist";
 
 export const EVENT_ID_LENGTH: number = 6;
 export const MAX_EVENT_ID_GENERATION_RETRIES: number = 1000;
@@ -112,13 +113,14 @@ router.put("/:eventId", Auth.verifyEventAccess, async (req, res) => {
 router.delete("/:eventId", Auth.verifyEventOwnerAccess, async (req, res) => {
   const event = await DI.em.findOne(Event, { id: req.params.eventId });
   const eventTracks = await DI.em.find(EventTrack, { event: event });
-  for (const eventTrack of eventTracks) {
-    await DI.em.removeAndFlush(eventTrack);
-  }
+  for (const eventTrack of eventTracks) await DI.em.removeAndFlush(eventTrack);
+
   const eventUsers = await DI.em.find(EventUser, { event: event });
-  for (const eventUser of eventUsers) {
-    await DI.em.removeAndFlush(eventUser);
-  }
+  for (const eventUser of eventUsers) await DI.em.removeAndFlush(eventUser);
+  const eventPlaylists = await DI.em.find(Playlist, { event: event });
+
+  for (const eventPlaylist of eventPlaylists) await DI.em.removeAndFlush(eventPlaylist);
+  
   if (event) {
     await DI.em.removeAndFlush(event);
     return res.status(200).end();

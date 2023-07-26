@@ -4,7 +4,6 @@ import { TextContainer } from "../styles";
 export const JoinEventByQr = (): JSX.Element | null => {
   const urlParams = new URLSearchParams(window.location.search);
   const eventID = urlParams.get("event") || null;
-  console.log(eventID);
 
   useJoinEventByQr(eventID);
 

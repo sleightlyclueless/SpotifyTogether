@@ -92,8 +92,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
       if (!spotifyTrackId) return;
 
       // Propose the new track using the hook
-      const response = await proposeNewEventTrack(eventId, spotifyTrackId);
-      console.log("Propose new event track response:", response);
+      await proposeNewEventTrack(eventId, spotifyTrackId);
 
       // Reload the playlist and songs after adding the new track
       const tracks = await fetchTracksOfPlaylist(eventId, currentPlaylistId);
@@ -205,6 +204,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
       {currentPlaylistId && !isLoading && (
         <ButtonContainer>
           <Button onClick={handleGeneratePlaylist}>Regenerate Playlist</Button>
+          
           <Button onClick={() => handleSavePlaylist()}>Save Playlist</Button>
         </ButtonContainer>
       )}
