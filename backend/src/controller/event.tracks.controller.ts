@@ -210,91 +210,138 @@ router.delete(
 );
 
 router.post("/save/:spotifyPlaylistId", async (req, res) => {
-  const playlist = await DI.em.findOne(
-    Playlist,
-    {
-      id: req.params.spotifyPlaylistId,
-      event: { id: req.event!.id },
-    }
-  );
+  const playlist = await DI.em.findOne(Playlist, {
+    id: req.params.spotifyPlaylistId,
+    event: { id: req.event!.id },
+  });
   if (!playlist)
     return res.status(404).json({ message: "Playlist not found." });
 
+  if (!req.user?.spotifyAccessToken)
+    return res.status(400).json({ message: "User not logged in." });
+
   try {
+    // Delete all tracks from the playlist
+    await deleteAllTracksFromPlaylist(
+      req.params.spotifyPlaylistId,
+      req.user!.spotifyAccessToken
+    );
+
     // Initialize the event tracks collection
     await playlist.eventTracks.init();
     const eventTracks = playlist.eventTracks.getItems();
-
-    // Filter out event tracks with certain statuses (e.g., proposed, denied)
-    const acceptedEventTracks = eventTracks.filter(
-      (eventTrack) =>
-        eventTrack.status === TrackStatus.GENERATED ||
-        eventTrack.status === TrackStatus.ACCEPTED_PLAYLIST ||
-        eventTrack.status === TrackStatus.ACCEPTED
-    );
-
-    if (acceptedEventTracks.length === 0) {
+    if (eventTracks.length === 0) {
       return res
         .status(400)
         .json({ message: "No accepted tracks in the playlist." });
     }
-    console.log(acceptedEventTracks.length + " event tracks found.");
 
-    const trackUris = acceptedEventTracks.map(
-      (trackId) => `spotify:track:${trackId}`
+    const trackUris = eventTracks.map(
+      (eventTrack) => `spotify:track:${eventTrack.track.id}`
     );
-    console.log("trackUris", trackUris);
 
-    const deletequery = `https://api.spotify.com/v1/playlists/${req.params.spotifyPlaylistId}/tracks`;
-    console.log("deletequery", deletequery);
-    try {
-      await axios.delete(deletequery, {
-        headers: {
-          Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
-        },
-        data: {
-          tracks: [
-            {
-              uri: trackUris[0],
-            },
-          ],
-        },
-      });
-      console.log("deleted tracks from playlist");
-    } catch (error) {
-      console.error("Error deleting tracks from playlist:", error);
-      return res.status(500).json({
-        error: "Internal server error while deleting tracks from playlist.",
-      });
-    }
+    if (
+      req.user!.spotifyAccessToken === undefined ||
+      req.user!.spotifyAccessToken === null
+    )
+      return res.status(400).json({ message: "User not logged in." });
 
-    const insertquery = `https://api.spotify.com/v1/playlists/${req.params.spotifyPlaylistId}/tracks`;
-    console.log("insertquery", insertquery);
-    try {
-      await axios.post(
-        insertquery,
-        {
-          uris: trackUris,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
-          },
-        }
+    // Split trackUris into batches of 100
+    const batchSize = 100;
+    const trackBatches = [];
+    for (let i = 0; i < trackUris.length; i += batchSize)
+      trackBatches.push(trackUris.slice(i, i + batchSize));
+
+    // Process each batch and insert tracks
+    for (const batchUris of trackBatches) {
+      await insertTracksToPlaylist(
+        req.params.spotifyPlaylistId,
+        req.user!.spotifyAccessToken,
+        batchUris
       );
-      console.log("added tracks to playlist");
-      return res.status(200).end();
-    } catch (error) {
-      console.error("Error adding tracks to playlist:", error);
-      return res.status(500).json({
-        error: "Internal server error while adding tracks to playlist.",
-      });
     }
+
+    return res.status(200).json({ message: "Playlist saved successfully." });
   } catch (error) {
     console.error("Error saving the playlist to Spotify:", error);
     return res.status(500).json({ error: "Internal server error." });
   }
 });
+
+// Function to delete all tracks from the playlist
+const deleteAllTracksFromPlaylist = async (
+  playlistId: string,
+  accessToken: string
+) => {
+  try {
+    let offset = 0;
+    const limit = 100;
+    let totalTracks = 1; // Initialize with a non-zero value to enter the loop
+
+    while (offset < totalTracks) {
+      const response = await axios.get(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          params: {
+            offset: offset.toString(),
+            limit: limit.toString(),
+          },
+        }
+      );
+
+      const trackUris = response.data.items.map(
+        (item: any) => item.track.uri // Assuming the track URI is available under 'track.uri' property
+      );
+
+      if (trackUris.length > 0) {
+        await axios.delete(
+          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            data: {
+              tracks: trackUris.map((uri: string) => ({ uri })),
+            },
+          }
+        );
+      }
+
+      totalTracks = response.data.total;
+      offset += limit;
+    }
+  } catch (error) {
+    console.error("Error deleting tracks from playlist:", error);
+    throw new Error("Failed to delete tracks from the playlist.");
+  }
+};
+
+const insertTracksToPlaylist = async (
+  playlistId: string,
+  accessToken: string,
+  trackUris: string[]
+) => {
+  const insertquery = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
+  try {
+    await axios.post(
+      insertquery,
+      {
+        uris: trackUris,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error adding tracks to playlist:", error);
+    throw new Error("Failed to delete tracks from the playlist.");
+  }
+};
 
 // ================================================================================
 
