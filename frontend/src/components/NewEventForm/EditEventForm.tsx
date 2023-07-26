@@ -1,17 +1,17 @@
 import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
-import { FunctionComponent, useState, useEffect, ChangeEvent } from "react";
+import { ChangeEvent, FunctionComponent, useEffect, useState } from "react";
 import { Event } from "../../constants";
 import { useUpdateEvent } from "../../hooks";
 import { toast } from "react-toastify";
 import {
   FormContainer,
-  Label,
   IconContainer,
+  Label,
   RandomIcon,
   StyledEventIdInput,
   StyledEventNameInput,
   StyledIonDatetime,
-  SubmitButton
+  SubmitButton,
 } from "../../styles";
 
 type EditEventFormProps = {
@@ -84,7 +84,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
       }
 
       // Show success message
-      toast.success("Event details updated successfully.");
+      toast("Event details updated successfully.");
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -148,7 +148,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
   );
 };
 
-function generateRandomId() {
+const generateRandomId = (): string => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
   let randomId = "";

@@ -2,18 +2,10 @@ import styled from "styled-components";
 import { COLORS } from "../colors";
 
 export const HeaderContainer = styled.div`
-  display: grid;
-  grid-template-columns: 15% 70% 15%;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  position: sticky;
-  top: 0;
   padding: 20px;
-  background-color: ${COLORS.background};
-`;
-
-export const PageName = styled.div`
-  font-size: 18px;
-  text-align: center;
 `;
 
 export const User = styled.div`

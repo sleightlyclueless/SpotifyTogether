@@ -27,11 +27,6 @@ export const LoginButton = styled.div`
   cursor: pointer;
   background: ${COLORS.button};
   transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    background: ${COLORS.buttonHover};
-  }
 `;
 
 export const NewEventButton = styled.div`
@@ -47,11 +42,6 @@ export const NewEventButton = styled.div`
   width: 80px;
   height: 80px;
   transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    background: ${COLORS.buttonHover};
-  }
 
   animation: 0.3s slide-in;
   @keyframes slide-in {
@@ -77,11 +67,6 @@ export const JoinEventButton = styled.div`
   justify-content: center;
   align-items: center;
   transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    background: ${COLORS.buttonHover};
-  }
 
   animation: 0.3s slide-in2;
   @keyframes slide-in2 {

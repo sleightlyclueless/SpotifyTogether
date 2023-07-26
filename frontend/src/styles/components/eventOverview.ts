@@ -53,7 +53,7 @@ export const SinglePlaylist = styled.div`
   align-items: center;
   flex-direction: column;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  background: rgba(${COLORS.buttonRGB}, 0.8);
+  background: rgba(${COLORS.buttonRGB}, 0.95);
   opacity: 0.85;
   transition: all 0.5s;
 

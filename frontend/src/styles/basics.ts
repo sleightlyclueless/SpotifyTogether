@@ -10,6 +10,7 @@ export const StyledIonModal = styled(IonModal)`
 export const Button = styled.div`
   min-width: 160px;
   min-height: 60px;
+  color: ${COLORS.font};
   background: ${COLORS.button};
   border-radius: 8px;
   display: flex;
@@ -18,15 +19,11 @@ export const Button = styled.div`
   font-size: 16px;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
   transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    background: ${COLORS.buttonHover};
-  }
 `;
 
 export const EventButtons = styled(Button)`
   background: ${COLORS.backgroundLight};
+  color: ${COLORS.font};
 `;
 
 export const BigButtonContainer = styled.div`
@@ -42,11 +39,6 @@ export const BigButtonContainer = styled.div`
   bottom: 16px;
   right: calc(50% - 40px);
   transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    background: ${COLORS.buttonHover};
-  }
 `;
 
 export const PageContainer = styled(IonPage)`

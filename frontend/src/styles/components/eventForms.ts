@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { AiOutlineReload } from "react-icons/ai";
-import { COLORS } from "../../styles/colors";
+import { COLORS } from "../colors";
 import { IonDatetime, IonInput } from "@ionic/react";
 
 export const FormContainer = styled.div`
@@ -16,14 +16,14 @@ export const IconContainer = styled.div`
   display: flex;
   align-items: center;
   width: 100%; /* Make the container take the full width */
-  margin-top: 32px; /* Add top margin to separate from other elements */
+  margin-bottom: 12px;
   position: relative; /* Add relative positioning */
 `;
 
 export const RandomIcon = styled(AiOutlineReload)`
   cursor: pointer;
   font-size: 24px;
-  color: #007bff;
+  color: ${COLORS.button};
   position: absolute; /* Position the icon inside the input */
   right: 8px; /* Adjust the position from the right side */
 `;
@@ -68,7 +68,7 @@ export const NewFormContainer = styled.div`
 
 export const StyledEventNameInput = styled(IonInput)`
   --padding-start: 8px !important;
-  margin-top: 32px;
+  margin-bottom: 12px;
   width: 100%;
   height: 40px;
   border-radius: 8px;
@@ -96,40 +96,30 @@ export const SubmitButton = styled.div`
   width: 160px;
   height: 60px;
   background: ${COLORS.button};
+  color: ${COLORS.font};
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 16px;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-
   transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    background: ${COLORS.buttonHover};
-  }
 `;
 
 export const StyledSelectSong = styled.div`
-    max-width: 100%;
-    background: ${COLORS.font};
+  max-width: 100%;
+  background: ${COLORS.font};
 `;
 
 export const StyledSelectSongOption = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px;
-    border-radius: 8px;
-    background: ${COLORS.font};
-    border: none;
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-    margin-bottom: 8px;
-    transition: all 0.5s;
-
-    &:hover {
-        cursor: pointer;
-        background: ${COLORS.buttonHover};
-    }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 8px;
+  background: ${COLORS.font};
+  border: none;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  margin-bottom: 8px;
+  transition: all 0.5s;
 `;

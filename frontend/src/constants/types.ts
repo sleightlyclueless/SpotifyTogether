@@ -1,5 +1,4 @@
 export type HeaderProps = {
-  title: string;
   userName?: string;
 };
 

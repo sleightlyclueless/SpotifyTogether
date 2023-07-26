@@ -1,11 +1,11 @@
 import { FunctionComponent } from "react";
 import { IoHome } from "react-icons/io5";
 import { CiHeadphones } from "react-icons/ci";
-import { HOME, HeaderProps } from "../../constants";
+import { HeaderProps, HOME } from "../../constants";
 import { UserSettings } from "../UserSettings";
-import { HeaderContainer, PageName, User, HomeIcon, StyledIonModal } from "../../styles";
+import { HeaderContainer, HomeIcon, StyledIonModal, User } from "../../styles";
 
-export const Header: FunctionComponent<HeaderProps> = ({ title, userName }) => {
+export const Header: FunctionComponent<HeaderProps> = ({ userName }) => {
   const handleHomeIconClick = () => {
     window.location.href = HOME;
   };
@@ -15,7 +15,6 @@ export const Header: FunctionComponent<HeaderProps> = ({ title, userName }) => {
       <HomeIcon onClick={handleHomeIconClick}>
         <IoHome />
       </HomeIcon>
-      <PageName>{title}</PageName>
       <User id="open-modal">
         {userName && <div>{userName}</div>}
         <CiHeadphones style={{ width: "24px", height: "24px" }} />

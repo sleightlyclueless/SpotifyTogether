@@ -2,51 +2,53 @@ import { FunctionComponent, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { CountdownTimer } from "../CountDownTimer";
-import { useGetUserEvents, useGetUserName } from "../../hooks";
+import {
+  useDeleteEvent,
+  useEditParticipantRole,
+  useGetUserEvents,
+  useGetUserName,
+  useRemoveParticipant,
+} from "../../hooks";
 import { EditEventForm } from "../NewEventForm/EditEventForm";
 import { EditEventPlaylist } from "../EventPlaylist/EditEventPlaylist";
 import { Event } from "../../constants";
 import {
-  useDeleteEvent,
-  useRemoveParticipant,
-  useEditParticipantRole,
-} from "../../hooks";
-import {
-  StyledIonModal,
-  EventOverviewContainer,
-  ParticipantsContainer,
-  ParticipantItem,
-  ParticipantId,
-  SinglePlaylist,
-  PartyName,
-  Timer,
-  DetailViewEventContainer,
-  FullPartyName,
-  TimerContainer,
-  TimerText,
   Button,
-  EventButtons,
   ButtonContainer,
-  StyledLuEdit2,
-  StyledLuClose,
-  StyledIonPopover,
-  StyledCode,
+  DetailViewEventContainer,
+  EventButtons,
+  EventOverviewContainer,
+  FullPartyName,
+  NoEventsContainer,
+  ParticipantId,
+  ParticipantItem,
+  ParticipantsContainer,
+  PartyName,
+  SinglePlaylist,
+  StyledAiOutlineArrowDown,
   StyledBiCopy,
+  StyledCode,
+  StyledIonModal,
+  StyledIonPopover,
+  StyledLuClose,
+  StyledLuEdit2,
   StyledMdClose,
   StyledRoleDropdown,
   StyledRoleText,
-  NoEventsContainer,
-  StyledAiOutlineArrowDown,
+  Timer,
+  TimerContainer,
+  TimerText,
 } from "../../styles";
 
 export const EventOverview: FunctionComponent = () => {
   // 0: Normal content; 1: EditEventForm; 2: EditEventPlaylist
-  const [contenMode, setContentMode] = useState<number>(0);
+  const [contentMode, setContentMode] = useState<number>(0);
   const events: Event[] = useGetUserEvents();
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
   const accessToken = localStorage.getItem("accessToken") || undefined;
   let loggedInUserName: string | null = null;
   if (accessToken != null) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     loggedInUserName = useGetUserName();
   }
 
@@ -110,7 +112,7 @@ export const EventOverview: FunctionComponent = () => {
                 >
                   {isOwner && (
                     <>
-                      {contenMode != 0 ? (
+                      {contentMode != 0 ? (
                         // Show EditEventForm
                         <StyledLuClose
                           onClick={(): void => setContentMode(0)}
@@ -123,12 +125,12 @@ export const EventOverview: FunctionComponent = () => {
                       )}
                     </>
                   )}
-                  {contenMode ? (
+                  {contentMode ? (
                     <>
-                      {contenMode === 1 ? (
+                      {contentMode === 1 ? (
                         // Show EditEventForm
                         <EditEventForm event={event} />
-                      ) : contenMode === 2 ? (
+                      ) : contentMode === 2 ? (
                         // Show EditEventPlaylist
                         <EditEventPlaylist eventId={event.id} />
                       ) : null}

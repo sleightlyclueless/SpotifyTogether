@@ -9,18 +9,17 @@ import {
 import { useGetUserName } from "../hooks";
 import { HOME, JOINEVENTBYQR } from "../constants";
 import partyVid from "../assets/party.mp4";
-import { useCheckAndRefreshToken } from "../hooks";
 
 import {
-  PageContainer,
-  StyledIonModal,
-  VidOverlay,
-  VideoBackground,
-  NewEventButton,
   JoinEventButton,
+  LoginButton,
   LoginContainer,
   LoginText,
-  LoginButton,
+  NewEventButton,
+  PageContainer,
+  StyledIonModal,
+  VideoBackground,
+  VidOverlay,
 } from "../styles";
 
 export const HomePage: FunctionComponent = () => {
@@ -47,12 +46,6 @@ export const HomePage: FunctionComponent = () => {
   useMemo(() => {
     getAccessToken();
   }, []);
-
-  // Call the useCheckAndRefreshToken hook
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    localStorage.getItem("accessToken") || undefined
-  );
-  useCheckAndRefreshToken(setAccessToken);
 
   const userName = useGetUserName();
 
@@ -86,7 +79,7 @@ export const HomePage: FunctionComponent = () => {
       <VidOverlay />
       {userName ? (
         <>
-          <Header title={"Home"} userName={userName || undefined} />
+          <Header userName={userName || undefined} />
           <EventOverview />
           <BigButton
             onClick={(): void => setBigButtonIsClicked(!bigButtonIsClicked)}

@@ -3,9 +3,9 @@ import { Header } from "../components";
 import { useGetUserName } from "../hooks";
 
 import {
-  PageContainer,
   EventQRContainer,
   IntroText,
+  PageContainer,
   QrOverlay,
 } from "../styles";
 
@@ -17,10 +17,7 @@ export const GenerateEventQr = () => {
 
   return (
     <PageContainer>
-      <Header
-        title={"Join Event via QR Code"}
-        userName={userName || undefined}
-      />
+      <Header userName={userName || undefined} />
       <EventQRContainer>
         <IntroText>
           <h1>Join Event: {eventID}</h1>
