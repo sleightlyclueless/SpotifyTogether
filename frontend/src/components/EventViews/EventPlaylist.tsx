@@ -53,14 +53,18 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
 
   const { searchResults, showDropdown, searchTracks } = useSearchTracks();
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredPlaylistTracks, setFilteredPlaylistTracks] = useState<
+    SpotifyTrack[] | null
+  >(null);
+  const [searchInPlaylistQuery, setSearchInPlaylistQuery] = useState("");
 
   useEffect(() => {
     const fetchPlaylistIds = async () => {
       try {
-        const playlistIds = await fetchSpotifyPlaylistIds(eventId);
-        if (playlistIds && playlistIds.length > 0) {
-          setCurrentPlaylistId(playlistIds[0]);
-          const tracks = await fetchTracksOfPlaylist(eventId, playlistIds[0]);
+        const playlistIDs = await fetchSpotifyPlaylistIds(eventId);
+        if (playlistIDs && playlistIDs.length > 0) {
+          setCurrentPlaylistId(playlistIDs[0]);
+          const tracks = await fetchTracksOfPlaylist(eventId, playlistIDs[0]);
           if (tracks) setCurrentPlaylistTracks(tracks);
         }
       } catch (error) {
@@ -69,19 +73,35 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
       }
     };
     fetchPlaylistIds();
-  }, [eventId]);
+  }, [eventId, currentPlaylistId]);
+
+  useEffect(() => {
+    setFilteredPlaylistTracks(currentPlaylistTracks);
+  }, [currentPlaylistTracks]);
 
   const handleGeneratePlaylist = async () => {
     setIsLoading(true);
     try {
       const response = await generatePlaylist(eventId);
-      if (response && response.playlistId)
-        setCurrentPlaylistId(response.playlistId);
+      console.log("Response:", response);
+      if (response && response.playlistID)
+        setCurrentPlaylistId(response.playlistID);
       setIsLoading(false);
     } catch (error) {
       console.error("Error generating playlist:", error);
       setIsLoading(false);
     }
+  };
+
+  const handleSearchForSongInPlaylist = () => {
+    const filtered = currentPlaylistTracks?.filter(
+      (track) =>
+        track.artistName
+          .toLowerCase()
+          .includes(searchInPlaylistQuery.toLowerCase()) ||
+        track.name.toLowerCase().includes(searchInPlaylistQuery.toLowerCase())
+    );
+    setFilteredPlaylistTracks(filtered || currentPlaylistTracks);
   };
 
   const handleSearch = async () => {
@@ -109,8 +129,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
       if (!currentPlaylistId) return;
 
       // Delete the proposed track using the hook
-      const response = await removeEventTrack(eventId, spotifyTrackId);
-      console.log("Remove event track response:", response);
+      await removeEventTrack(eventId, spotifyTrackId);
 
       // Reload the playlist and songs after removing the track
       const tracks = await fetchTracksOfPlaylist(eventId, currentPlaylistId);
@@ -126,7 +145,6 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
       if (!currentPlaylistId) return;
 
       const response = await proposePlaylist(eventId, currentPlaylistId);
-      console.log("Playlist save response: ", response);
       setIsLoading(false);
     } catch (error) {
       console.error("Error proposing a playlist:", error);
@@ -140,76 +158,116 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
         <LoadingSpinner />
       </LoadingContainer>
     );
-  // If there are no playlists, show the generate playlist button
-  if (!currentPlaylistId) {
+
+  if (currentPlaylistId && currentPlaylistId != "undefined") {
     return (
       <FormContainer>
-        {/* Generate Playlist Button */}
-        <StyledText>Generate Playlist</StyledText>
-        <Button onClick={handleGeneratePlaylist}>Generate Playlist</Button>
-        <StyledText>No playlist found.</StyledText>
+        {/* Display Current Event Tracks */}
+        <StyledText>Current Event Tracks</StyledText>
+        <StyledText>Search for songs in playlist</StyledText>
+        <StyledEventIdInput
+          type="text"
+          onChange={(e: any) => {
+            setSearchInPlaylistQuery(e.target.value);
+            handleSearchForSongInPlaylist();
+          }}
+          placeholder="Enter a song name or artist"
+        />
+        <SongContainer>
+          {filteredPlaylistTracks?.map((track: SpotifyTrack) => (
+            <SongItemContainer key={track.id}>
+              <SongItemImage src={track.albumImage} alt={track.name} />
+              <SongItemText>
+                {track.artistName} - {track.name}
+              </SongItemText>
+              {rights >= 1 && ( // Render delete button only if user is owner
+                <StyledDeleteButton
+                  onClick={() => handleDeleteProposedTrack(track.id)}
+                >
+                  <DeleteIcon>&times;</DeleteIcon>
+                </StyledDeleteButton>
+              )}
+            </SongItemContainer>
+          ))}
+        </SongContainer>
+
+        {/* New section for proposing a track */}
+        {rights >= 1 &&
+          currentPlaylistId &&
+          currentPlaylistId != "undefined" && ( // Render search bar only if user is admin or owner
+            <>
+              <StyledText>Search for a Song</StyledText>
+              <StyledEventIdInput
+                type="text"
+                value={searchQuery}
+                onChange={(e: any) => {
+                  setSearchQuery(e.target.value);
+                  handleSearch();
+                }}
+                placeholder="Enter a song name or artist"
+              />
+            </>
+          )}
+        {showDropdown && (
+          <>
+            <StyledText>Search Results</StyledText>
+            <SearchResultsContainer>
+              {searchResults.map((track: SpotifyTrack) => (
+                <SearchItemContainer
+                  key={track.id}
+                  onClick={() => rights >= 1 && handleProposeNewTrack(track.id)} // Only allow proposal if user is admin or owner
+                >
+                  <SongItemImage src={track.albumImage} alt={track.name} />
+                  <SongItemText>
+                    {track.artist} - {track.name}
+                  </SongItemText>
+                </SearchItemContainer>
+              ))}
+            </SearchResultsContainer>
+          </>
+        )}
+
+        {/* No playlist found message */}
+        {!currentPlaylistId && (
+          <StyledText>
+            {rights === 2
+              ? "No playlist found. Generate a playlist for this event."
+              : "No playlist found. The playlist will be generated once available."}
+          </StyledText>
+        )}
+
+        {/* Save Playlist Button */}
+        {currentPlaylistId &&
+          currentPlaylistId != "undefined" &&
+          !isLoading && (
+            <ButtonContainer>
+              {rights == 2 && ( // Admin can only regenerate the playlist
+                <>
+                  <Button onClick={handleGeneratePlaylist}>
+                    {currentPlaylistTracks?.length
+                      ? "Regenerate Playlist"
+                      : "Generate Playlist"}
+                  </Button>
+                  <Button onClick={handleSavePlaylist}>Save Playlist</Button>
+                </>
+              )}
+            </ButtonContainer>
+          )}
       </FormContainer>
     );
   }
 
-  // If there is a playlist, display the tracks and the search functionality
   return (
-    <FormContainer>
-      {/* Display Current Event Tracks */}
-      <StyledText>Current Event Tracks</StyledText>
-      <SongContainer>
-        {currentPlaylistTracks?.map((track: SpotifyTrack) => (
-          <SongItemContainer key={track.id}>
-            <SongItemImage src={track.albumImage} alt={track.name} />
-            <SongItemText>
-              {track.artistName} - {track.name}
-            </SongItemText>
-            <StyledDeleteButton
-              onClick={() => handleDeleteProposedTrack(track.id)}
-            >
-              <DeleteIcon>&times;</DeleteIcon>
-            </StyledDeleteButton>
-          </SongItemContainer>
-        ))}
-      </SongContainer>
-
-      {/* New section for proposing a track */}
-      <StyledText>Search for a Song</StyledText>
-      <StyledEventIdInput
-        type="text"
-        value={searchQuery}
-        onChange={(e: any) => {
-          setSearchQuery(e.target.value);
-          handleSearch();
-        }}
-        placeholder="Enter a song name or artist"
-      />
-      {showDropdown && (
-        <>
-          <StyledText>Search Results</StyledText>
-          <SearchResultsContainer>
-            {searchResults.map((track: SpotifyTrack) => (
-              <SearchItemContainer
-                key={track.id}
-                onClick={() => handleProposeNewTrack(track.id)}
-              >
-                <SongItemImage src={track.albumImage} alt={track.name} />
-                <SongItemText>
-                  {track.name} - {track.artist}
-                </SongItemText>
-              </SearchItemContainer>
-            ))}
-          </SearchResultsContainer>
-        </>
+    <>
+      <StyledText>No playlist found.</StyledText>
+      {rights === 2 && (
+        <FormContainer>
+          {/* Generate Playlist Button */}
+          <Button onClick={handleGeneratePlaylist}>Generate Playlist</Button>
+        </FormContainer>
       )}
-      {/* Save Playlist Button */}
-      {currentPlaylistId && !isLoading && (
-        <ButtonContainer>
-          <Button onClick={handleGeneratePlaylist}>Regenerate Playlist</Button>
-
-          <Button onClick={() => handleSavePlaylist()}>Save Playlist</Button>
-        </ButtonContainer>
-      )}
-    </FormContainer>
+    </>
   );
 };
+
+export default EditEventPlaylist;

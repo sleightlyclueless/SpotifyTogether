@@ -21,8 +21,7 @@ export const useFetchTracksOfPlaylist = () => {
           },
         }
       );
-      toast.success("Tracks fetched");
-      console.log("response.data", response.data);
+      // toast.success("Tracks fetched");
       setfetchTracksOfPlaylistisLoading(false);
       return response.data;
     } catch (error) {

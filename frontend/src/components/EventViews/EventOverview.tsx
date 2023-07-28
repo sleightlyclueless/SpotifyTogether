@@ -20,7 +20,9 @@ export const EventOverview: FunctionComponent = () => {
 
   const handleUpdateEvent = (updatedEvent: Event) => {
     setEvents((prevEvents) =>
-      prevEvents.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
+      prevEvents.map((event) =>
+        event.id === updatedEvent.id ? updatedEvent : event
+      )
     );
   };
 
@@ -128,7 +130,7 @@ export const EventOverview: FunctionComponent = () => {
                   breakpoints={[0.0, 0.8]}
                   handleBehavior="cycle"
                 >
-                  {rights > 0 && (
+                  {(rights > 0 || contentMode != "none") && (
                     <>
                       {contentMode !== "none" ? (
                         // Show EditEventForm
@@ -143,15 +145,17 @@ export const EventOverview: FunctionComponent = () => {
                   )}
                   {contentMode !== "none" ? (
                     <>
-                    {contentMode === "editEvent" ? (
-                      // Show EditEventForm
-                      <EditEventForm event={event} onUpdateEvent={handleUpdateEvent} />
-                    ) : contentMode === "editPlaylist" ? (
-                      // Show EditEventPlaylist
-                      <EditEventPlaylist eventId={event.id} rights={rights}/>
-                    ) : null}
-                  </>
-
+                      {contentMode === "editEvent" ? (
+                        // Show EditEventForm
+                        <EditEventForm
+                          event={event}
+                          onUpdateEvent={handleUpdateEvent}
+                        />
+                      ) : contentMode === "editPlaylist" ? (
+                        // Show EditEventPlaylist
+                        <EditEventPlaylist eventId={event.id} rights={rights} />
+                      ) : null}
+                    </>
                   ) : (
                     // Show normal content
                     <DetailViewEventContainer>
@@ -169,12 +173,7 @@ export const EventOverview: FunctionComponent = () => {
                             {event.participants.map((participant) => {
                               participant.permission =
                                 participant.permission.toUpperCase();
-                              const participantRights =
-                                participant.permission === "OWNER"
-                                  ? 2
-                                  : participant.permission === "ADMIN"
-                                  ? 1
-                                  : 0;
+                              const participantRights = participant.permission === "OWNER" ? 2 : participant.permission === "ADMIN" ? 1 : 0;
 
                               return (
                                 <ParticipantItem
@@ -224,7 +223,7 @@ export const EventOverview: FunctionComponent = () => {
                         )}
                       </ParticipantsContainer>
 
-                      {rights > 0 && (
+                      {rights > 0 ? (
                         <ButtonContainer>
                           <EventButtons id="generate-code">
                             Invite People
@@ -249,7 +248,7 @@ export const EventOverview: FunctionComponent = () => {
                           <EventButtons
                             onClick={() => setContentMode("editPlaylist")}
                           >
-                            View Playlist
+                            Manage Playlist
                           </EventButtons>
                           {rights === 2 && (
                             <EventButtons
@@ -258,6 +257,14 @@ export const EventOverview: FunctionComponent = () => {
                               Delete Event
                             </EventButtons>
                           )}
+                        </ButtonContainer>
+                      ) : (
+                        <ButtonContainer>
+                          <EventButtons
+                            onClick={() => setContentMode("editPlaylist")}
+                          >
+                            View Playlist
+                          </EventButtons>
                         </ButtonContainer>
                       )}
                     </DetailViewEventContainer>

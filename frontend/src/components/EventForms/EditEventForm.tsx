@@ -37,22 +37,20 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 
       // Attempt to update the event ID
       try {
-        console.log("Updating event ID:", customEventId);
         await setCustomEventId(event.id, customEventId, eventName, eventDate.toISOString());
         event.id = customEventId;
       } catch (error) {
         toast.error("Failed to update event ID. Please check the input.");
-        console.log(error);
+        console.error("Error updating event ID:", error);
         return;
       }
 
       // Update name
       try {
-        console.log("Updating event name:", eventName, "for event:", event.id);
         await updateEventName(event.id, eventName, event.name);
       } catch (error) {
         toast.error("Failed to update event name. Please check the input.");
-        console.log(error);
+        console.error("Error updating event name:", error);
         return;
       }
 
@@ -62,11 +60,10 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
         return;
       }
       try {
-        console.log("Updating event date:", eventDate.toISOString());
         await updateEventDate(event.id, eventDate.toISOString());
       } catch (error) {
         toast.error("Failed to update event date. Please check the input.");
-        console.log(error);
+        console.error("Error updating event date:", error);
         return;
       }
 
@@ -123,7 +120,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
           if (selectedDate instanceof Date) {
             setEventDate(selectedDate);
           } else {
-            console.log("Invalid date format");
+            toast.error("Invalid date format");
           }
         }}
       />

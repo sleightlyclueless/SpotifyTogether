@@ -42,15 +42,11 @@ router.put("/generate", async (req, res) => {
 
   // Clear before new run
   await req.event!.eventTracks.init();
-
-  // Remove associated records from the "event_track" table
-  for (const eventTrack of req.event!.eventTracks) {
-    await DI.em.removeAndFlush(eventTrack);
-  }
-
+  for (const eventTrack of req.event!.eventTracks) await DI.em.removeAndFlush(eventTrack);
   req.event!.eventTracks.removeAll();
 
   await req.event!.playlists.init();
+  for (const playlist of req.event!.playlists) await DI.em.removeAndFlush(playlist);
   req.event!.playlists.removeAll();
 
   await DI.em.flush();
@@ -143,10 +139,18 @@ router.put("/generate", async (req, res) => {
   // 4. Create Spotify playlist from event
   // ====================================================================================================
   const playlistID = await createSpotifyPlaylistFromEvent(req.event!, owner);
+  if (playlistID == "undefined")
+    return res
+      .status(500)
+      .json({ message: "Server failed to create playlist." });
 
   return res
     .status(200)
-    .json({ message: "Successfully created playlist!", playlistID: playlistID })
+    .json({
+      message: "Successfully created playlist!",
+      playlistID: playlistID,
+      newOwnerToken: access_token_array[0],
+    })
     .end();
 });
 
@@ -512,6 +516,7 @@ async function createSpotifyPlaylistFromEvent(
     )
     .then(async function (response) {
       const playlistId: string = response.data.id;
+      if (!playlistId) return "undefined";
       const newPlaylist: Playlist = new Playlist(playlistId);
       newPlaylist.accepted = false;
       event.playlists.add(newPlaylist);
@@ -538,6 +543,11 @@ async function createSpotifyPlaylistFromEvent(
           batch = []; // Clear the batch after each function call
         }
 
+        /*const checkTrack = await DI.em.findOne(EventTrack, {
+          event: { id: event.id },
+          track: { id: batchTrack.track.id },
+        });
+        if (!checkTrack)*/
         await DI.em.persistAndFlush(batchTrack);
       }
 
@@ -598,7 +608,7 @@ async function pushTracksToSpotifyPlaylist(
       //console.log("Tracks successfully added to the playlist.");
     })
     .catch(function (error) {
-      //console.log("pushTracksToSpotifyPlaylist() " + error.message);
+      console.log("pushTracksToSpotifyPlaylist() " + error.message);
     });
 }
 // ====================================================================================================
@@ -652,7 +662,10 @@ async function addTrackToEvent(
           response.data.artists[0].name,
           response.data.album.images[0]?.url || ""
         );
-        await DI.em.persist(topTrack);
+        const checkTrack = await DI.em.findOne(SpotifyTrack, {
+          id: topTrack!.id,
+        });
+        if (!checkTrack) await DI.em.persist(topTrack);
       })
       .catch((error) => {
         console.log("addTrackToEvent() " + error.message);

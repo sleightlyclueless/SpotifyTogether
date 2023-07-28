@@ -35,7 +35,7 @@ export const useGetUserEvents = () => {
           setgetUserEventisLoading(false);
           return { ...event, participants, getUserEventisLoading };
         } catch (error) {
-          console.log("Error fetching participants:", error);
+          console.error("Error fetching participants:", error);
           setgetUserEventisLoading(false);
           return { ...event, participants: [], getUserEventisLoading };
         }
@@ -45,7 +45,7 @@ export const useGetUserEvents = () => {
       setEventsWithParticipants(eventsWithParticipants);
     } catch (error) {
       toast.error("Failed to fetch events");
-      console.log("Error fetching events:", error);
+      console.error("Error fetching events:", error);
       setgetUserEventisLoading(false);
     }
   };

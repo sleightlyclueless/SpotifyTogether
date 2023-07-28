@@ -16,7 +16,7 @@ export const useGetUserName = (): string | null => {
       setUserName(res.data.spotifyUserId);
     })
     .catch((error) => {
-      console.log("Error fetching username:", error);
+      console.error("Error fetching username:", error);
     });
 
   return userName;

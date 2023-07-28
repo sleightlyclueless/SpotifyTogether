@@ -15,7 +15,7 @@ export const useUpdateEvent = () => {
         },
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Error updating event:",error);
       })
       .finally(() => {
         setuseUpdateEventisLoading(false);

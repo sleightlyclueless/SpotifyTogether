@@ -63,6 +63,31 @@ router.get("/:spotifyPlaylistId", async (req, res) => {
   );
   if (!playlist) return res.status(404).end();
 
+  const playlistResponse = await axios.get(
+    `https://api.spotify.com/v1/playlists/${playlist.id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
+      },
+    }
+  );
+  if (!playlistResponse.data || playlistResponse.data.tracks.total === 0) {
+    const event = await DI.em.findOne(Event, { id: req.event!.id });
+    if (!event) return res.status(404).json({ error: "Event not found" });
+
+    await req.event!.eventTracks.init();
+    for (const eventTrack of req.event!.eventTracks)
+      await DI.em.removeAndFlush(eventTrack);
+    req.event!.eventTracks.removeAll();
+
+    await req.event!.playlists.init();
+    for (const playlist of req.event!.playlists)
+      await DI.em.removeAndFlush(playlist);
+    req.event!.playlists.removeAll();
+
+    await DI.em.flush();
+  }
+
   const tracksWithInfo = playlist.eventTracks
     .getItems()
     .map((eventTrack: EventTrack) => {

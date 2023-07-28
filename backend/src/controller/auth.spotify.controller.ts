@@ -108,7 +108,7 @@ router.put('/refresh_token', Auth.verifySpotifyAccess, async (req, res) => {
         DI.em.persistAndFlush(req.user!);
         return res.status(200).json(req.user);
     }).catch(function (error) {
-        console.log(error);
+        console.error(error);
         return res.status(error.status).json(error);
     });
 });
