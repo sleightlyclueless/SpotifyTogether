@@ -1,26 +1,23 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export const useGetUserName = (): string | null => {
   const accessToken = localStorage.getItem("accessToken") || undefined;
   const [userName, setUserName] = useState<string | null>(null);
+  if (accessToken === undefined) return null;
 
-  useEffect(() => {
-    if (accessToken === undefined) return;
-
-    axios
-      .get(`http://localhost:4000/account/spotifyUserId`, {
-        headers: {
-          Authorization: accessToken,
-        },
-      })
-      .then((res) => {
-        setUserName(res.data.spotifyUserId);
-      })
-      .catch((error) => {
-        console.log("Error fetching username:", error);
-      });
-  }, [accessToken]);
+  axios
+    .get(`http://localhost:4000/account/spotifyUserId`, {
+      headers: {
+        Authorization: accessToken,
+      },
+    })
+    .then((res) => {
+      setUserName(res.data.spotifyUserId);
+    })
+    .catch((error) => {
+      console.log("Error fetching username:", error);
+    });
 
   return userName;
 };

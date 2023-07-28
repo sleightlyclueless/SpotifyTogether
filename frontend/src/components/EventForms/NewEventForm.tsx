@@ -1,13 +1,7 @@
 import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import { useCreateEvent } from "../../hooks";
-import { toast } from "react-toastify";
-import {
-  NewFormContainer,
-  StyledEventNameInput,
-  StyledIonDatetime,
-  SubmitButton,
-} from "../../styles";
+import { NewFormContainer, StyledEventNameInput, StyledIonDatetime, SubmitButton } from "../../styles";
 
 type NewEventFormProps = {
   closeModal: () => void;
@@ -18,17 +12,20 @@ export const NewEventForm: FunctionComponent<NewEventFormProps> = ({
 }) => {
   const [eventName, setEventName] = useState<string | null>(null);
   const [eventDate, setEventDate] = useState<Date | null>(null);
-  const { createEvent } = useCreateEvent(); // Use the hook
+  const { createEventisLoading, createEvent } = useCreateEvent();
 
-  const handleSubmit = async () => {
-    await createEvent(eventName || "", eventDate, (error) => {
-      if (!error) {
+  // Use useEffect to close the modal only when isLoading becomes false
+  useEffect(() => {
+    if (!createEventisLoading) {
+      setTimeout(() => {
         closeModal();
         window.location.reload();
-      } else {
-        toast.error(error);
-      }
-    });
+      }, 1000);
+    }
+  }, [createEventisLoading, closeModal]);
+
+  const handleSubmit = async () => {
+    await createEvent(eventName || "", eventDate);
   };
 
   return (

@@ -29,10 +29,12 @@ import {
 
 type EditEventPlaylistProps = {
   eventId: string;
+  rights: number; // 0 = participant, 1 = admin, 2 = owner
 };
 
 export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   eventId,
+  rights,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPlaylistId, setCurrentPlaylistId] = useState<string | null>(
@@ -204,7 +206,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
       {currentPlaylistId && !isLoading && (
         <ButtonContainer>
           <Button onClick={handleGeneratePlaylist}>Regenerate Playlist</Button>
-          
+
           <Button onClick={() => handleSavePlaylist()}>Save Playlist</Button>
         </ButtonContainer>
       )}

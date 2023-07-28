@@ -1,10 +1,13 @@
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 export const useRemoveParticipant = () => {
   const accessToken = localStorage.getItem("accessToken") || undefined;
+  const [removeParticipantisLoading, setremoveParticipantisLoading] = useState<boolean>(false);
 
   const removeParticipant = (eventID: string, spotifyUserId: string): void => {
+    setremoveParticipantisLoading(true);
     axios
       .put(
         `http://localhost:4000/events/${eventID}/participants/${spotifyUserId}`,
@@ -16,11 +19,11 @@ export const useRemoveParticipant = () => {
         }
       )
       .then(() => {
+        setremoveParticipantisLoading(false);
         toast("Participant removed successfully");
-        window.location.reload();
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.error("Error removing participant", error));
   };
 
-  return removeParticipant;
+  return { removeParticipant, removeParticipantisLoading };
 };

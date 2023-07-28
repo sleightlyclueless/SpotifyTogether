@@ -28,7 +28,7 @@ export const QrOverlay = styled.div`
   align-items: center;
   flex-direction: column;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  background: ${COLORS.background};
+  background: ${COLORS.white};
 `;
 
 export const TextContainer = styled.div`

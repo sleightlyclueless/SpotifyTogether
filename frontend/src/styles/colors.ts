@@ -7,4 +7,5 @@ export const COLORS = {
   buttonRGB: "30, 30, 30",
   buttonHoverRGB: "14, 131, 136",
   link: "#ff9900",
+  white: "#FFFFFF",
 };

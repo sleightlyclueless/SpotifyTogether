@@ -1,18 +1,12 @@
 import QRCode from "qrcode.react";
 import { Header } from "../components";
 import { useGetUserName } from "../hooks";
+import { EventQRContainer, IntroText, PageContainer, QrOverlay } from "../styles";
 
-import {
-  EventQRContainer,
-  IntroText,
-  PageContainer,
-  QrOverlay,
-} from "../styles";
-
+// Site to provide a qr code to join an event
 export const GenerateEventQr = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const eventID = urlParams.get("event") || undefined;
-
   const userName = useGetUserName();
 
   return (

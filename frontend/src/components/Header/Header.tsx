@@ -16,7 +16,7 @@ export const Header: FunctionComponent<HeaderProps> = ({ userName }) => {
         <IoHome />
       </HomeIcon>
       <User id="open-modal">
-        {userName && <div>{userName}</div>}
+        {userName && <>{userName}</>}
         <CiHeadphones style={{ width: "24px", height: "24px" }} />
       </User>
       <StyledIonModal

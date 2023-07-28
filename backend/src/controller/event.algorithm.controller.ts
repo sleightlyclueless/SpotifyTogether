@@ -7,6 +7,7 @@ import { EventTrack, TrackStatus } from "../entities/EventTrack";
 import { Playlist } from "../entities/Playlist";
 import { DI } from "../index";
 import axios from "axios";
+import util from "util";
 
 const AMOUNT_ARTISTS = 20;
 const AMOUNT_TRACKS_PER_ARTIST = 3;
@@ -67,22 +68,9 @@ router.put("/generate", async (req, res) => {
   if (!eventUserOwner)
     return res.status(404).json({ message: "Owner not found." });
 
-  // fetch owner info
+  // fetch playlist metadata
   const owner = eventUserOwner.user;
-  const owner_access_token = await generateAccessToken(eventUserOwner.user);
-
   let access_token_array = new Array<string>();
-  access_token_array.push(owner_access_token);
-  const maxSongsPerUser = Math.floor(
-    (PLAYLIST_SIZE - 50) / access_token_array.length
-  );
-
-  if (owner_access_token == null)
-    return res
-      .status(500)
-      .json({ message: "Server failed to generate new token for owner" });
-
-  // fetch event users
   const eventUsers = await DI.em.find(
     EventUser,
     {
@@ -93,8 +81,17 @@ router.put("/generate", async (req, res) => {
     }
   );
   for (const eventUser of eventUsers)
-    if (eventUser != eventUserOwner)
-      access_token_array.push(await generateAccessToken(eventUser.user));
+    access_token_array.push(await generateAccessToken(eventUser.user));
+  owner.spotifyAccessToken = access_token_array[0];
+
+  const maxSongsPerUser = Math.floor(
+    (PLAYLIST_SIZE - 50) / access_token_array.length
+  );
+
+  if (access_token_array[0] == null)
+    return res
+      .status(500)
+      .json({ message: "Server failed to generate new token for owner" });
 
   console.log(
     "0: Generating playlist for event " +
@@ -498,7 +495,6 @@ async function createSpotifyPlaylistFromEvent(
 
   await event.eventTracks.init();
   const eventTracksArray: EventTrack[] = [...event.eventTracks];
-  const processedTrackIds = new Set<string>();
 
   return axios
     .post(
@@ -519,9 +515,6 @@ async function createSpotifyPlaylistFromEvent(
       const newPlaylist: Playlist = new Playlist(playlistId);
       newPlaylist.accepted = false;
       event.playlists.add(newPlaylist);
-      console.log(
-        "createSpotifyPlaylistFromEvent(): Playlist ID: " + playlistId
-      );
       const uniqueEventTracks: EventTrack[] = await returnUniqueEventTracks(
         eventTracksArray
       );

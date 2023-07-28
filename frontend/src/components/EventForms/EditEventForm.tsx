@@ -3,29 +3,21 @@ import { ChangeEvent, FunctionComponent, useEffect, useState } from "react";
 import { Event } from "../../constants";
 import { useUpdateEvent } from "../../hooks";
 import { toast } from "react-toastify";
-import {
-  FormContainer,
-  IconContainer,
-  Label,
-  RandomIcon,
-  StyledEventIdInput,
-  StyledEventNameInput,
-  StyledIonDatetime,
-  SubmitButton,
-} from "../../styles";
+import { FormContainer, IconContainer, Label, RandomIcon, StyledEventIdInput, StyledEventNameInput, StyledIonDatetime, SubmitButton } from "../../styles";
 
 type EditEventFormProps = {
   event: Event;
+  onUpdateEvent: (event: Event) => void;
 };
 
 export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
   event,
+  onUpdateEvent,
 }) => {
   const [eventName, setEventName] = useState<string>(event.name);
   const [eventDate, setEventDate] = useState<Date>(new Date(event.date));
   const [customEventId, setFormCustomEventId] = useState<string>(event.id);
-  const { isLoading, updateEventName, updateEventDate, setCustomEventId } =
-    useUpdateEvent();
+  const { useUpdateEventisLoading, updateEventName, updateEventDate, setCustomEventId } = useUpdateEvent();
 
   useEffect(() => {
     setEventName(event.name);
@@ -46,12 +38,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
       // Attempt to update the event ID
       try {
         console.log("Updating event ID:", customEventId);
-        await setCustomEventId(
-          event.id,
-          customEventId,
-          eventName,
-          eventDate.toISOString()
-        );
+        await setCustomEventId(event.id, customEventId, eventName, eventDate.toISOString());
         event.id = customEventId;
       } catch (error) {
         toast.error("Failed to update event ID. Please check the input.");
@@ -85,9 +72,12 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 
       // Show success message
       toast("Event details updated successfully.");
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      onUpdateEvent({
+        ...event,
+        name: eventName,
+        date: eventDate.toISOString(),
+        id: customEventId,
+      });
     } catch (error) {
       console.error("Error updating event:", error);
     }
@@ -137,7 +127,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
           }
         }}
       />
-      {isLoading ? (
+      {useUpdateEventisLoading ? (
         <p>Loading...</p>
       ) : (
         <>
@@ -149,12 +139,11 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 };
 
 const generateRandomId = (): string => {
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
   let randomId = "";
   for (let i = 0; i < 6; i++) {
     const randomIndex = Math.floor(Math.random() * characters.length);
     randomId += characters[randomIndex];
   }
   return randomId;
-}
+};

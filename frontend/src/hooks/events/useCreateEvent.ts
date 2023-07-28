@@ -1,55 +1,53 @@
 import { useState } from "react";
 import axios from "axios";
 import { Event } from "../../constants";
+import { toast } from "react-toastify";
 
 export const useCreateEvent = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [createEventisLoading, setcreateEventisLoading] = useState<boolean>(true);
   const accessToken = localStorage.getItem("accessToken") || undefined;
 
-  const createEvent = async (
-    eventName: string,
-    eventDate: Date | null,
-    onError: (error: string | null) => void // Callback function to handle the error in the component
-  ) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const createEvent = async (eventName: string, eventDate: Date | null) => {
+    setcreateEventisLoading(true);
 
-      if (!eventName || !eventDate) {
-        throw new Error("Event Name or Date is not set!");
-      }
+    if (!eventName || !eventDate) {
+      toast.error("Event Name or Date is not set!");
+      setcreateEventisLoading(true);
+      return;
+    }
 
-      const eventData: Event = {
-        id: "",
-        name: eventName,
-        date: eventDate.toISOString(),
-        locked: false,
-        participants: [],
-        eventTracks: [],
-        playlists: [],
-      };
+    const eventData: Event = {
+      id: "",
+      name: eventName,
+      date: eventDate.toISOString(),
+      locked: false,
+      participants: [],
+      eventTracks: [],
+      playlists: [],
+    };
 
-      await axios.post("http://localhost:4000/events", eventData, {
+    axios
+      .post("http://localhost:4000/events", eventData, {
         headers: {
           Authorization: accessToken,
         },
+      })
+      .then((response) => {
+        if (response.status === 201) {
+          toast.success("Event created");
+          setcreateEventisLoading(false);
+        } else {
+          setcreateEventisLoading(true);
+          toast.error("Error creating event");
+          console.error("Error creating event:", response.data);
+        }
+      })
+      .catch((error) => {
+        setcreateEventisLoading(true);
+        toast.error("Error creating event");
+        console.error("Error creating event:", error);
       });
-
-      setIsLoading(false);
-      onError(null);
-    } catch (error) {
-      setError(
-        (error as Error).message ||
-          "An error occurred while creating the event."
-      );
-      setIsLoading(false);
-      onError(
-        (error as Error).message ||
-          "An error occurred while creating the event."
-      );
-    }
   };
 
-  return { isLoading, error, createEvent };
+  return { createEvent, createEventisLoading };
 };

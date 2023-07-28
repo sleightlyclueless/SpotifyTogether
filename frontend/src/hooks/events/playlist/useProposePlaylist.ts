@@ -1,4 +1,6 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 interface ProposePlaylistResponse {
   message: string;
@@ -7,12 +9,13 @@ interface ProposePlaylistResponse {
 
 export const useProposePlaylist = () => {
   const accessToken = localStorage.getItem("accessToken") || undefined;
-  console.log("proposing playlist with: ", accessToken);
+  const [proposePlaylistisLoading, setproposePlaylistisLoading] = useState<boolean>(false);
 
   const proposePlaylist = async (
     eventId: string,
     spotifyPlaylistId: string
   ): Promise<ProposePlaylistResponse | null> => {
+    setproposePlaylistisLoading(true);
     try {
       const response = await axios.post<ProposePlaylistResponse>(
         `http://localhost:4000/events/${eventId}/tracks/save/${spotifyPlaylistId}`,
@@ -23,22 +26,16 @@ export const useProposePlaylist = () => {
           },
         }
       );
-
-      // Return the relevant data from the response
-      return {
-        message: response.data.message,
-        playlistId: response.data.playlistId,
-      };
+      toast.success("Playlist saved!");
+      setproposePlaylistisLoading(false);
+      return response.data;
     } catch (error) {
-      console.error(
-        "Error proposing a playlist:",
-        (error as AxiosError).message
-      );
+      toast.error("Error saving playlist");
+      console.error("Error saving playlist:", error);
+      setproposePlaylistisLoading(false);
       return null;
     }
   };
 
-  return { proposePlaylist };
+  return { proposePlaylist, proposePlaylistisLoading };
 };
-
-export default useProposePlaylist;

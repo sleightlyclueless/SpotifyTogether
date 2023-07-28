@@ -1,29 +1,34 @@
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 export const useEditParticipantRole = () => {
   const accessToken = localStorage.getItem("accessToken") || undefined;
+  const [editParticipantisLoading, seteditParticipantisLoading] = useState<boolean>(false);
 
-  const changeRole = (
-    eventID: string,
+  const changeRole = async (
+    eventId: string,
     spotifyUserId: string,
     newRole: string
-  ): void => {
-    axios
-      .put(
-        `http://localhost:4000/events/${eventID}/participants/${spotifyUserId}/${newRole}`,
+  ): Promise<void> => {
+    seteditParticipantisLoading(true);
+    try {
+      await axios.put(
+        `http://localhost:4000/events/${eventId}/participants/${spotifyUserId}/${newRole}`,
         {},
         {
           headers: {
             Authorization: accessToken,
           },
         }
-      )
-      .then(() => {
-        toast("Role changed successfully");
-        window.location.reload();
-      })
-      .catch((error) => console.log(error));
+      );
+      toast.success("Role changed successfully");
+      seteditParticipantisLoading(false);
+    } catch (error) {
+      toast.error("Error changing role");
+      console.error("Error changing role", error);
+      seteditParticipantisLoading(false);
+    }
   };
 
   const copyCode = (code: string): void => {
@@ -31,5 +36,5 @@ export const useEditParticipantRole = () => {
     toast("Copied to clipboard!");
   };
 
-  return { changeRole, copyCode };
+  return { changeRole, copyCode, editParticipantisLoading };
 };

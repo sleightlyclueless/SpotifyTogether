@@ -1,40 +1,26 @@
 import { FunctionComponent, useMemo, useState } from "react";
-import {
-  BigButton,
-  EventOverview,
-  Header,
-  JoinEventForm,
-  NewEventForm,
-} from "../components";
+import { Header, BigButton, JoinEventForm, EventOverview, NewEventForm } from "../components";
 import { useGetUserName } from "../hooks";
 import { HOME, JOINEVENTBYQR } from "../constants";
+import { JoinEventButton, LoginButton, LoginContainer, LoginText, NewEventButton, PageContainer, StyledIonModal, VideoBackground, VidOverlay } from "../styles";
 import partyVid from "../assets/party.mp4";
-
-import {
-  JoinEventButton,
-  LoginButton,
-  LoginContainer,
-  LoginText,
-  NewEventButton,
-  PageContainer,
-  StyledIonModal,
-  VideoBackground,
-  VidOverlay,
-} from "../styles";
 
 export const HomePage: FunctionComponent = () => {
   const [isNewEventFormOpen, setIsNewEventFormOpen] = useState(false);
   const [isJoinEventFormOpen, setIsJoinEventFormOpen] = useState(false);
   const [bigButtonIsClicked, setBigButtonIsClicked] = useState(false);
+  const userName = useGetUserName();
 
   const getAccessToken = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const accessTokenCheck = urlParams.get("access_token") || undefined;
+    // Check url param access token from backend auth redirect and store it in local storage
     if (accessTokenCheck) {
       localStorage.setItem("accessToken", accessTokenCheck || "");
       window.location.href = HOME;
-    } else {
-      // If access token refreshed check autoeventjoin
+    }
+    // If access token refreshed check autoeventjoin from qr code redirect
+    else {
       const eventID = localStorage.getItem("autojoinevent") || undefined;
       if (eventID != undefined) {
         localStorage.removeItem("autojoinevent");
@@ -43,31 +29,35 @@ export const HomePage: FunctionComponent = () => {
     }
   };
 
+  // Just call getAccessToken on initial render. We assume not more than 1 hour is spent on the page, else use useEffect
   useMemo(() => {
     getAccessToken();
   }, []);
 
-  const userName = useGetUserName();
-
+  // Login button click handler frontend -> backend: login -> backend: login_resonse -> redirect frontend: /?access_token=...
   const handleOnLoginClick = () => {
     window.location.href = "http://localhost:4000/account/login";
   };
 
+  // Open module to create a new playlist
   const handleOnNewPlaylistClick = () => {
     setIsNewEventFormOpen(true);
     setBigButtonIsClicked(false);
   };
-
+  // Close module to create a new playlist
   const handleCloseNewEventModal = () => {
     setIsNewEventFormOpen(false);
+    setBigButtonIsClicked(false);
   };
 
-  const handleCloseJoinEventModal = () => {
-    setIsJoinEventFormOpen(false);
-  };
-
+  // Open module to join an event
   const handleOnJoinEventClick = () => {
     setIsJoinEventFormOpen(true);
+    setBigButtonIsClicked(false);
+  }; 
+  // Close module to join an event
+  const handleCloseJoinEventModal = () => {
+    setIsJoinEventFormOpen(false);
     setBigButtonIsClicked(false);
   };
 
@@ -79,19 +69,15 @@ export const HomePage: FunctionComponent = () => {
       <VidOverlay />
       {userName ? (
         <>
-          <Header userName={userName || undefined} />
+          <Header userName={userName} />
           <EventOverview />
           <BigButton
             onClick={(): void => setBigButtonIsClicked(!bigButtonIsClicked)}
           />
           {bigButtonIsClicked && (
             <>
-              <NewEventButton onClick={handleOnNewPlaylistClick}>
-                Create
-              </NewEventButton>
-              <JoinEventButton onClick={handleOnJoinEventClick}>
-                Join
-              </JoinEventButton>
+              <NewEventButton onClick={handleOnNewPlaylistClick}>Create</NewEventButton>
+              <JoinEventButton onClick={handleOnJoinEventClick}>Join</JoinEventButton>
             </>
           )}
           <StyledIonModal
