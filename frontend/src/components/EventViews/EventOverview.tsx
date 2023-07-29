@@ -6,7 +6,7 @@ import { useDeleteEvent, useEditParticipantRole, useGetUserEvents, useGetUserNam
 import { EditEventForm } from "../EventForms/EditEventForm";
 import { EditEventPlaylist } from "./EventPlaylist";
 import { Event } from "../../constants";
-import { ButtonContainer, DetailViewEventContainer, Button, EventOverviewContainer, FullPartyName, NoEventsContainer, ParticipantId, ParticipantItem, ParticipantsContainer, PartyName, SinglePlaylist, StyledAiOutlineArrowDown, StyledBiCopy, StyledCode, StyledIonModal, StyledIonPopover, StyledLuClose, StyledLuEdit2, StyledMdClose, StyledRoleDropdown, StyledRoleText, Timer, TimerContainer, TimerText } from "../../styles";
+import { ButtonContainer, DetailViewEventContainer, Button, ContentContainer, CenterContainer, ParticipantId, ParticipantItem, PartyName, PlaylistContainer, StyledAiOutlineArrowDown, StyledBiCopy, StyledCode, StyledIonModal, StyledIonPopover, StyledLuClose, StyledLuCloseTop, StyledLuEdit2, StyledRoleDropdown, StyledRoleText, Timer, TimerContainer, TimerText, StyledTextL } from "../../styles";
 
 type EditEventType = "none" | "editEvent" | "editPlaylist";
 
@@ -103,7 +103,7 @@ export const EventOverview: FunctionComponent = () => {
 
   return (
     <>
-      <EventOverviewContainer>
+      <ContentContainer>
         {events.length > 0 ? (
           events.map((event) => {
             const participant = event.participants.find(
@@ -116,12 +116,12 @@ export const EventOverview: FunctionComponent = () => {
 
             return (
               <div key={event.id}>
-                <SinglePlaylist id={event.id}>
+                <PlaylistContainer id={event.id}>
                   <PartyName>{event.name}</PartyName>
                   <Timer>
                     <CountdownTimer targetDate={new Date(event.date)} />
                   </Timer>
-                </SinglePlaylist>
+                </PlaylistContainer>
 
                 <StyledIonModal
                   trigger={event.id}
@@ -134,7 +134,7 @@ export const EventOverview: FunctionComponent = () => {
                     <>
                       {contentMode !== "none" ? (
                         // Show EditEventForm
-                        <StyledLuClose onClick={() => setContentMode("none")} />
+                        <StyledLuCloseTop onClick={() => setContentMode("none")} />
                       ) : (
                         // Show EditEventPlaylist
                         <StyledLuEdit2
@@ -159,14 +159,13 @@ export const EventOverview: FunctionComponent = () => {
                   ) : (
                     // Show normal content
                     <DetailViewEventContainer>
-                      <FullPartyName>{event.name}</FullPartyName>
+                      <StyledTextL>{event.name}</StyledTextL>
                       <TimerContainer>
                         <TimerText>Your Party starts in:</TimerText>
                         <Timer>
                           <CountdownTimer targetDate={new Date(event.date)} />
                         </Timer>
                       </TimerContainer>
-                      <ParticipantsContainer>
                         {event.participants.length > 0 && (
                           <div>
                             <h2>Participants:</h2>
@@ -207,7 +206,7 @@ export const EventOverview: FunctionComponent = () => {
                                     </StyledRoleText>
                                   )}
                                   {rights > 0 && participantRights < rights && (
-                                    <StyledMdClose
+                                    <StyledLuClose
                                       onClick={() =>
                                         handleRemoveParticipant(
                                           event.id,
@@ -221,7 +220,6 @@ export const EventOverview: FunctionComponent = () => {
                             })}
                           </div>
                         )}
-                      </ParticipantsContainer>
 
                       {rights > 0 ? (
                         <ButtonContainer>
@@ -274,12 +272,12 @@ export const EventOverview: FunctionComponent = () => {
             );
           })
         ) : (
-          <NoEventsContainer>
+          <CenterContainer>
             Create or join an event
             <StyledAiOutlineArrowDown />
-          </NoEventsContainer>
+          </CenterContainer>
         )}
-      </EventOverviewContainer>
+      </ContentContainer>
     </>
   );
 };

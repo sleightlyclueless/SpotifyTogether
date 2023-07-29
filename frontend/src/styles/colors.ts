@@ -6,7 +6,7 @@ export const COLORS = {
   backgroundLight: "#FFFFFF",
 
   link: "#c98318",
-  linkRGB: "30, 30, 30",
+  linkRGB: "201, 131, 24",
   linkHover: "#0E8388",
   linkHoverRGB: "14, 131, 136",
 

@@ -1,28 +1,7 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import { SpotifyTrack } from "../../constants";
-import {
-  Button,
-  ButtonContainer,
-  DeleteIcon,
-  IonContainer80,
-  LoadingSpinner,
-  SongContainer,
-  SongItemContainer,
-  SongItemImage,
-  StyledInput,
-  StyledText,
-  StyledTextL,
-  SearchContainer
-} from "../../styles";
-import {
-  useFetchSpotifyPlaylistIds,
-  useFetchTracksOfPlaylist,
-  useGeneratePlaylist,
-  useProposeNewEventTrack,
-  useProposePlaylist,
-  useRemoveEventTrack,
-  useSearchTracks,
-} from "../../hooks";
+import { Button, ButtonContainer, DeleteIcon, IonContainer80, LoadingSpinner, SongContainer, SongItemContainer, SongItemImage, StyledInput, StyledText, StyledTextL, SearchContainer, ContentContainer } from "../../styles";
+import { useFetchSpotifyPlaylistIds,useFetchTracksOfPlaylist,useGeneratePlaylist,useProposeNewEventTrack,useProposePlaylist,useRemoveEventTrack,useSearchTracks } from "../../hooks";
 
 type EditEventPlaylistProps = {
   eventId: string;
@@ -222,11 +201,13 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
 
         {/* No playlist found message */}
         {!currentPlaylistId && (
-          <StyledText>
+            <ContentContainer>
+          <StyledTextL>
             {rights === 2
               ? "No playlist found. Generate a playlist for this event."
               : "No playlist found. The playlist will be generated once available."}
-          </StyledText>
+          </StyledTextL>
+          </ContentContainer>
         )}
 
         {/* Save Playlist Button */}
@@ -251,15 +232,15 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   }
 
   return (
-    <>
-      <StyledText>No playlist found.</StyledText>
+    <ContentContainer>
+      <StyledTextL>No playlist found.</StyledTextL>
       {rights === 2 && (
         <IonContainer80>
           {/* Generate Playlist Button */}
           <Button onClick={handleGeneratePlaylist}>Generate Playlist</Button>
         </IonContainer80>
       )}
-    </>
+    </ContentContainer>
   );
 };
 

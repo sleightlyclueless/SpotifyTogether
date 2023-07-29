@@ -26,12 +26,8 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
   const [eventName, setEventName] = useState<string>(event.name);
   const [eventDate, setEventDate] = useState<Date>(new Date(event.date));
   const [customEventId, setFormCustomEventId] = useState<string>(event.id);
-  const {
-    useUpdateEventisLoading,
-    updateEventName,
-    updateEventDate,
-    setCustomEventId,
-  } = useUpdateEvent();
+  const { updateEventName, updateEventDate, setCustomEventId } =
+    useUpdateEvent();
 
   useEffect(() => {
     setEventName(event.name);
@@ -51,6 +47,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 
       // Attempt to update the event ID
       try {
+        console.log("Updating event ID to ", customEventId, "...");
         await setCustomEventId(
           event.id,
           customEventId,
@@ -112,7 +109,7 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
         <StyledInput
           type="text"
           value={customEventId}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          onIonChange={(e: ChangeEvent<HTMLInputElement>) =>
             setFormCustomEventId(e.target.value)
           }
           placeholder={"Event ID"}
@@ -144,11 +141,8 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
           }
         }}
       />
-      {useUpdateEventisLoading ? (
-        <p>Loading...</p>
-      ) : (
-          <Button onClick={handleSave}>Save Changes</Button>
-      )}
+
+      <Button onClick={handleSave}>Save Changes</Button>
     </IonContainer80>
   );
 };

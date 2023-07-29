@@ -5,26 +5,34 @@ import { BiCopy } from "react-icons/bi";
 import { MdClose, MdCopyAll } from "react-icons/md";
 import { AiOutlineArrowDown } from "react-icons/ai";
 import { COLORS } from "../colors";
+import { IonContainer80 } from "../basics";
 
-export const EventOverviewContainer = styled.div`
+export const PlaylistContainer = styled.div`
+  width: 120px;
+  height: 120px;
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 16px;
   display: flex;
-  flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  flex-wrap: wrap;
-  padding: 16px;
-  gap: 16px;
+  flex-direction: column;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  background: rgba(${COLORS.linkRGB}, 0.75);
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    background: rgba(${COLORS.linkRGB}, 1);
+  }
 `;
 
-export const ParticipantsContainer = styled.div`
+export const ButtonContainer = styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: space-around;
   align-items: center;
-  flex-wrap: wrap;
-  padding: 16px;
+  justify-content: space-around;
   gap: 16px;
-  color: ${COLORS.font};
+  flex-wrap: wrap;
 `;
 
 export const ParticipantItem = styled.div`
@@ -40,27 +48,6 @@ export const ParticipantItem = styled.div`
 export const ParticipantId = styled.div`
   font-weight: bold;
   min-width: 100px;
-`;
-
-export const SinglePlaylist = styled.div`
-  width: 120px;
-  height: 120px;
-  padding: 16px;
-  border-radius: 16px;
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  flex-direction: column;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  background: rgba(${COLORS.link}, 0.95);
-  opacity: 0.85;
-  transition: all 0.5s;
-
-  &:hover {
-    cursor: pointer;
-    opacity: 1;
-  }
 `;
 
 export const PartyName = styled.div`
@@ -83,21 +70,6 @@ export const Timer = styled.div`
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
 `;
 
-export const DetailViewEventContainer = styled.div`
-  height: 75%;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-export const FullPartyName = styled.div`
-  color: ${COLORS.font};
-  margin-top: 16px;
-  font-size: 20px;
-`;
-
 export const TimerContainer = styled.div`
   display: flex;
   align-items: center;
@@ -108,12 +80,9 @@ export const TimerText = styled.div`
   color: ${COLORS.font};
 `;
 
-export const ButtonContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  gap: 16px;
-  flex-wrap: wrap;
+export const DetailViewEventContainer = styled(IonContainer80)`
+  justify-content: space-between;
+  height: 75%;
 `;
 
 export const StyledCode = styled.div`
@@ -125,26 +94,10 @@ export const StyledCode = styled.div`
   gap: 16px;
 `;
 
-export const StyledBiCopy = styled(BiCopy)`
-  width: 20px;
-  height: 20px;
-  color: ${COLORS.background};
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-`;
-
-export const StyledMdClose = styled(MdClose)`
-  width: 20px;
-  height: 20px;
-  color: ${COLORS.font};
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-`;
-
 export const StyledRoleDropdown = styled.select`
   padding: 8px;
   border-radius: 8px;
-  background: ${COLORS.background};
+  background: ${COLORS.link};
   color: ${COLORS.font};
   border: none;
   font-size: 14px;
@@ -155,18 +108,17 @@ export const StyledRoleText = styled.div`
   min-width: 100px;
 `;
 
-export const NoEventsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  height: 75vh;
-  gap: 20px;
-`;
-
 export const StyledAiOutlineArrowDown = styled(AiOutlineArrowDown)`
   width: 40px;
   height: 40px;
+`;
+
+export const StyledBiCopy = styled(BiCopy)`
+  width: 20px;
+  height: 20px;
+  color: ${COLORS.background};
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
 `;
 
 export const StyledLuEdit2 = styled(LuEdit2)`
@@ -185,9 +137,6 @@ export const StyledLuEdit2 = styled(LuEdit2)`
 `;
 
 export const StyledLuClose = styled(MdClose)`
-  position: absolute;
-  top: 16px;
-  right: 16px;
   width: 20px;
   height: 20px;
   color: ${COLORS.font};
@@ -197,6 +146,12 @@ export const StyledLuClose = styled(MdClose)`
     cursor: pointer;
     color: ${COLORS.link};
   }
+`;
+
+export const StyledLuCloseTop = styled(StyledLuClose)`
+  position: absolute;
+  top: 16px;
+  right: 16px;
 `;
 
 export const StyledBiCheckCircle = styled(MdCopyAll)`

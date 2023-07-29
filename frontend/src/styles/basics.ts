@@ -26,6 +26,16 @@ export const CenterContainer = styled.div`
   height: 100%;
 `;
 
+export const ContentContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 16px;
+  gap: 16px;
+`;
+
 export const SingleButtonCenterContainer = styled.div`
   max-width: 200px;
   margin: 16px auto;
@@ -57,7 +67,6 @@ export const Button = styled.div`
   max-width: 300px;
   min-height: 60px;
   color: ${COLORS.font};
-  background: ${COLORS.link};
   border-radius: 8px;
   display: flex;
   justify-content: center;
@@ -66,6 +75,13 @@ export const Button = styled.div`
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
   transition: all 0.5s;
   margin-top: 16px;
+  background: rgba(${COLORS.linkRGB}, 0.75);
+  transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    background: rgba(${COLORS.linkRGB}, 1);
+  }
 `;
 
 export const RoundButton = styled.div`
@@ -75,12 +91,17 @@ export const RoundButton = styled.div`
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: ${COLORS.link};
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
   position: absolute;
   bottom: 16px;
   right: calc(50% - 40px);
+  background: rgba(${COLORS.linkRGB}, 0.75);
   transition: all 0.5s;
+
+  &:hover {
+    cursor: pointer;
+    background: rgba(${COLORS.linkRGB}, 1);
+  }
 `;
 
 // Texts
