@@ -1,31 +1,7 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import { SpotifyTrack } from "../../constants";
-import {
-  Button,
-  ButtonContainer,
-  DeleteIcon,
-  FormContainer,
-  LoadingContainer,
-  LoadingSpinner,
-  SearchItemContainer,
-  SearchResultsContainer,
-  SongContainer,
-  SongItemContainer,
-  SongItemImage,
-  SongItemText,
-  StyledDeleteButton,
-  StyledEventIdInput,
-  StyledText,
-} from "../../styles";
-import {
-  useFetchSpotifyPlaylistIds,
-  useFetchTracksOfPlaylist,
-  useGeneratePlaylist,
-  useProposeNewEventTrack,
-  useProposePlaylist,
-  useRemoveEventTrack,
-  useSearchTracks,
-} from "../../hooks";
+import { Button, ButtonContainer, DeleteIcon, FormContainer, LoadingContainer, LoadingSpinner, SearchItemContainer, SearchResultsContainer, SongContainer, SongItemContainer, SongItemImage, SongItemText, StyledDeleteButton, StyledEventIdInput, StyledText } from "../../styles";
+import { useFetchSpotifyPlaylistIds, useFetchTracksOfPlaylist, useGeneratePlaylist, useProposeNewEventTrack, useProposePlaylist, useRemoveEventTrack, useSearchTracks } from "../../hooks";
 
 type EditEventPlaylistProps = {
   eventId: string;
@@ -37,12 +13,21 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   rights,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+
   const [currentPlaylistId, setCurrentPlaylistId] = useState<string | null>(
     null
   );
-  const [currentPlaylistTracks, setCurrentPlaylistTracks] = useState<
+  const [playlistTrackFilter, setCurrentPlaylistTracks] = useState<
     SpotifyTrack[] | null
   >(null);
+
+  const { searchResults, showDropdown, searchTracks } = useSearchTracks();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [filteredPlaylistTracks, setFilteredPlaylistTracks] = useState<
+    SpotifyTrack[] | null
+  >(null);
+  const [searchInPlaylistQuery, setSearchInPlaylistQuery] = useState("");
 
   const { generatePlaylist } = useGeneratePlaylist();
   const { fetchSpotifyPlaylistIds } = useFetchSpotifyPlaylistIds();
@@ -51,13 +36,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   const { removeEventTrack } = useRemoveEventTrack();
   const { proposePlaylist } = useProposePlaylist();
 
-  const { searchResults, showDropdown, searchTracks } = useSearchTracks();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredPlaylistTracks, setFilteredPlaylistTracks] = useState<
-    SpotifyTrack[] | null
-  >(null);
-  const [searchInPlaylistQuery, setSearchInPlaylistQuery] = useState("");
-
+  // Fetch playlist and songs on load & change of event or playlist
   useEffect(() => {
     const fetchPlaylistIds = async () => {
       try {
@@ -75,9 +54,25 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
     fetchPlaylistIds();
   }, [eventId, currentPlaylistId]);
 
+  // Filter playlist tracks on load & change of playlist tracks search textbox
   useEffect(() => {
-    setFilteredPlaylistTracks(currentPlaylistTracks);
-  }, [currentPlaylistTracks]);
+    setFilteredPlaylistTracks(playlistTrackFilter);
+  }, [playlistTrackFilter]);
+
+  const handleSearch = async () => {
+    await searchTracks(eventId, searchQuery);
+  };
+  
+  const handleSearchForSongInPlaylist = () => {
+    const filtered = playlistTrackFilter?.filter(
+      (track) =>
+        track.artistName
+          .toLowerCase()
+          .includes(searchInPlaylistQuery.toLowerCase()) ||
+        track.name.toLowerCase().includes(searchInPlaylistQuery.toLowerCase())
+    );
+    setFilteredPlaylistTracks(filtered || playlistTrackFilter);
+  };
 
   const handleGeneratePlaylist = async () => {
     setIsLoading(true);
@@ -91,21 +86,6 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
       console.error("Error generating playlist:", error);
       setIsLoading(false);
     }
-  };
-
-  const handleSearchForSongInPlaylist = () => {
-    const filtered = currentPlaylistTracks?.filter(
-      (track) =>
-        track.artistName
-          .toLowerCase()
-          .includes(searchInPlaylistQuery.toLowerCase()) ||
-        track.name.toLowerCase().includes(searchInPlaylistQuery.toLowerCase())
-    );
-    setFilteredPlaylistTracks(filtered || currentPlaylistTracks);
-  };
-
-  const handleSearch = async () => {
-    await searchTracks(eventId, searchQuery);
   };
 
   const handleProposeNewTrack = async (spotifyTrackId: string) => {
@@ -244,7 +224,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
               {rights == 2 && ( // Admin can only regenerate the playlist
                 <>
                   <Button onClick={handleGeneratePlaylist}>
-                    {currentPlaylistTracks?.length
+                    {playlistTrackFilter?.length
                       ? "Regenerate Playlist"
                       : "Generate Playlist"}
                   </Button>

@@ -10,3 +10,20 @@ body {
     --toastify-color-dark: #1f1f1f;
     --toastify-color-progress-dark: #c98318;
 }
+
+html ::-webkit-scrollbar, body ::-webkit-scrollbar {
+    width: 8px;
+    background-color: #e6e6e6;
+}
+
+html ::-webkit-scrollbar-thumb, body ::-webkit-scrollbar-thumb {
+    border-radius: 12px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #8a8a8a;
+}
+
+html ::-webkit-scrollbar-track, body ::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    background-color: #e6e6e6;
+}

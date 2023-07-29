@@ -34,7 +34,7 @@ interface SongPlaylist {
 
 const router = Router({ mergeParams: true });
 
-// TODO: add comment
+
 router.put("/generate", async (req, res) => {
   // TODO: lock event
   req.event = await DI.em.findOne(Event, { id: req.event!.id });
@@ -61,8 +61,7 @@ router.put("/generate", async (req, res) => {
       populate: ["user"],
     }
   );
-  if (!eventUserOwner)
-    return res.status(404).json({ message: "Owner not found." });
+  if (!eventUserOwner) return res.status(404).json({ message: "Owner not found." });
 
   // fetch playlist metadata
   const owner = eventUserOwner.user;
@@ -76,13 +75,10 @@ router.put("/generate", async (req, res) => {
       populate: ["user"],
     }
   );
-  for (const eventUser of eventUsers)
-    access_token_array.push(await generateAccessToken(eventUser.user));
+  for (const eventUser of eventUsers) access_token_array.push(await generateAccessToken(eventUser.user));
   owner.spotifyAccessToken = access_token_array[0];
 
-  const maxSongsPerUser = Math.floor(
-    (PLAYLIST_SIZE - 50) / access_token_array.length
-  );
+  const maxSongsPerUser = Math.floor((PLAYLIST_SIZE - 50) / access_token_array.length);
 
   if (access_token_array[0] == null)
     return res
@@ -212,9 +208,8 @@ async function findCommonSongsBetweenPlaylists(
         }
       }
 
-      if (commonSongIds === null) {
-        commonSongIds = playlistSongIds;
-      } else {
+      if (commonSongIds === null) commonSongIds = playlistSongIds;
+      else {
         commonSongIds = new Set<string>(
           [...commonSongIds].filter((songId: string) =>
             playlistSongIds.has(songId)
@@ -232,12 +227,8 @@ async function findCommonSongsBetweenPlaylists(
       if (tracksToAdd.length >= maxSongsPerUser * accessTokens.length) break; // Check if the song amount limit is reached
       tracksToAdd.push(songId);
     }
-    for (const songId of tracksToAdd)
-      await addTrackToEvent(event, accessTokens, songId);
-  } else
-    console.log(
-      "findCommonSongsBetweenPlaylists(): No common songs found between all users."
-    );
+    for (const songId of tracksToAdd) await addTrackToEvent(event, accessTokens, songId);
+  } else console.log("findCommonSongsBetweenPlaylists(): No common songs found between all users.");
 }
 
 async function fetchUserPlaylists(
@@ -322,9 +313,7 @@ async function addTopTracksForEachUser(
     const topTrackIds = await fetchArtistTopTrackIds(accessTokens[0], artistId);
     if (topTrackIds) {
       for (const trackId of topTrackIds) {
-        if (commonTopTracks.length >= maxSongsPerUser * accessTokens.length) {
-          break; // Check if the limit is reached
-        }
+        if (commonTopTracks.length >= maxSongsPerUser * accessTokens.length) break; // Check if the limit is reached
         commonTopTracks.push(trackId);
       }
     }
@@ -334,9 +323,7 @@ async function addTopTracksForEachUser(
   console.log("2: Common top tracks: " + commonTopTracks.length);
 
   // Step 5: Add the common top tracks to the event playlist
-  for (const trackId of commonTopTracks) {
-    await addTrackToEvent(event, accessTokens, trackId);
-  }
+  for (const trackId of commonTopTracks) await addTrackToEvent(event, accessTokens, trackId);
 }
 
 async function fetchArtistTopTrackIds(
@@ -391,8 +378,6 @@ async function addCommonGenresRecommendations(
   for (const access_token of accessTokens) {
     if (access_token == null) continue;
 
-    let userTopGenres: string[] = [];
-
     await axios
       .get(`https://api.spotify.com/v1/me/top/artists?limit=50`, {
         headers: {
@@ -405,11 +390,10 @@ async function addCommonGenresRecommendations(
           for (const artist of response.data.items) {
             if (artist.genres) {
               artist.genres.forEach((genre: string) => {
-                if (availableGenres.has(genre)) {
+                if (availableGenres.has(genre))
                   if (commonGenres.has(genre))
                     commonGenres.set(genre, commonGenres.get(genre)! + 1);
                   else commonGenres.set(genre, 1);
-                }
               });
             }
           }
@@ -543,12 +527,11 @@ async function createSpotifyPlaylistFromEvent(
           batch = []; // Clear the batch after each function call
         }
 
-        /*const checkTrack = await DI.em.findOne(EventTrack, {
+        const checkTrack = await DI.em.findOne(EventTrack, {
           event: { id: event.id },
           track: { id: batchTrack.track.id },
         });
-        if (!checkTrack)*/
-        await DI.em.persistAndFlush(batchTrack);
+        if (!checkTrack) await DI.em.persistAndFlush(batchTrack);
       }
 
       if (batch.length > 0) {
