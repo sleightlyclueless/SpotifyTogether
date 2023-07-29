@@ -51,7 +51,8 @@ router.put("/generate", async (req, res) => {
 
   await DI.em.flush();
 
-  const eventUserOwner = await DI.em.findOne(
+  // Check and regenerate access tokens
+  let eventUserOwner = await DI.em.findOne(
     EventUser,
     {
       event: { id: req.event!.id },
@@ -62,10 +63,11 @@ router.put("/generate", async (req, res) => {
     }
   );
   if (!eventUserOwner) return res.status(404).json({ message: "Owner not found." });
-
-  // fetch playlist metadata
+  eventUserOwner.user.spotifyAccessToken = await generateAccessToken(eventUserOwner.user);
   const owner = eventUserOwner.user;
+  if (!owner.spotifyAccessToken) return res.status(404).json({ message: "Owner access token not found." });
   let access_token_array = new Array<string>();
+  access_token_array.push(owner.spotifyAccessToken);
   const eventUsers = await DI.em.find(
     EventUser,
     {
@@ -75,8 +77,10 @@ router.put("/generate", async (req, res) => {
       populate: ["user"],
     }
   );
-  for (const eventUser of eventUsers) access_token_array.push(await generateAccessToken(eventUser.user));
-  owner.spotifyAccessToken = access_token_array[0];
+  for (const eventUser of eventUsers)
+    if (eventUser.user != owner)
+        access_token_array.push(await generateAccessToken(eventUser.user));
+
 
   const maxSongsPerUser = Math.floor((PLAYLIST_SIZE - 50) / access_token_array.length);
 
@@ -484,6 +488,8 @@ async function createSpotifyPlaylistFromEvent(
   await event.eventTracks.init();
   const eventTracksArray: EventTrack[] = [...event.eventTracks];
 
+  console.log("Trying to create playlist for owner " + owner.spotifyId);
+  console.log("Trying to create playlist for owner with access token " + owner.spotifyAccessToken);
   return axios
     .post(
       "https://api.spotify.com/v1/users/" + owner.spotifyId + "/playlists",

@@ -1,6 +1,6 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import { SpotifyTrack } from "../../constants";
-import { Button, ButtonContainer, DeleteIcon, IonContainer80, LoadingSpinner, SongContainer, SongItemContainer, SongItemImage, StyledInput, StyledText, StyledTextL, SearchContainer, ContentContainer } from "../../styles";
+import { Button, ButtonContainer, DeleteIcon, IonContainer80, LoadingSpinner, SongContainer, SongItemContainer, SongItemImage, StyledInput, StyledText, StyledTextL, SearchContainer, SearchItemContainer, ContentContainer } from "../../styles";
 import { useFetchSpotifyPlaylistIds,useFetchTracksOfPlaylist,useGeneratePlaylist,useProposeNewEventTrack,useProposePlaylist,useRemoveEventTrack,useSearchTracks } from "../../hooks";
 
 type EditEventPlaylistProps = {
@@ -186,7 +186,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
         {showDropdown && (
           <SearchContainer>
             {searchResults.map((track: SpotifyTrack) => (
-              <SongItemContainer
+              <SearchItemContainer
                 key={track.id}
                 onClick={() => rights >= 1 && handleProposeNewTrack(track.id)} // Only allow proposal if user is admin or owner
               >
@@ -194,7 +194,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
                 <StyledText>
                   {track.artist} - {track.name}
                 </StyledText>
-              </SongItemContainer>
+              </SearchItemContainer>
             ))}
           </SearchContainer>
         )}

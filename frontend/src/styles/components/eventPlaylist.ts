@@ -29,15 +29,8 @@ export const SongContainer = styled.div`
   margin: 16px 0 32px;
 `;
 
-export const SearchContainer = styled.div`
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+export const SearchContainer = styled(SongContainer)`
   max-height: 14%;
-  overflow-y: scroll;
-  color: ${COLORS.fontDark};
-  margin: 16px 0 32px;
 `;
 
 export const SongItemContainer = styled.div`
@@ -57,6 +50,13 @@ export const SongItemContainer = styled.div`
   position: relative;
 `;
 
+export const SearchItemContainer = styled(SongItemContainer)`
+  &:hover {
+    background: ${COLORS.link};
+    cursor: pointer;
+  }
+`;
+
 export const SongItemImage = styled.img`
   width: 40px;
   height: 40px;
@@ -65,9 +65,13 @@ export const SongItemImage = styled.img`
 `;
 
 export const DeleteIcon = styled.span`
-  color: ${COLORS.link};
+  color: ${COLORS.fontDark};
   font-size: 30px;
   transition: all 0.5s;
   position: absolute;
   right: 8px;
+  &:hover {
+    color: ${COLORS.link};
+    cursor: pointer;
+  }
 `;
