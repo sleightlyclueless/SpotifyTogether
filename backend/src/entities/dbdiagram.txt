@@ -11,20 +11,22 @@ Table User {
 }
 
 Table EventUser {
-  user User [primary key]
   event Event [primary key]
+  user User [primary key]
   permission Permission
 }
 
 Table Event {
   id varchar [primary key]
-  duration integer
+  name varchar
+  date date
+  locked boolean
 }
 
 Table EventTrack {
-  event Event [primary key]
-  track SpotifyTrack [primary key]
+  id varchar [primary key]
   status TrackStatus
+  playlists Playlist
 }
 
 Table SpotifyTrack {
@@ -32,20 +34,21 @@ Table SpotifyTrack {
   genre varchar
   duration integer
   artist varchar
+  artistName varchar
+  trackName varchar
+  albumImage varchar
 }
 
-Table SpotifyPlaylist {
+Table Playlist {
   id varchar [primary key]
-  duration bigint
-  event Event
-  tracks EvenTrack
+  accepted boolean
 }
+
+Ref: Playlist.id > Event.id
 
 Ref: EventUser.user > User.spotifyId
 Ref: EventUser.event > Event.id
 
-Ref: EventTrack.event > Event.id
-Ref: EventTrack.event > SpotifyTrack.id
-
-Ref: SpotifyPlaylist.tracks > EventTrack.track
-//Ref: SpotifyPlaylist.event - Event.id
+Ref: EventTrack.id > Event.id
+Ref: EventTrack.id > SpotifyTrack.id
+Ref: EventTrack.id > Playlist.id

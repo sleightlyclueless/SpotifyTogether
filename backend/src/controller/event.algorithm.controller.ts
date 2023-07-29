@@ -1,13 +1,12 @@
-import { Router } from "express";
-import { Event } from "../entities/Event";
-import { User } from "../entities/User";
-import { EventUser, Permission } from "../entities/EventUser";
-import { SpotifyTrack } from "../entities/SpotifyTrack";
-import { EventTrack, TrackStatus } from "../entities/EventTrack";
-import { Playlist } from "../entities/Playlist";
-import { DI } from "../index";
+import {Router} from "express";
+import {Event} from "../entities/Event";
+import {User} from "../entities/User";
+import {EventUser, Permission} from "../entities/EventUser";
+import {SpotifyTrack} from "../entities/SpotifyTrack";
+import {EventTrack, TrackStatus} from "../entities/EventTrack";
+import {Playlist} from "../entities/Playlist";
+import {DI} from "../index";
 import axios from "axios";
-import util from "util";
 
 const AMOUNT_ARTISTS = 20;
 const AMOUNT_TRACKS_PER_ARTIST = 3;
@@ -685,22 +684,21 @@ async function addTrackToEvent(
 }
 
 async function getGenreString(artistId: string, access_token: string) {
-  const artistResponse = await axios
-    .get(`https://api.spotify.com/v1/artists/${artistId}`, {
-      headers: {
-        Authorization: "Bearer " + access_token,
-      },
-    })
-    .then((response) => {
-      return response.data.genres && response.data.genres.length > 0
-        ? response.data.genres.join(",")
-        : "Unknown";
-    })
-    .catch((error) => {
-      console.log("getGenreString() " + error.message);
-      return "Unknown";
-    });
-  return artistResponse;
+  return await axios
+      .get(`https://api.spotify.com/v1/artists/${artistId}`, {
+        headers: {
+          Authorization: "Bearer " + access_token,
+        },
+      })
+      .then((response) => {
+        return response.data.genres && response.data.genres.length > 0
+            ? response.data.genres.join(",")
+            : "Unknown";
+      })
+      .catch((error) => {
+        console.log("getGenreString() " + error.message);
+        return "Unknown";
+      });
 }
 
 export const EventAlgorithmController = router;

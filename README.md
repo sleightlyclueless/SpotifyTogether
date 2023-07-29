@@ -1,11 +1,15 @@
 # Spotify Project
 - - -
 Create an event with the perfect playlist everyone loves.
-<br><br>
+
+<br>
 
 ## Disclaimer - Anfängliche Organisation
 - - -
-Wir haben anfangs eine klare Aufgabenteilung zwischen Backend und Frontend gemacht. Björn, Noah und Antoine haben sich hier anfangs um das Backend gekümmert, während Paul und Sebi hauptsächlich am Frontend gearbeitet haben. Im Verlaufe des Projektes gab es neben Absprachen in beide Richtungen auch Arbeiten an der Gegenseite während gegenseitigem Zuschneiden von Funktionalitäten.
+Wir haben eine klare Aufgabenteilung zwischen Backend und Frontend gemacht. Björn, Noah und Antoine haben sich
+hier anfangs um das Backend gekümmert, während Paul und Sebi hauptsächlich am Frontend gearbeitet haben. 
+Im Verlaufe des Projektes gab es neben Absprachen in beide Richtungen auch Arbeiten an der Gegenseite während 
+gegenseitigem Zuschneiden von Funktionalitäten.
 
 ### Team Frontend
 
@@ -21,19 +25,22 @@ Wir haben anfangs eine klare Aufgabenteilung zwischen Backend und Frontend gemac
 ##### Noah & Björn:
 - regelmäig Freitags & Samstags online getroffen
    - Zusammenarbeit in Jetbrains Webstorm code with me 
-- event.controller-struktur konzept und implementierung
+     - erhöhte Produktivität durch pair programming
+     - weniger Git Konflikte
+     - Möglichst einheitliche Formatierung und Kommentierung des Codes
+- entity-relationship Konzept und Implementierung
+- event.controller-struktur Konzept und Implementierung
    - auth.spotify.controller.ts
-   - event.algorithm.controller.ts 
-   - event.controller.ts
+   - event.algorithm.controller.ts
+   - event.controller.ts 
    - event.settings.controller.ts 
-   - Integration des participants-controllers
-- auth middleware
-  - auth.middleware.ts
-- entity-relationships konzept + implementierung
-- Spotify-Anbindung
-- debugging mit Team Frontend (schnelles Troubleshooting bei integration des Frotend)
+- Integration des participants-controllers
+- auth.middleware.ts
+- Spotify-Anbindung & Authentication auf Basis von Sebi's Prototyp
+- Debugging mit Team Frontend (schnelles Troubleshooting bei Integration des Frontend)
 - Hilfe bei Integration im Frontend
 - backend readme
+  - Während der Implementierung der Routen in den controllern haben wir immer die... 
 
 ##### Antoine:
 - Unterstützung von Backend und Frontend über Code with Me
@@ -47,15 +54,11 @@ Wir haben anfangs eine klare Aufgabenteilung zwischen Backend und Frontend gemac
 - Entwicklung einer Test Strategie fürs Backend (In der Abschlusspräsentation)
 - Backend readme   
 
-Disclaimer Teamarbeit Noah/Björn/Antoine:
-
-Coden zu zweit ist lustiger, deswegen haben wir das Code-with-me-Feature fleißig benutzt und bessere Ergebnisse abgeliefert,
-da direkte Kommunikation sowie schnelles Troubleshooting für uns wichtiger waren als eigene Bearbeitungszeit.
-Da wir aus vorherigen Modulen zusammen schon ähnliche Codestandards übernommen haben fiel es uns leicht eine gehobene Codequalität abzuliefern.
-
 Disclaimer Antoine
 In den letzten Wochen vor der Abgabe ist bei mir ein nahestehender verstorben, weswegen ich zum Schluss nicht in gewohnter intensität am Projekt teilnehmen konnte. 
-<br><br><br>
+
+<br>
+
 ## Backend
 - - -
 ### Start (Docker)
@@ -63,7 +66,6 @@ Um das Backend zu verwenden reicht es, aus dem Projekt-root folgenden Befehl aus
 ```shell
 docker compose up --build
 ```
-- - -
 
 ### Anforderungen
 - Node.js & NPM
@@ -78,20 +80,23 @@ docker compose up --build
 
 - - -
 
-
-### Entities Structure
+### Entitiy Structure
 ![alt text](entities.png "Entities")
-Übersicht verwendeter Datenbank Entitäten. Notiz, Sebi (TODO für Backend): Später hinzugekommen sind noch die Felder artistName, trackName, albumImage im SpotifyTrack zur Darstellung im Frontend
+Dies ist lediglich eine Visualisierung und enthält nicht alle Attribute wie not null oder spezifische Datentypen.
 
-### Spotify Authorization
+### (Spotify-) Authorization
+Wir haben kein eigenes Login System implementiert, sondern nutzen den durch Spotify generierten access- & refresh token.
+
 ![alt text](auth-code-flow.png "Spotify Authorization")
 Als Anbindung an die Spotify API verwenden wir den 
 [Authorization Code Flow](https://developer.spotify.com/documentation/web-api/tutorials/code-flow) OAuth2 flow.
 Wir lagern somit sämtliche Authentification an Spotify aus und verwenden ihren access_token zum Validieren des Nutzers.
 
 ### Backend Routen
-Für fast alle Routen ist das Setzen des "Authorization" Headers mit einem gültigen spotify access_token nötig. Dieses ist vonseiten Spotifys für maximal eine Stunde gültig, wobei ein weiteres während oder nach dessen Ablauf per Refresh Token unter /account/refresh_token angefordert und gespeichert werden kann.
+Für fast alle Routen ist das Setzen des "Authorization" Headers mit einem gültigen spotify access_token nötig. 
 
+Dieses ist vonseiten Spotifys für maximal eine Stunde gültig, wobei ein weiteres während oder nach dessen Ablauf per 
+Refresh Token unter /account/refresh_token angefordert und gespeichert werden kann.
 
 ### Auth Middleware
 | method                  | codes    | description                                        |
@@ -165,11 +170,11 @@ Note: The status code 429 is returned by spotify if the app has exceeded its rat
 ### Tests
 Das Backend und Frontend lässt sich leider nicht leicht per Postman oder automatisierten Tests testen, da alles sehr stark an die Spotify-API angebunden ist und somit auch abhängig von dieser ist. Dies hängt mit der Funktionsweise unserer Anwendung zusammen und hat seine Richtigkeit. Man könnte in Postman zwar per persistierten Dummy Usern und pre-request-script gültige API-Keys Simulieren, allerdings ist dieser Aufwand für uns nicht als sinnvoll erachtet, da die Erreichbarkeit der Routen zwar getestet werden könnte, nicht aber deren Rückgabewerte. Getestet wird also über die live Anwendung. Daher haben wir frühzeitig Kontakt mit unserem Projektbetreuer aufgenommen, nach Rücksprache mit ihm sollen wir in unserer README erwähnen, wie man das Testing mit deutlich mehr Zeit durchführen könnte. Normalerweise, wenn man mehr Zeit für das Projekt hätte, dann würde man die Anwendung und somit auch die Tests unabhängiger von der Spotify-API machen. Die Spotify-API würde von uns Gemockt also im kleinen Nachgebaut werden, sodass diese unsere Automatisierten / Postman Tests nicht mehr behindert. Backend und Frontend sollten möglichst komplett unabhängig voneinander und von anderen getrennt testbar sein.
 
-
-### CI/CD ?
+### CI/CD
 Eine CI/CD Pipeline ist eingerichtet, diese testet nach jedem Commit und Merge den Code durch. 
 
-<br><br>
+<br>
+
 ## Frontend
 - - -
 

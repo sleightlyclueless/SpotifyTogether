@@ -18,6 +18,9 @@ export class EventTrack {
   @PrimaryKey({ nullable: false, unique: true })
   id: string;
 
+  @Property()
+  status!: TrackStatus;
+
   @ManyToOne({ entity: () => SpotifyTrack })
   track: SpotifyTrack;
 
@@ -26,9 +29,6 @@ export class EventTrack {
 
   @ManyToMany(() => Playlist, "eventTracks", { owner: true })
   playlists = new Collection<Playlist>(this);
-
-  @Property()
-  status!: TrackStatus;
 
   constructor(status: TrackStatus, track: SpotifyTrack, event: Event) {
     this.id = v4();
