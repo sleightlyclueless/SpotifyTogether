@@ -1,6 +1,6 @@
 import { HOME } from "../../constants";
 import { useGetUserName, useLogout } from "../../hooks";
-import { Content, LogoutButton, UserSettingsContainer } from "../../styles";
+import { Button, StyledTextL, IonContainer35 } from "../../styles";
 
 export const UserSettings = () => {
   const userName = useGetUserName();
@@ -9,12 +9,12 @@ export const UserSettings = () => {
   if (!isLoading) window.location.href = HOME;
 
   return (
-    <UserSettingsContainer>
-      <Content>Settings</Content>
+    <IonContainer35>
+      <StyledTextL>Settings</StyledTextL>
       Hello {userName}, let's create some events!
-      <LogoutButton onClick={logout} disabled={isLoading}>
+      <Button onClick={logout} disabled={isLoading}>
         {!isLoading ? "Logging out..." : "Logout"}
-      </LogoutButton>
-    </UserSettingsContainer>
+      </Button>
+    </IonContainer35>
   );
 };

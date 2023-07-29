@@ -2,24 +2,28 @@ import axios from "axios";
 import { useState } from "react";
 
 export const useUpdateEvent = () => {
-  const [useUpdateEventisLoading, setuseUpdateEventisLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const accessToken = localStorage.getItem("accessToken") || undefined;
 
-  const callUpdateAPI = async (url: string, data?: any) => {
-    setuseUpdateEventisLoading(true);
+  const regenerateEventId = async (eventID: string) => {
+    try {
+      setIsLoading(true);
 
-    await axios
-      .put(url, data, {
-        headers: {
-          Authorization: accessToken,
-        },
-      })
-      .catch((error) => {
-        console.error("Error updating event:",error);
-      })
-      .finally(() => {
-        setuseUpdateEventisLoading(false);
-      });
+      await axios.put(
+        `http://localhost:4000/events/${eventID}/settings/generateNewId`,
+        {},
+        {
+          headers: {
+            Authorization: accessToken,
+          },
+        }
+      );
+
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
   };
 
   const setCustomEventId = async (
@@ -28,13 +32,24 @@ export const useUpdateEvent = () => {
     newName: string,
     newDate: string
   ) => {
-    await callUpdateAPI(
-      `http://localhost:4000/events/${eventID}/settings/id/${newEventId}`,
-      {
-        newName,
-        newDate,
-      }
-    );
+    try {
+      setIsLoading(true);
+
+      await axios.put(
+        `http://localhost:4000/events/${eventID}/settings/id/${newEventId}`,
+        { newName, newDate }, // Include newName and newDate in the request body
+        {
+          headers: {
+            Authorization: accessToken,
+          },
+        }
+      );
+
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
   };
 
   const updateEventName = async (
@@ -42,40 +57,102 @@ export const useUpdateEvent = () => {
     newName: string,
     currentName: string
   ) => {
+    // Only update the name if it's different from the current name
     if (newName !== currentName) {
-      await callUpdateAPI(
-        `http://localhost:4000/events/${eventID}/settings/name/${newName}`
-      );
+      try {
+        setIsLoading(true);
+
+        await axios.put(
+          `http://localhost:4000/events/${eventID}/settings/name/${newName}`,
+          {},
+          {
+            headers: {
+              Authorization: accessToken,
+            },
+          }
+        );
+
+        setIsLoading(false);
+      } catch (error) {
+        console.log(error);
+        setIsLoading(false);
+      }
     }
   };
 
   const updateEventDate = async (eventID: string, newDate: string) => {
-    const eventDateString = new Date(newDate).toISOString();
-    await callUpdateAPI(
-      `http://localhost:4000/events/${eventID}/settings/date/${eventDateString}`
-    );
+    try {
+      setIsLoading(true);
+
+      // Ensure the date string is in ISO 8601 format before making the API call
+      const eventDateString = new Date(newDate).toISOString();
+
+      await axios.put(
+        `http://localhost:4000/events/${eventID}/settings/date/${eventDateString}`,
+        {},
+        {
+          headers: {
+            Authorization: accessToken,
+          },
+        }
+      );
+
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
   };
 
-  /*
   const lockEvent = async (eventID: string) => {
-    await callUpdateAPI(
-      `http://localhost:4000/events/${eventID}/settings/lock`
-    );
+    try {
+      setIsLoading(true);
+
+      await axios.put(
+        `http://localhost:4000/events/${eventID}/settings/lock`,
+        {},
+        {
+          headers: {
+            Authorization: accessToken,
+          },
+        }
+      );
+
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
   };
 
   const unlockEvent = async (eventID: string) => {
-    await callUpdateAPI(
-      `http://localhost:4000/events/${eventID}/settings/unlock`
-    );
+    try {
+      setIsLoading(true);
+
+      await axios.put(
+        `http://localhost:4000/events/${eventID}/settings/unlock`,
+        {},
+        {
+          headers: {
+            Authorization: accessToken,
+          },
+        }
+      );
+
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
   };
-  */
 
   return {
-    useUpdateEventisLoading,
+    isLoading,
     setCustomEventId,
+    regenerateEventId,
     updateEventName,
     updateEventDate,
-    //lockEvent,
-    //unlockEvent,
+    lockEvent,
+    unlockEvent,
   };
 };

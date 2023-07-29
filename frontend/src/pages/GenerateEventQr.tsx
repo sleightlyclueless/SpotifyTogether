@@ -1,7 +1,7 @@
 import QRCode from "qrcode.react";
 import { Header } from "../components";
 import { useGetUserName } from "../hooks";
-import { EventQRContainer, IntroText, PageContainer, QrOverlay } from "../styles";
+import { CenterContainer, StyledTextL, PageContainer, QrOverlay } from "../styles";
 
 // Site to provide a qr code to join an event
 export const GenerateEventQr = () => {
@@ -12,12 +12,12 @@ export const GenerateEventQr = () => {
   return (
     <PageContainer>
       <Header userName={userName || undefined} />
-      <EventQRContainer>
-        <IntroText>Join Event: {eventID}</IntroText>
+      <CenterContainer>
+        <StyledTextL>Join Event: {eventID}</StyledTextL>
         <QrOverlay>
           <QRCode value={`/join?event=${eventID}`} />
         </QrOverlay>
-      </EventQRContainer>
+      </CenterContainer>
     </PageContainer>
   );
 };

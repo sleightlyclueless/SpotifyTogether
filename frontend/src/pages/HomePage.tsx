@@ -2,7 +2,7 @@ import { FunctionComponent, useMemo, useState } from "react";
 import { Header, BigButton, JoinEventForm, EventOverview, NewEventForm } from "../components";
 import { useGetUserName } from "../hooks";
 import { HOME, JOINEVENTBYQR } from "../constants";
-import { JoinEventButton, LoginButton, LoginContainer, LoginText, NewEventButton, PageContainer, StyledIonModal, VideoBackground, VidOverlay } from "../styles";
+import { JoinEventButton, NewEventButton, Button, CenterContainer, StyledTextL, PageContainer, SingleButtonCenterContainer, StyledIonModal, VideoBackground, VidOverlay } from "../styles";
 import partyVid from "../assets/party.mp4";
 
 export const HomePage: FunctionComponent = () => {
@@ -102,13 +102,15 @@ export const HomePage: FunctionComponent = () => {
           </StyledIonModal>
         </>
       ) : (
-        <LoginContainer>
-          <LoginText>
+        <CenterContainer>
+            
+          <StyledTextL>
             Create your community, host events and build your custom playlist
             for it with spotify.
-            <LoginButton onClick={handleOnLoginClick}>Get started!</LoginButton>
-          </LoginText>
-        </LoginContainer>
+            <SingleButtonCenterContainer><Button onClick={handleOnLoginClick}>Get started!</Button></SingleButtonCenterContainer>
+          </StyledTextL>
+          
+        </CenterContainer>
       )}
     </PageContainer>
   );

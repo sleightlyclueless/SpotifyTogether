@@ -3,7 +3,16 @@ import { ChangeEvent, FunctionComponent, useEffect, useState } from "react";
 import { Event } from "../../constants";
 import { useUpdateEvent } from "../../hooks";
 import { toast } from "react-toastify";
-import { FormContainer, IconContainer, Label, RandomIcon, StyledEventIdInput, StyledEventNameInput, StyledIonDatetime, SubmitButton } from "../../styles";
+import {
+  IonContainer80,
+  IconContainer,
+  Label,
+  ReloadIcon,
+  StyledInput,
+  StyledIonDatetime,
+  Button,
+  StyledTextL,
+} from "../../styles";
 
 type EditEventFormProps = {
   event: Event;
@@ -17,7 +26,12 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
   const [eventName, setEventName] = useState<string>(event.name);
   const [eventDate, setEventDate] = useState<Date>(new Date(event.date));
   const [customEventId, setFormCustomEventId] = useState<string>(event.id);
-  const { useUpdateEventisLoading, updateEventName, updateEventDate, setCustomEventId } = useUpdateEvent();
+  const {
+    useUpdateEventisLoading,
+    updateEventName,
+    updateEventDate,
+    setCustomEventId,
+  } = useUpdateEvent();
 
   useEffect(() => {
     setEventName(event.name);
@@ -37,7 +51,12 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
 
       // Attempt to update the event ID
       try {
-        await setCustomEventId(event.id, customEventId, eventName, eventDate.toISOString());
+        await setCustomEventId(
+          event.id,
+          customEventId,
+          eventName,
+          eventDate.toISOString()
+        );
         event.id = customEventId;
       } catch (error) {
         toast.error("Failed to update event ID. Please check the input.");
@@ -86,10 +105,11 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
   };
 
   return (
-    <FormContainer>
+    <IonContainer80>
+      <StyledTextL>Edit Event</StyledTextL>
       <Label>Event ID</Label>
       <IconContainer>
-        <StyledEventIdInput
+        <StyledInput
           type="text"
           value={customEventId}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -97,10 +117,10 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
           }
           placeholder={"Event ID"}
         />
-        <RandomIcon onClick={handleGenerateRandomId} />
+        <ReloadIcon onClick={handleGenerateRandomId} />
       </IconContainer>
       <Label>Event Name</Label>
-      <StyledEventNameInput
+      <StyledInput
         type={"text"}
         placeholder={"Event Name"}
         value={eventName}
@@ -127,16 +147,15 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
       {useUpdateEventisLoading ? (
         <p>Loading...</p>
       ) : (
-        <>
-          <SubmitButton onClick={handleSave}>Save Changes</SubmitButton>
-        </>
+          <Button onClick={handleSave}>Save Changes</Button>
       )}
-    </FormContainer>
+    </IonContainer80>
   );
 };
 
 const generateRandomId = (): string => {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
   let randomId = "";
   for (let i = 0; i < 6; i++) {
     const randomIndex = Math.floor(Math.random() * characters.length);

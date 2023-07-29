@@ -6,7 +6,7 @@ import { useDeleteEvent, useEditParticipantRole, useGetUserEvents, useGetUserNam
 import { EditEventForm } from "../EventForms/EditEventForm";
 import { EditEventPlaylist } from "./EventPlaylist";
 import { Event } from "../../constants";
-import { ButtonContainer, DetailViewEventContainer, EventButtons, EventOverviewContainer, FullPartyName, NoEventsContainer, ParticipantId, ParticipantItem, ParticipantsContainer, PartyName, SinglePlaylist, StyledAiOutlineArrowDown, StyledBiCopy, StyledCode, StyledIonModal, StyledIonPopover, StyledLuClose, StyledLuEdit2, StyledMdClose, StyledRoleDropdown, StyledRoleText, Timer, TimerContainer, TimerText } from "../../styles";
+import { ButtonContainer, DetailViewEventContainer, Button, EventOverviewContainer, FullPartyName, NoEventsContainer, ParticipantId, ParticipantItem, ParticipantsContainer, PartyName, SinglePlaylist, StyledAiOutlineArrowDown, StyledBiCopy, StyledCode, StyledIonModal, StyledIonPopover, StyledLuClose, StyledLuEdit2, StyledMdClose, StyledRoleDropdown, StyledRoleText, Timer, TimerContainer, TimerText } from "../../styles";
 
 type EditEventType = "none" | "editEvent" | "editPlaylist";
 
@@ -225,9 +225,9 @@ export const EventOverview: FunctionComponent = () => {
 
                       {rights > 0 ? (
                         <ButtonContainer>
-                          <EventButtons id="generate-code">
+                          <Button id="generate-code">
                             Invite People
-                          </EventButtons>
+                          </Button>
                           <StyledIonPopover
                             ref={popoverRef}
                             trigger="generate-code"
@@ -245,26 +245,26 @@ export const EventOverview: FunctionComponent = () => {
                               </Link>
                             </StyledCode>
                           </StyledIonPopover>
-                          <EventButtons
+                          <Button
                             onClick={() => setContentMode("editPlaylist")}
                           >
                             Manage Playlist
-                          </EventButtons>
+                          </Button>
                           {rights === 2 && (
-                            <EventButtons
+                            <Button
                               onClick={() => handleDeleteEvent(event.id)}
                             >
                               Delete Event
-                            </EventButtons>
+                            </Button>
                           )}
                         </ButtonContainer>
                       ) : (
                         <ButtonContainer>
-                          <EventButtons
+                          <Button
                             onClick={() => setContentMode("editPlaylist")}
                           >
                             View Playlist
-                          </EventButtons>
+                          </Button>
                         </ButtonContainer>
                       )}
                     </DetailViewEventContainer>

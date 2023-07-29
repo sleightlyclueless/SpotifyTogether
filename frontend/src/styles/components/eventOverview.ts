@@ -53,7 +53,7 @@ export const SinglePlaylist = styled.div`
   align-items: center;
   flex-direction: column;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  background: rgba(${COLORS.buttonRGB}, 0.95);
+  background: rgba(${COLORS.link}, 0.95);
   opacity: 0.85;
   transition: all 0.5s;
 
@@ -73,7 +73,7 @@ export const PartyName = styled.div`
 
 export const Timer = styled.div`
   border-radius: 12px;
-  background: ${COLORS.backgroundLight};
+  background: ${COLORS.background};
   color: ${COLORS.background};
   padding: 8px;
   height: 24px;
@@ -144,7 +144,7 @@ export const StyledMdClose = styled(MdClose)`
 export const StyledRoleDropdown = styled.select`
   padding: 8px;
   border-radius: 8px;
-  background: ${COLORS.backgroundLight};
+  background: ${COLORS.background};
   color: ${COLORS.font};
   border: none;
   font-size: 14px;

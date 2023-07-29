@@ -1,14 +1,6 @@
 import styled from "styled-components";
 import { COLORS } from "../colors";
 
-export const LoadingContainer = styled.div`
-  display: flex;
-  height: 80%;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-`;
-
 export const LoadingSpinner = styled.div`
   top: 50%;
   width: 50px;
@@ -26,15 +18,6 @@ export const LoadingSpinner = styled.div`
     }
 `;
 
-export const SearchResultsContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-height: 100px;
-  overflow-y: scroll;
-`;
-
 export const SongContainer = styled.div`
   max-width: 100%;
   display: flex;
@@ -42,6 +25,19 @@ export const SongContainer = styled.div`
   align-items: center;
   max-height: 50%;
   overflow-y: scroll;
+  color: ${COLORS.fontDark};
+  margin: 16px 0 32px;
+`;
+
+export const SearchContainer = styled.div`
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 14%;
+  overflow-y: scroll;
+  color: ${COLORS.fontDark};
+  margin: 16px 0 32px;
 `;
 
 export const SongItemContainer = styled.div`
@@ -50,7 +46,7 @@ export const SongItemContainer = styled.div`
   width: 95%;
   max-width: 400px;
   min-height: 40px;
-  padding: 8px;
+  padding: 8px 16px 8px;
   border-radius: 8px;
   background: ${COLORS.font};
   border: none;
@@ -58,23 +54,7 @@ export const SongItemContainer = styled.div`
   margin-bottom: 8px;
   transition: all 0.5s;
   overflow: hidden;
-`;
-
-export const SearchItemContainer = styled.div`
-  display: flex;
-  align-items: center;
-  width: 95%;
-  max-width: 400px;
-  min-height: 40px;
-  padding: 8px;
-  border-radius: 8px;
-  background: ${COLORS.font};
-  border: none;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  margin-bottom: 8px;
-  transition: all 0.5s;
-  cursor: pointer;
-  overflow: hidden;
+  position: relative;
 `;
 
 export const SongItemImage = styled.img`
@@ -84,25 +64,10 @@ export const SongItemImage = styled.img`
   margin-right: 8px;
 `;
 
-export const SongItemText = styled.div`
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-export const StyledText = styled.div`
-  color: ${COLORS.font};
-  font-size: 16px;
-`;
-
-export const StyledDeleteButton = styled.button`
-  background-color: transparent;
-  border: none;
-`;
-
 export const DeleteIcon = styled.span`
-  color: ${COLORS.button};
+  color: ${COLORS.link};
   font-size: 30px;
   transition: all 0.5s;
+  position: absolute;
+  right: 8px;
 `;

@@ -8,5 +8,4 @@ export * from "./pages/eventqrbundle";
 export * from "./components/eventOverview";
 export * from "./components/eventForms";
 export * from "./components/showCounter";
-export * from "./components/userSettings";
 export * from "./components/eventPlaylist";

@@ -1,7 +1,7 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import { InputCustomEvent } from "@ionic/react";
 import { useJoinEvent } from "../../hooks";
-import { JoinFormContainer, EventIDInput, SubmitButton } from "../../styles";
+import { IonContainer35, StyledInput, StyledTextL, Button } from "../../styles";
 
 type JoinEventFormProps = {
   closeModal: () => void;
@@ -24,8 +24,9 @@ export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
   }, [joinEventisLoading, formSubmitted, closeModal]);
 
   return (
-    <JoinFormContainer>
-      <EventIDInput
+    <IonContainer35>
+      <StyledTextL>Join Event</StyledTextL>
+      <StyledInput
         placeholder="Enter event code"
         type={"text"}
         value={eventID}
@@ -33,9 +34,9 @@ export const JoinEventForm: FunctionComponent<JoinEventFormProps> = ({
           seteventID(e.detail.value || null);
         }}
       />
-      <SubmitButton onClick={handleSubmit} disabled={joinEventisLoading}>
+      <Button onClick={handleSubmit} disabled={joinEventisLoading}>
         {joinEventisLoading ? "Joining..." : "Join Event"}
-      </SubmitButton>
-    </JoinFormContainer>
+      </Button>
+    </IonContainer35>
   );
 };

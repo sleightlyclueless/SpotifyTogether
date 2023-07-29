@@ -1,7 +1,28 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import { SpotifyTrack } from "../../constants";
-import { Button, ButtonContainer, DeleteIcon, FormContainer, LoadingContainer, LoadingSpinner, SearchItemContainer, SearchResultsContainer, SongContainer, SongItemContainer, SongItemImage, SongItemText, StyledDeleteButton, StyledEventIdInput, StyledText } from "../../styles";
-import { useFetchSpotifyPlaylistIds, useFetchTracksOfPlaylist, useGeneratePlaylist, useProposeNewEventTrack, useProposePlaylist, useRemoveEventTrack, useSearchTracks } from "../../hooks";
+import {
+  Button,
+  ButtonContainer,
+  DeleteIcon,
+  IonContainer80,
+  LoadingSpinner,
+  SongContainer,
+  SongItemContainer,
+  SongItemImage,
+  StyledInput,
+  StyledText,
+  StyledTextL,
+  SearchContainer
+} from "../../styles";
+import {
+  useFetchSpotifyPlaylistIds,
+  useFetchTracksOfPlaylist,
+  useGeneratePlaylist,
+  useProposeNewEventTrack,
+  useProposePlaylist,
+  useRemoveEventTrack,
+  useSearchTracks,
+} from "../../hooks";
 
 type EditEventPlaylistProps = {
   eventId: string;
@@ -62,8 +83,9 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
   const handleSearch = async () => {
     await searchTracks(eventId, searchQuery);
   };
-  
+
   const handleSearchForSongInPlaylist = () => {
+    console.log("called");
     const filtered = playlistTrackFilter?.filter(
       (track) =>
         track.artistName
@@ -134,38 +156,35 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
 
   if (isLoading)
     return (
-      <LoadingContainer>
+      <IonContainer80>
         <LoadingSpinner />
-      </LoadingContainer>
+      </IonContainer80>
     );
 
   if (currentPlaylistId && currentPlaylistId != "undefined") {
     return (
-      <FormContainer>
+      <IonContainer80>
         {/* Display Current Event Tracks */}
-        <StyledText>Current Event Tracks</StyledText>
-        <StyledText>Search for songs in playlist</StyledText>
-        <StyledEventIdInput
+        <StyledTextL>Your Playlist</StyledTextL>
+        <StyledInput
           type="text"
-          onChange={(e: any) => {
+          onIonInput={(e: any) => {
             setSearchInPlaylistQuery(e.target.value);
             handleSearchForSongInPlaylist();
           }}
-          placeholder="Enter a song name or artist"
+          placeholder="Search for songs in playlist"
         />
         <SongContainer>
           {filteredPlaylistTracks?.map((track: SpotifyTrack) => (
             <SongItemContainer key={track.id}>
               <SongItemImage src={track.albumImage} alt={track.name} />
-              <SongItemText>
+              <StyledText>
                 {track.artistName} - {track.name}
-              </SongItemText>
+              </StyledText>
               {rights >= 1 && ( // Render delete button only if user is owner
-                <StyledDeleteButton
-                  onClick={() => handleDeleteProposedTrack(track.id)}
-                >
-                  <DeleteIcon>&times;</DeleteIcon>
-                </StyledDeleteButton>
+                <DeleteIcon onClick={() => handleDeleteProposedTrack(track.id)}>
+                  &times;
+                </DeleteIcon>
               )}
             </SongItemContainer>
           ))}
@@ -175,36 +194,30 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
         {rights >= 1 &&
           currentPlaylistId &&
           currentPlaylistId != "undefined" && ( // Render search bar only if user is admin or owner
-            <>
-              <StyledText>Search for a Song</StyledText>
-              <StyledEventIdInput
-                type="text"
-                value={searchQuery}
-                onChange={(e: any) => {
-                  setSearchQuery(e.target.value);
-                  handleSearch();
-                }}
-                placeholder="Enter a song name or artist"
-              />
-            </>
+            <StyledInput
+              type="text"
+              value={searchQuery}
+              onIonInput={(e: any) => {
+                setSearchQuery(e.target.value);
+                handleSearch();
+              }}
+              placeholder="Search songs to add from Spotify"
+            />
           )}
         {showDropdown && (
-          <>
-            <StyledText>Search Results</StyledText>
-            <SearchResultsContainer>
-              {searchResults.map((track: SpotifyTrack) => (
-                <SearchItemContainer
-                  key={track.id}
-                  onClick={() => rights >= 1 && handleProposeNewTrack(track.id)} // Only allow proposal if user is admin or owner
-                >
-                  <SongItemImage src={track.albumImage} alt={track.name} />
-                  <SongItemText>
-                    {track.artist} - {track.name}
-                  </SongItemText>
-                </SearchItemContainer>
-              ))}
-            </SearchResultsContainer>
-          </>
+          <SearchContainer>
+            {searchResults.map((track: SpotifyTrack) => (
+              <SongItemContainer
+                key={track.id}
+                onClick={() => rights >= 1 && handleProposeNewTrack(track.id)} // Only allow proposal if user is admin or owner
+              >
+                <SongItemImage src={track.albumImage} alt={track.name} />
+                <StyledText>
+                  {track.artist} - {track.name}
+                </StyledText>
+              </SongItemContainer>
+            ))}
+          </SearchContainer>
         )}
 
         {/* No playlist found message */}
@@ -233,7 +246,7 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
               )}
             </ButtonContainer>
           )}
-      </FormContainer>
+      </IonContainer80>
     );
   }
 
@@ -241,10 +254,10 @@ export const EditEventPlaylist: FunctionComponent<EditEventPlaylistProps> = ({
     <>
       <StyledText>No playlist found.</StyledText>
       {rights === 2 && (
-        <FormContainer>
+        <IonContainer80>
           {/* Generate Playlist Button */}
           <Button onClick={handleGeneratePlaylist}>Generate Playlist</Button>
-        </FormContainer>
+        </IonContainer80>
       )}
     </>
   );

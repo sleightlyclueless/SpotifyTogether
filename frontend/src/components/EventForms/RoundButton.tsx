@@ -1,6 +1,6 @@
 import { RiPlayListAddLine } from "react-icons/ri";
 import { FunctionComponent } from "react";
-import { BigButtonContainer } from "../../styles";
+import { RoundButton } from "../../styles";
 
 type NewPlaylistButtonProps = {
   onClick: () => void;
@@ -10,8 +10,8 @@ export const BigButton: FunctionComponent<NewPlaylistButtonProps> = ({
   onClick,
 }) => {
   return (
-    <BigButtonContainer>
+    <RoundButton>
       <RiPlayListAddLine onClick={onClick} />
-    </BigButtonContainer>
+    </RoundButton>
   );
 };

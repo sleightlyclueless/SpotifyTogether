@@ -1,80 +1,46 @@
 import styled from "styled-components";
-import { COLORS } from "../colors";
+import { RoundButton } from "../basics";
 
-export const LoginContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+export const VidOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: -1;
 `;
 
-export const LoginText = styled.div`
-  font-size: 20px;
-  font-weight: bold;
-  color: white;
-  text-align: center;
-  margin-bottom: 16px;
+export const VideoBackground = styled.video`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
 `;
 
-export const LoginButton = styled.div`
-  border-radius: 8px;
-  border: 1px solid white;
-  color: white;
-  padding: 10px;
-  max-width: 200px;
-  margin: 20px auto;
-  text-align: center;
-  cursor: pointer;
-  background: ${COLORS.button};
-  transition: all 0.5s;
-`;
-
-export const NewEventButton = styled.div`
-  position: absolute;
-  bottom: 100px;
-  left: 25%;
-  border-radius: 50%;
-  background: ${COLORS.button};
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 80px;
-  height: 80px;
-  transition: all 0.5s;
-
-  animation: 0.3s slide-in;
-  @keyframes slide-in {
+export const NewEventButton = styled(RoundButton)`
+  animation: 0.3s slide-out-top-right forwards;
+  @keyframes slide-out-top-right {
     from {
-      transform: translateY(100%) translateX(100%);
+      transform: translateY(0) translateX(0);
     }
     to {
-      transform: translateY(0) translateX(0);
+      transform: translateY(-100%) translateX(-100%);
     }
   }
 `;
 
-export const JoinEventButton = styled.div`
-  position: absolute;
-  bottom: 100px;
-  right: 25%;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: ${COLORS.button};
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.5s;
-
-  animation: 0.3s slide-in2;
-  @keyframes slide-in2 {
+export const JoinEventButton = styled(RoundButton)`
+  animation: 0.3s slide-out-top-left forwards;
+  @keyframes slide-out-top-left {
     from {
-      transform: translateY(100%) translateX(-50%);
+      transform: translateY(0) translateX(0);
     }
     to {
-      transform: translateY(0) translateX(0);
+      transform: translateY(-100%) translateX(100%);
     }
   }
 `;

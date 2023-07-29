@@ -6,7 +6,6 @@ body {
     hyphens: auto;
     font-weight: 100;
     color: #FFFFFF;
-    background: #1f1f1f;
     --toastify-color-dark: #1f1f1f;
     --toastify-color-progress-dark: #c98318;
 }

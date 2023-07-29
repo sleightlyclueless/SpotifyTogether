@@ -3,31 +3,6 @@ import { AiOutlineReload } from "react-icons/ai";
 import { COLORS } from "../colors";
 import { IonDatetime, IonInput } from "@ionic/react";
 
-export const FormContainer = styled.div`
-  height: 75%;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-export const IconContainer = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%; /* Make the container take the full width */
-  margin-bottom: 12px;
-  position: relative; /* Add relative positioning */
-`;
-
-export const RandomIcon = styled(AiOutlineReload)`
-  cursor: pointer;
-  font-size: 24px;
-  color: ${COLORS.button};
-  position: absolute; /* Position the icon inside the input */
-  right: 8px; /* Adjust the position from the right side */
-`;
-
 export const Label = styled.label`
   font-size: 14px;
   font-weight: bold;
@@ -37,89 +12,41 @@ export const Label = styled.label`
   text-align: left;
 `;
 
-export const JoinFormContainer = styled.div`
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: column;
-  height: 40%;
-`;
-
-export const EventIDInput = styled(IonInput)`
-  --padding-start: 8px !important;
-  margin-top: 32px;
+export const StyledInput = styled(IonInput)`
   width: 100%;
   height: 40px;
   border-radius: 8px;
-  background: ${COLORS.font};
+  background: ${COLORS.backgroundLight};
+  color: ${COLORS.fontDark} !important;
   border: none;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  margin-bottom: 16px;
+  input {
+    padding-left: 8px !important;
+  }
 `;
 
-export const NewFormContainer = styled.div`
-  padding: 16px;
+export const IconContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-direction: column;
-  height: 75%;
-`;
-
-export const StyledEventNameInput = styled(IonInput)`
-  --padding-start: 8px !important;
+  width: 100%;
   margin-bottom: 12px;
-  width: 100%;
-  height: 40px;
-  border-radius: 8px;
-  background: ${COLORS.font};
-  border: none;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+  position: relative;
 `;
 
-export const StyledEventIdInput = styled.input`
-  padding-left: 8px;
-  width: 100%;
-  height: 40px;
-  border-radius: 8px;
-  background: ${COLORS.font};
-  border: none;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
+export const ReloadIcon = styled(AiOutlineReload)`
+  cursor: pointer;
+  font-size: 24px;
+  color: ${COLORS.link};
+  position: absolute;
+  right: 8px;
+  margin-bottom: 16px;
+  z-index: 2;
 `;
 
 export const StyledIonDatetime = styled(IonDatetime)`
   border-radius: 8px;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-`;
-
-export const SubmitButton = styled.div`
-  width: 160px;
-  height: 60px;
-  background: ${COLORS.button};
-  color: ${COLORS.font};
-  border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 16px;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  transition: all 0.5s;
-`;
-
-export const StyledSelectSong = styled.div`
-  max-width: 100%;
-  background: ${COLORS.font};
-`;
-
-export const StyledSelectSongOption = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px;
-  border-radius: 8px;
-  background: ${COLORS.font};
-  border: none;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.75);
-  margin-bottom: 8px;
-  transition: all 0.5s;
+  color: ${COLORS.fontDark} !important;
+  margin-bottom: 16px;
 `;
