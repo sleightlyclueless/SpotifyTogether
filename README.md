@@ -40,7 +40,7 @@ gegenseitigem Zuschneiden von Funktionalitäten.
 - Debugging mit Team Frontend (schnelles Troubleshooting bei Integration des Frontend)
 - Hilfe bei Integration im Frontend
 - backend readme
-  - Während der Implementierung der Routen in den controllern haben wir immer die... 
+  - Unser Fokus lag vor allem darauf die Backend Routen für das Team Frontend up-to-date zu halten.
 
 ##### Antoine:
 - Unterstützung von Backend und Frontend über Code with Me
