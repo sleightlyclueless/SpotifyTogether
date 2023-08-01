@@ -84,6 +84,9 @@ docker compose up --build
 ![alt text](entities.png "Entities")
 Dies ist lediglich eine Visualisierung und enthält nicht alle Attribute wie not null oder spezifische Datentypen.
 
+### Controller Structure
+![alt text](controller.drawio.png "Controller Structure")
+
 ### (Spotify-) Authorization
 Wir haben kein eigenes Login System implementiert, sondern nutzen den durch Spotify generierten access- & refresh token.
 
