@@ -6,12 +6,10 @@ import { EventTrack, TrackStatus } from "../entities/EventTrack";
 import { Event } from "../entities/Event";
 import { SpotifyTrack } from "../entities/SpotifyTrack";
 import { Playlist } from "../entities/Playlist";
-import { Collection } from "@mikro-orm/core";
-import util from "util";
-import { User } from "../entities/User";
 
 const router = Router({ mergeParams: true });
 
+// search a song from spotify to add to playlists
 router.get("/search", async (req, res) => {
   const { query } = req.query;
 

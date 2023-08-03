@@ -1,11 +1,11 @@
-import {Router} from "express";
-import {Event} from "../entities/Event";
-import {User} from "../entities/User";
-import {EventUser, Permission} from "../entities/EventUser";
-import {SpotifyTrack} from "../entities/SpotifyTrack";
-import {EventTrack, TrackStatus} from "../entities/EventTrack";
-import {Playlist} from "../entities/Playlist";
-import {DI} from "../index";
+import { Router } from "express";
+import { Event } from "../entities/Event";
+import { User } from "../entities/User";
+import { EventUser, Permission } from "../entities/EventUser";
+import { SpotifyTrack } from "../entities/SpotifyTrack";
+import { EventTrack, TrackStatus } from "../entities/EventTrack";
+import { Playlist } from "../entities/Playlist";
+import { DI } from "../index";
 import axios from "axios";
 
 const AMOUNT_ARTISTS = 20;
@@ -148,7 +148,6 @@ router.put("/generate", async (req, res) => {
         .json({
             message: "Successfully created playlist!",
             playlistID: playlistID,
-            newOwnerToken: access_token_array[0],
         })
         .end();
 });

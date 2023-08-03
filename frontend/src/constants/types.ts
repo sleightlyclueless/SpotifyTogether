@@ -15,6 +15,7 @@ export type Event = {
 export type Participant = {
   event: string;
   user: {
+    userid: string;
     spotifyId: string;
     spotifyAccessToken: string | null;
     spotifyRefreshToken: string | null;

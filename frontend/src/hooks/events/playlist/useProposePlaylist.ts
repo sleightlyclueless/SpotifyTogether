@@ -8,7 +8,7 @@ interface ProposePlaylistResponse {
 }
 
 export const useProposePlaylist = () => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const [proposePlaylistisLoading, setproposePlaylistisLoading] = useState<boolean>(false);
 
   const proposePlaylist = async (
@@ -22,7 +22,7 @@ export const useProposePlaylist = () => {
         null,
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );

@@ -11,12 +11,12 @@ export const HomePage: FunctionComponent = () => {
   const [bigButtonIsClicked, setBigButtonIsClicked] = useState(false);
   const userName = useGetUserName();
 
-  const getAccessToken = () => {
+  const getuserID = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const accessTokenCheck = urlParams.get("access_token") || undefined;
+    const userID = urlParams.get("userid") || undefined;
     // Check url param access token from backend auth redirect and store it in local storage
-    if (accessTokenCheck) {
-      localStorage.setItem("accessToken", accessTokenCheck || "");
+    if (userID) {
+      localStorage.setItem("userID", userID || "");
       window.location.href = HOME;
     }
     // If access token refreshed check autoeventjoin from qr code redirect
@@ -29,9 +29,9 @@ export const HomePage: FunctionComponent = () => {
     }
   };
 
-  // Just call getAccessToken on initial render. We assume not more than 1 hour is spent on the page, else use useEffect
+  // Just call getuserID on initial render. We assume not more than 1 hour is spent on the page, else use useEffect
   useMemo(() => {
-    getAccessToken();
+    getuserID();
   }, []);
 
   // Login button click handler frontend -> backend: login -> backend: login_resonse -> redirect frontend: /?access_token=...

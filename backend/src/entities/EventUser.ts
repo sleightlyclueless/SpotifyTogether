@@ -1,6 +1,6 @@
-import {Entity, ManyToOne, Property} from "@mikro-orm/core";
-import {User} from './User'
-import {Event} from './Event'
+import { Entity, ManyToOne, Property } from "@mikro-orm/core";
+import { User } from './User'
+import { Event } from './Event'
 
 // hierarchical order, top to bottom, every level has all rights of all levels above
 export enum Permission {

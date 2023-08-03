@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { useState } from "react";
 
 export const useEditParticipantRole = () => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const [editParticipantisLoading, seteditParticipantisLoading] = useState<boolean>(false);
 
   const changeRole = async (
@@ -18,7 +18,7 @@ export const useEditParticipantRole = () => {
         {},
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );

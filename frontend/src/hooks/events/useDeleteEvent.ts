@@ -4,13 +4,13 @@ import { toast } from "react-toastify";
 
 export const useDeleteEvent = () => {
   const [deleteEventisLoading, setdeleteEventisLoading] = useState<boolean>(false);
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const handleDelete = (eventID: string): void => {
     setdeleteEventisLoading(true);
     axios
       .delete(`http://localhost:4000/events/${eventID}`, {
         headers: {
-          Authorization: accessToken,
+          Authorization: userID,
         },
       })
       .then(() => {

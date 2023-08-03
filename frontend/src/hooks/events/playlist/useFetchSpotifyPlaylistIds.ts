@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const useFetchSpotifyPlaylistIds = () => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
 
   const fetchSpotifyPlaylistIds = async (eventId: string) => {
     try {
@@ -9,7 +9,7 @@ export const useFetchSpotifyPlaylistIds = () => {
         `http://localhost:4000/events/${eventId}/tracks/spotifyPlaylistIds`,
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );

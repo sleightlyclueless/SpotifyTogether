@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 
 export const useProposeNewEventTrack = () => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const [proposeTrackisLoading, setproposeTrackisLoading] = useState<boolean>(false);
 
   const proposeNewEventTrack = async (
@@ -17,7 +17,7 @@ export const useProposeNewEventTrack = () => {
         null,
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );

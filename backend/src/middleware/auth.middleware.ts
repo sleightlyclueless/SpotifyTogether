@@ -1,13 +1,13 @@
-import {NextFunction, Request, RequestHandler, Response} from "express";
-import {DI} from "../index";
-import {User} from "../entities/User";
-import {Permission} from "../entities/EventUser";
+import { NextFunction, Request, RequestHandler, Response } from "express";
+import { DI } from "../index";
+import { User } from "../entities/User";
+import { Permission } from "../entities/EventUser";
 
 // prepare check for existing user with valid spotify access_token
 const prepareUserAuthentication = async (req: Request, _res: Response, next: NextFunction) => {
-    const spotifyToken = req.get('Authorization');
-    if (spotifyToken) {
-        const user = await DI.em.findOne(User, {spotifyAccessToken: spotifyToken});
+    const userID = req.get('Authorization');
+    if (userID) {
+        const user = await DI.em.findOne(User, {userid: userID});
         if (user && Date.now() <= user.issuedAt + user.expiresInMs) req.user = user;
         else req.user = null;
     } else req.user = null;
@@ -56,6 +56,7 @@ const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
     next();
 };
 
+// checks if user is the owner
 const verifyEventOwnerAccess: RequestHandler = async (req: Request, res, next) => {
     if(req.eventUser == null)
         return res.status(403).json({errors: ["verifyOwnerAccess(): You don't have access"]});

@@ -21,7 +21,7 @@ export const useSearchTracks = () => {
             query: searchQuery,
           },
           headers: {
-            Authorization: localStorage.getItem("accessToken"),
+            Authorization: localStorage.getItem("userID"),
           },
         }
       );

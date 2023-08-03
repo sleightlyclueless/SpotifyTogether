@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 
 export const useFetchTracksOfPlaylist = () => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const [fetchTracksOfPlaylistisLoading, setfetchTracksOfPlaylistisLoading] = useState<boolean>(false);
 
   const fetchTracksOfPlaylist = async (
@@ -17,7 +17,7 @@ export const useFetchTracksOfPlaylist = () => {
         `http://localhost:4000/events/${eventId}/tracks/${spotifyPlaylistId}`,
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );

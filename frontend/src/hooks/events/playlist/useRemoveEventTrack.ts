@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 
 export const useRemoveEventTrack = () => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const [removeTrackisLoading, setremoveTrackisLoading] = useState<boolean>(false);
 
   const removeEventTrack = async (eventId: string, spotifyTrackId: string) => {
@@ -13,7 +13,7 @@ export const useRemoveEventTrack = () => {
         `http://localhost:4000/events/${eventId}/tracks/${spotifyTrackId}`,
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );

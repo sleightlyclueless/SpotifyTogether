@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { useState } from "react";
 
 export const useRemoveParticipant = () => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const [removeParticipantisLoading, setremoveParticipantisLoading] = useState<boolean>(false);
 
   const removeParticipant = (eventID: string, spotifyUserId: string): void => {
@@ -14,7 +14,7 @@ export const useRemoveParticipant = () => {
         {},
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       )

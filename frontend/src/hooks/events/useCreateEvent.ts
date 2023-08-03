@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 export const useCreateEvent = () => {
   const [createEventisLoading, setcreateEventisLoading] = useState<boolean>(true);
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
 
   const createEvent = async (eventName: string, eventDate: Date | null) => {
     setcreateEventisLoading(true);
@@ -29,7 +29,7 @@ export const useCreateEvent = () => {
     axios
       .post("http://localhost:4000/events", eventData, {
         headers: {
-          Authorization: accessToken,
+          Authorization: userID,
         },
       })
       .then((response) => {

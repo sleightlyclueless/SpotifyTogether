@@ -1,7 +1,7 @@
-import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
-import {EventUser} from "./EventUser";
-import {EventTrack} from "./EventTrack";
-import {Playlist} from "./Playlist";
+import { Collection, Entity, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { EventUser } from "./EventUser";
+import { EventTrack } from "./EventTrack";
+import { Playlist } from "./Playlist";
 
 @Entity()
 export class Event {

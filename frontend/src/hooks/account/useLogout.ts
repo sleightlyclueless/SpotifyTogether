@@ -3,19 +3,19 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 
 export const useLogout = () => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const [isLoading, setIsLoading] = useState(true);
 
   const logout = () => {
     axios
       .put("http://localhost:4000/account/logout", null, {
         headers: {
-          Authorization: accessToken,
+          Authorization: userID,
         },
       })
       .then((response) => {
         if (response.status === 204) {
-          localStorage.removeItem("accessToken");
+          localStorage.removeItem("userID");
           toast.info("Logged out");
           setIsLoading(false);
         }

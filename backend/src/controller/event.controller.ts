@@ -9,7 +9,6 @@ import { EventParticipantsController } from "./event.participants.controller";
 import { TracksController } from "./event.tracks.controller";
 import { EventAlgorithmController } from "./event.algorithm.controller";
 import { EventTrack } from "../entities/EventTrack";
-import util from "util";
 import { Playlist } from "../entities/Playlist";
 
 export const EVENT_ID_LENGTH: number = 6;
@@ -22,7 +21,7 @@ const router = Router({ mergeParams: true });
 router.param("eventId", async function (req, res, next, eventId) {
   const eventUser = await DI.em.findOne(EventUser, {
     event: { id: eventId },
-    user: { spotifyAccessToken: req.user!.spotifyAccessToken },
+    user: { userid: req.user!.userid },
   });
   if (eventUser) {
     req.eventUser = eventUser;

@@ -2,14 +2,14 @@ import axios from "axios";
 import { useState } from "react";
 
 export const useGetUserName = (): string | null => {
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
   const [userName, setUserName] = useState<string | null>(null);
-  if (accessToken === undefined) return null;
+  if (userID === undefined) return null;
 
   axios
     .get(`http://localhost:4000/account/spotifyUserId`, {
       headers: {
-        Authorization: accessToken,
+        Authorization: userID,
       },
     })
     .then((res) => {

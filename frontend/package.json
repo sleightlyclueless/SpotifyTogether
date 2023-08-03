@@ -4,11 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "generate:api": "openapi-generator-cli generate -i src/openapispec.yaml -g typescript-axios -o src/adapter/api/__generated --skip-validate-spec && rimraf src/api/__generated/git_push.sh"
+    "dev": "vite"
   },
   "dependencies": {
     "@ionic/react": "^7.0.10",
@@ -28,13 +24,7 @@
     "@types/randomstring": "^1.1.8",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-react": "^4.0.0",
-    "eslint": "^8.38.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.3.4",
-    "prettier": "^2.8.8",
     "typescript": "^5.0.2",
     "vite": "^4.3.2"
   }

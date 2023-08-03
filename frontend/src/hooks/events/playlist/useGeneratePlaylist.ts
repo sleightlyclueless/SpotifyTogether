@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 
 export const useGeneratePlaylist = () => {
-  const [accessToken, setAccessToken] = useState<string | undefined>(localStorage.getItem("accessToken") || undefined);
+  const userID = localStorage.getItem("userID") || undefined;
   const [generatePlaylistisLoading, setgeneratePlaylistisLoading] =
     useState<boolean>(false);
 
@@ -15,13 +15,10 @@ export const useGeneratePlaylist = () => {
         null,
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );
-      const newAccessToken = response.data.newOwnerToken;
-      setAccessToken(newAccessToken);
-      localStorage.setItem("accessToken", newAccessToken);
       toast.success("Playlist generated");
       setgeneratePlaylistisLoading(false);
       return response.data;

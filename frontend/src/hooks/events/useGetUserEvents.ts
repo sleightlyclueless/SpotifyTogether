@@ -8,14 +8,14 @@ export const useGetUserEvents = () => {
     (Event & { participants: Participant[] })[]
   >([]);
   const [getUserEventisLoading, setgetUserEventisLoading] = useState<boolean>(false);
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
 
   const fetchEventsAndParticipants = async (): Promise<void> => {
     setgetUserEventisLoading(true);
     try {
       const eventsResponse = await axios.get("http://localhost:4000/events", {
         headers: {
-          Authorization: accessToken,
+          Authorization: userID,
         },
       });
       const events = eventsResponse.data;
@@ -26,7 +26,7 @@ export const useGetUserEvents = () => {
             `http://localhost:4000/events/${event.id}/participants`,
             {
               headers: {
-                Authorization: accessToken,
+                Authorization: userID,
               },
             }
           );
@@ -51,9 +51,9 @@ export const useGetUserEvents = () => {
   };
 
   useEffect(() => {
-    if (!accessToken) return;
+    if (!userID) return;
     fetchEventsAndParticipants();
-  }, [accessToken]);
+  }, [userID]);
 
   return eventsWithParticipants;
 };

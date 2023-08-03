@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 export const useJoinEvent = () => {
   // Provide a loading state to the component
   const [joinEventisLoading, setjoinEventisLoading] = useState<boolean>(false);
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
 
   // Provide a callback function to be called when the event is successfully joined (closeModal in component)
   const joinEvent = async (eventID: string | null) => {
@@ -20,7 +20,7 @@ export const useJoinEvent = () => {
 
       // If a new / not logged in user tries to join an event, save the eventID in localstorage and have him login (joinEventByQr.ts)
       // Note: Thats why we need the window.location reloads in the hook, because we have two types of join
-      if (accessToken === undefined) {
+      if (userID === undefined) {
         localStorage.setItem("autojoinevent", eventID);
         window.location.href = "http://localhost:4000/account/login";
       }
@@ -29,7 +29,7 @@ export const useJoinEvent = () => {
         `http://localhost:4000/events/${eventID}`,
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );

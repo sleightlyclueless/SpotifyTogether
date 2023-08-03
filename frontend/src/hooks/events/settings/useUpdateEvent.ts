@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export const useUpdateEvent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const accessToken = localStorage.getItem("accessToken") || undefined;
+  const userID = localStorage.getItem("userID") || undefined;
 
   const regenerateEventId = async (eventID: string) => {
     try {
@@ -14,7 +14,7 @@ export const useUpdateEvent = () => {
         {},
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );
@@ -40,7 +40,7 @@ export const useUpdateEvent = () => {
         { newName, newDate }, // Include newName and newDate in the request body
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );
@@ -67,7 +67,7 @@ export const useUpdateEvent = () => {
           {},
           {
             headers: {
-              Authorization: accessToken,
+              Authorization: userID,
             },
           }
         );
@@ -92,7 +92,7 @@ export const useUpdateEvent = () => {
         {},
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );
@@ -113,7 +113,7 @@ export const useUpdateEvent = () => {
         {},
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );
@@ -134,7 +134,7 @@ export const useUpdateEvent = () => {
         {},
         {
           headers: {
-            Authorization: accessToken,
+            Authorization: userID,
           },
         }
       );
