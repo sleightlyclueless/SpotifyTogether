@@ -91,6 +91,7 @@ Dies ist lediglich eine Visualisierung und enthält nicht alle Attribute wie not
 Wir haben kein eigenes Login System implementiert, sondern nutzen den durch Spotify generierten access- & refresh token.
 
 ![alt text](auth-code-flow.png "Spotify Authorization")
+
 Als Anbindung an die Spotify API verwenden wir den 
 [Authorization Code Flow](https://developer.spotify.com/documentation/web-api/tutorials/code-flow) OAuth2 flow.
 Wir lagern somit sämtliche Authentification an Spotify aus und verwenden ihren access_token zum Validieren des Nutzers.
