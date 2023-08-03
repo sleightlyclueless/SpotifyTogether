@@ -151,7 +151,9 @@ Refresh Token unter /account/refresh_token angefordert und gespeichert werden ka
 | POST*  | /:spotifyPlaylistId        | 201, 429      | verifyParticipantAccess | propose new playlist                |
 | PUT*   | /:spotifyPlaylistId/accept | 200, 404      | verifyAdminAccess       | accept all songs from a playlist    |
 | PUT*   | /:spotifyPlaylistId/remove | 404           | verifyAdminAccess       | remove all songs from a playlist    |
+
 *currently unused
+
 Note: The status code 429 is returned by spotify if the app has exceeded its rate limits.
 
 ### Event Settings ( /events/:eventId/settings )
@@ -163,6 +165,7 @@ Note: The status code 429 is returned by spotify if the app has exceeded its rat
 | PUT    | /date/:newDate | 200     | verifyOwnerAccess | set new date for event      |
 | PUT*   | /lock          | 200     | verifyOwnerAccess | close Event for new Entries |
 | PUT*   | /unlock        | 200     | verifyOwnerAccess | open Event for new Entries  |
+
 *currently unused
 
 ### Event Algorithm ( /events/:eventId/algorithm )
