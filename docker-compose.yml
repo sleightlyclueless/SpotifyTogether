@@ -13,8 +13,8 @@ services:
       # Application Settings
       MIKRO_ORM_HOST: db
       MIKRO_ORM_PORT: 5432
-      MIKRO_ORM_DB_NAME: diaryDB
-      MIKRO_ORM_USER: diaryDBUser
+      MIKRO_ORM_DB_NAME: spotifyDB
+      MIKRO_ORM_USER: spotifyDBUser
       MIKRO_ORM_PASSWORD: fweSS22
     ports:
       # <Port exposed> : <Node Port running inside container>
@@ -27,8 +27,8 @@ services:
     restart: always
     environment:
       # Database Settings
-      POSTGRES_DB: diaryDB
-      POSTGRES_USER: diaryDBUser
+      POSTGRES_DB: spotifyDB
+      POSTGRES_USER: spotifyDBUser
       POSTGRES_PASSWORD: fweSS22
     ports:
       # <Port exposed> : <Node Port running inside container>

@@ -1,5 +1,5 @@
-import { Router } from "express";
 import randomstring from "randomstring";
+import { Router } from "express";
 import { DI } from "../index";
 import { EventUser, Permission } from "../entities/EventUser";
 import { Event } from "../entities/Event";
@@ -16,8 +16,7 @@ export const MAX_EVENT_ID_GENERATION_RETRIES: number = 1000;
 
 const router = Router({ mergeParams: true });
 
-// prepare to check requested event
-// (was planned to be part of the auth.middleware.ts but was missing access to the eventId param)
+// prepare to check requested event originally planned for auth.middleware.ts, but was missing access to the eventId param)
 router.param("eventId", async function (req, res, next, eventId) {
   const eventUser = await DI.em.findOne(EventUser, {
     event: { id: eventId },
@@ -35,16 +34,9 @@ router.param("eventId", async function (req, res, next, eventId) {
 
 router.use("/:eventId/tracks", Auth.verifyEventAccess, TracksController);
 router.use("/:eventId/participants", EventParticipantsController);
-router.use(
-  "/:eventId/settings",
-  Auth.verifyEventOwnerAccess,
-  EventSettingsController
-);
-router.use(
-  "/:eventId/algorithm",
-  Auth.verifyEventOwnerAccess,
-  EventAlgorithmController
-);
+router.use("/:eventId/settings", Auth.verifyEventAndAdminAccess, EventSettingsController);
+router.use("/:eventId/algorithm", Auth.verifyEventAndOwnerAccess, 
+EventAlgorithmController);
 
 // fetch all events of user
 router.get("/", async (req, res) => {
@@ -75,7 +67,7 @@ router.post("/", async (req, res) => {
   res.status(201).json(event);
 });
 
-// fetch all data from one event
+// fetch all data from one event and add user to event
 router.get("/:eventId", async (req, res) => {
   const event = await DI.em.findOne(Event, { id: req.params.eventId });
   if (event) {
@@ -109,7 +101,7 @@ router.put("/:eventId", Auth.verifyEventAccess, async (req, res) => {
 });
 
 // delete one event
-router.delete("/:eventId", Auth.verifyEventOwnerAccess, async (req, res) => {
+router.delete("/:eventId", Auth.verifyEventAndOwnerAccess, async (req, res) => {
   const event = await DI.em.findOne(Event, { id: req.params.eventId });
   const eventTracks = await DI.em.find(EventTrack, { event: event });
   for (const eventTrack of eventTracks) await DI.em.removeAndFlush(eventTrack);

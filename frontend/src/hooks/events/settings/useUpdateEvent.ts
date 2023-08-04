@@ -5,27 +5,6 @@ export const useUpdateEvent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const userID = localStorage.getItem("userID") || undefined;
 
-  const regenerateEventId = async (eventID: string) => {
-    try {
-      setIsLoading(true);
-
-      await axios.put(
-        `http://localhost:4000/events/${eventID}/settings/generateNewId`,
-        {},
-        {
-          headers: {
-            Authorization: userID,
-          },
-        }
-      );
-
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
-    }
-  };
-
   const setCustomEventId = async (
     eventID: string,
     newEventId: string,
@@ -149,7 +128,6 @@ export const useUpdateEvent = () => {
   return {
     isLoading,
     setCustomEventId,
-    regenerateEventId,
     updateEventName,
     updateEventDate,
     lockEvent,

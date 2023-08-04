@@ -28,40 +28,39 @@ const verifyEventAccess: RequestHandler = (req, res, next) => {
     next();
 };
 
-const verifyEventParticipantAccess: RequestHandler = async (req, res, next) => {
+// checks if user is at least a participant
+const verifyEventAndParticipantAccess: RequestHandler = async (req, res, next) => {
     if(req.eventUser == null)
-        return res.status(403).json({errors: ["verifyParticipantAccess(): You don't have access"]});
+        return res.status(403).json({errors: ["verifyEventAndParticipantAccess(): You don't have access"]});
     if(castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.PARTICIPANT))
-        return res.status(403).json({errors: ["verifyParticipantAccess(): You must be at least a participant."]});
-    next();
-};
-
-// checks if user is at least a participant and event is not locked
-const verifyUnlockedEventParticipantAccess: RequestHandler = async (req, res, next) => {
-    if (req.eventUser == null || req.event == null)
-        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess(): Missing event authentication."]});
-    if (castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.PARTICIPANT))
-        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess: Insufficient access rights."]});
-    if (castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.ADMIN) && req.event!.locked)
-        return res.status(403).json({errors: ["verifyUnlockedEventParticipantAccess(): Event locked for participant."]});
+        return res.status(403).json({errors: ["verifyEventAndParticipantAccess(): Insufficient access rights."]});
     next();
 };
 
 // checks if user is at least a admin
-const verifyEventAdminAccess: RequestHandler = async (req, res, next) => {
-    if (req.eventUser == null)
-        return res.status(403).json({errors: ["verifyEventAdminAccess: Missing event authentication."]});
+const verifyEventAndAdminAccess: RequestHandler = async (req, res, next) => {
+    if(req.eventUser == null)
+        return res.status(403).json({errors: ["verifyEventAndAdminAccess(): You don't have access"]});
     if (castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.ADMIN))
-        return res.status(403).json({errors: ["verifyEventAdminAccess: Insufficient access rights."]});
+        return res.status(403).json({errors: ["verifyEventAndAdminAccess(): Insufficient access rights."]});
     next();
 };
 
 // checks if user is the owner
-const verifyEventOwnerAccess: RequestHandler = async (req: Request, res, next) => {
+const verifyEventAndOwnerAccess: RequestHandler = async (req: Request, res, next) => {
     if(req.eventUser == null)
-        return res.status(403).json({errors: ["verifyOwnerAccess(): You don't have access"]});
+        return res.status(403).json({errors: ["verifyEventAndOwnerAccess(): You don't have access"]});
     if(castPermissionToInt(req.eventUser.permission.toLowerCase()) < castPermissionToInt(Permission.OWNER))
-        return res.status(403).json({errors: ["verifyOwnerAccess(): You must be at least a owner."]});
+        return res.status(403).json({errors: ["verifyEventAndOwnerAccess(): Insufficient access rights."]});
+    next();
+};
+
+// checks if user is at least a participant and event is not locked
+const verifyUnlockedEvent: RequestHandler = async (req, res, next) => {
+    if (req.eventUser == null || req.event == null)
+        return res.status(403).json({errors: ["verifyUnlockedEvent(): Missing event authentication."]});
+    if (req.event!.locked)
+        return res.status(403).json({errors: ["verifyUnlockedEvent(): Event locked for participant."]});
     next();
 };
 
@@ -69,10 +68,10 @@ export const Auth = {
     prepareUserAuthentication,
     verifySpotifyAccess,
     verifyEventAccess,
-    verifyEventParticipantAccess,
-    verifyUnlockedEventParticipantAccess,
-    verifyEventAdminAccess,
-    verifyEventOwnerAccess,
+    verifyEventAndParticipantAccess,
+    verifyEventAndAdminAccess,
+    verifyEventAndOwnerAccess,
+    verifyUnlockedEvent,
 };
 
 function castPermissionToInt(permission: string): number {

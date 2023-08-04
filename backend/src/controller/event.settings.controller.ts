@@ -1,30 +1,10 @@
 import { Router } from "express";
 import { DI } from "../index";
 import { Event } from "../entities/Event";
-import randomstring from "randomstring";
-import { EVENT_ID_LENGTH, MAX_EVENT_ID_GENERATION_RETRIES } from "./event.controller";
+import { EVENT_ID_LENGTH } from "./event.controller";
 import { EventUser } from "../entities/EventUser";
 
 const router = Router({ mergeParams: true });
-
-router.put("/generateNewId", async (req, res) => {
-  let newEventId;
-  let event = null;
-  let retries = 0;
-  do {
-    retries++;
-    newEventId = randomstring.generate(EVENT_ID_LENGTH);
-    event = await DI.em.findOne(Event, { id: newEventId });
-  } while (event != null || retries >= MAX_EVENT_ID_GENERATION_RETRIES);
-
-  // Failed to generate unique id, return internal server error
-  if (retries >= MAX_EVENT_ID_GENERATION_RETRIES && event != null)
-    res.status(500).end();
-
-  req.event!.id = newEventId;
-  await DI.em.persistAndFlush(req.event!);
-  return res.status(200).end();
-});
 
 router.put("/id/:newId", async (req, res) => {
   const newEventId = req.params.newId;
@@ -41,7 +21,7 @@ router.put("/id/:newId", async (req, res) => {
   if (existingEvent) {
     return res
       .status(400)
-      .json({ message: "Another event already uses this id." });
+      .json({ message: "Another event already uses this id or you didn't change it." });
   }
 
   // Create a new Event entity with the updated ID, name, and date

@@ -1,13 +1,7 @@
 import { DatetimeCustomEvent, InputCustomEvent } from "@ionic/react";
 import { FunctionComponent, useEffect, useState } from "react";
 import { useCreateEvent } from "../../hooks";
-import {
-  IonContainer35,
-  StyledInput,
-  StyledIonDatetime,
-  Button,
-  StyledTextL,
-} from "../../styles";
+import { IonContainer35, StyledInput, StyledIonDatetime, Button, StyledTextL } from "../../styles";
 
 type NewEventFormProps = {
   closeModal: () => void;

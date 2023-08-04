@@ -1,12 +1,12 @@
 import express from 'express';
 import http from 'http';
+import cors from "cors";
+import 'dotenv/config';
 import { EntityManager, MikroORM, RequestContext } from '@mikro-orm/core';
 import { Auth } from "./middleware/auth.middleware";
 import { EventController } from "./controller/event.controller";
 import { SpotifyAuthController } from "./controller/auth.spotify.controller";
 import { SchemaGenerator } from "@mikro-orm/postgresql";
-import cors from "cors";
-import 'dotenv/config';
 
 const app = express();
 
@@ -39,16 +39,16 @@ export const initializeServer = async () => {
     await DI.generator.updateSchema();
     console.log("All database schemas updated !");
 
-    // global middleware
+    // global middleware (useful for debug)
     app.use((req, res, next) => {
-        console.info(`New request to ${req.path}`); // useful debug info
+        console.info(`New request to ${req.path}`);
         next();
     });
     app.use(cors());
     app.use(express.json());
     app.use((req, res, next) => RequestContext.create(DI.orm.em, next));
 
-    // prepare user authentication
+    // prepare user authentication, leaving a global variable req.user (null if not authenticated)
     app.use(Auth.prepareUserAuthentication);
 
     // routes

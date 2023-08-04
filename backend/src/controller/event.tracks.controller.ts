@@ -15,14 +15,8 @@ router.get("/search", async (req, res) => {
 
   axios
     .get("https://api.spotify.com/v1/search", {
-      params: {
-        q: query,
-        type: "track",
-        limit: 10,
-      },
-      headers: {
-        Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
-      },
+      params: { q: query, type: "track", limit: 10 },
+      headers: { Authorization: `Bearer ${req.user!.spotifyAccessToken}` },
     })
     .then((response) => {
       const tracks = response.data.tracks.items.map((item: any) => ({
@@ -41,7 +35,9 @@ router.get("/search", async (req, res) => {
 });
 
 // fetch ids of all playlists
-router.get("/spotifyPlaylistIds", async (req, res) => {
+router.get("/spotifyPlaylistIds", 
+Auth.verifyEventAccess,
+async (req, res) => {
   const eventId = req.event?.id;
   if (!eventId) return res.status(400).json({ error: "Event ID not provided" });
   const playlists = await DI.em.find(Playlist, { event: { id: eventId } });
@@ -50,7 +46,9 @@ router.get("/spotifyPlaylistIds", async (req, res) => {
 });
 
 // fetch all tracks of playlist
-router.get("/:spotifyPlaylistId", async (req, res) => {
+router.get("/:spotifyPlaylistId", 
+Auth.verifyEventAccess,
+async (req, res) => {
   const playlist = await DI.em.findOne(
     Playlist,
     {
@@ -64,9 +62,7 @@ router.get("/:spotifyPlaylistId", async (req, res) => {
   const playlistResponse = await axios.get(
     `https://api.spotify.com/v1/playlists/${playlist.id}`,
     {
-      headers: {
-        Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
-      },
+        headers: { Authorization: `Bearer ${req.user!.spotifyAccessToken}` },
     }
   );
   if (!playlistResponse.data || playlistResponse.data.tracks.total === 0) {
@@ -108,7 +104,8 @@ router.get("/:spotifyPlaylistId", async (req, res) => {
 // propose new event track
 router.post(
   "/:spotifyTrackId",
-  Auth.verifyUnlockedEventParticipantAccess,
+  Auth.verifyUnlockedEvent,
+  Auth.verifyEventAndAdminAccess,
   async (req, res) => {
     // check if eventrack already in event
     const eventTrack = await DI.em.findOne(EventTrack, {
@@ -130,9 +127,7 @@ router.post(
         const response = await axios.get(
           `https://api.spotify.com/v1/tracks/${req.params.spotifyTrackId}`,
           {
-            headers: {
-              Authorization: `Bearer ${req.user!.spotifyAccessToken}`,
-            },
+            headers: { Authorization: `Bearer ${req.user!.spotifyAccessToken}` },
           }
         );
 
@@ -165,7 +160,7 @@ router.post(
           "Error fetching track information from Spotify API:",
           error
         );
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error fetching track information" });
       }
     }
 
@@ -190,7 +185,8 @@ router.post(
 // Delete a proposed event track from the event playlist
 router.delete(
   "/:spotifyTrackId",
-  Auth.verifyUnlockedEventParticipantAccess,
+  Auth.verifyUnlockedEvent,
+  Auth.verifyEventAndAdminAccess,
   async (req, res) => {
     // Find the Event entity
     const event = await DI.em.findOne(Event, { id: req.event!.id });
@@ -232,7 +228,10 @@ router.delete(
   }
 );
 
-router.post("/save/:spotifyPlaylistId", async (req, res) => {
+// save playlist to spotify
+router.post("/save/:spotifyPlaylistId",
+Auth.verifyEventAndOwnerAccess,
+async (req, res) => {
   const playlist = await DI.em.findOne(Playlist, {
     id: req.params.spotifyPlaylistId,
     event: { id: req.event!.id },
@@ -305,9 +304,7 @@ const deleteAllTracksFromPlaylist = async (
       const response = await axios.get(
         `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
           params: {
             offset: offset.toString(),
             limit: limit.toString(),
@@ -323,9 +320,7 @@ const deleteAllTracksFromPlaylist = async (
         await axios.delete(
           `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
           {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
+            headers: { Authorization: `Bearer ${accessToken}` },
             data: {
               tracks: trackUris.map((uri: string) => ({ uri })),
             },
@@ -355,9 +350,7 @@ const insertTracksToPlaylist = async (
         uris: trackUris,
       },
       {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
   } catch (error) {
@@ -369,35 +362,8 @@ const insertTracksToPlaylist = async (
 // ================================================================================
 
 // ================================================================================
-/*router.get("/", async (req, res) => {
-  const eventId = req.event?.id;
-  if (!eventId) return res.status(400).json({ error: "Event ID not provided" });
 
-  // Fetch all event tracks for the given event
-  const eventTracks = await DI.em.find(
-    EventTrack,
-    { event: { id: eventId } },
-    { populate: ["track"] } // Populating the "track" property of EventTrack with SpotifyTrack entities
-  );
-
-  // Map the event tracks to include all the data from the SpotifyTrack entities
-  const tracksWithInfo = eventTracks.map((eventTrack) => {
-    const spotifyTrack = eventTrack.track;
-    return {
-      id: spotifyTrack.id,
-      name: spotifyTrack.trackName,
-      duration: spotifyTrack.duration,
-      genre: spotifyTrack.genre,
-      artist: spotifyTrack.artist,
-      artistName: spotifyTrack.artistName,
-      albumImage: spotifyTrack.albumImage,
-      status: eventTrack.status,
-    };
-  });
-
-  res.status(200).json(tracksWithInfo);
-});
-
+/*
 // change event track status
 router.put(
   "/:spotifyTrackId/:status",

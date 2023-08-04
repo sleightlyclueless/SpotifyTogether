@@ -1,7 +1,7 @@
-import { Router } from "express";
 import * as querystring from "querystring";
 import randomstring from "randomstring";
 import axios from "axios";
+import { Router } from "express";
 import { DI } from "../index";
 import { User } from "../entities/User";
 import { Auth } from "../middleware/auth.middleware";
@@ -12,12 +12,9 @@ const router = Router({ mergeParams: true });
 router.get("/login", async (req, res) => {
   const state = randomstring.generate(16);
   let scope = ""; // https://developer.spotify.com/documentation/web-api/concepts/scopes
-  scope +=
-    " playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private"; // Playlists
-  scope +=
-    " user-read-playback-position user-top-read user-read-recently-played"; // Listening History
-  scope +=
-    " user-read-playback-state user-modify-playback-state user-read-currently-playing"; // Spotify connect
+  scope += " playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private"; // Playlists
+  scope += " user-read-playback-position user-top-read user-read-recently-played"; // Listening History
+  scope += " user-read-playback-state user-modify-playback-state user-read-currently-playing"; // Spotify connect
   scope += " app-remote-control streaming"; // Playback
 
   res.redirect(
@@ -135,6 +132,7 @@ router.put("/refresh_token", Auth.verifySpotifyAccess, async (req, res) => {
       return res.status(error.status).json(error);
     });
 });
+
 // returns spotify user ID
 router.get("/spotifyUserId", Auth.verifySpotifyAccess, async (req, res) => {
   return res.status(200).json({ spotifyUserId: req.user!.spotifyId });
@@ -142,9 +140,7 @@ router.get("/spotifyUserId", Auth.verifySpotifyAccess, async (req, res) => {
 
 // returns how long the current access_token is still valid
 router.get(
-  "/remaining_expiry_time",
-  Auth.verifySpotifyAccess,
-  async (req, res) => {
+  "/remaining_expiry_time", Auth.verifySpotifyAccess, async (req, res) => {
     const remainingTime =
       req.user!.expiresInMs - (Date.now() - req.user!.issuedAt);
     return res.status(200).json({ expires_in: remainingTime });

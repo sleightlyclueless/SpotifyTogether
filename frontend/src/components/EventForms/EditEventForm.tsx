@@ -3,16 +3,7 @@ import { ChangeEvent, FunctionComponent, useEffect, useState } from "react";
 import { Event } from "../../constants";
 import { useUpdateEvent } from "../../hooks";
 import { toast } from "react-toastify";
-import {
-  IonContainer80,
-  IconContainer,
-  Label,
-  ReloadIcon,
-  StyledInput,
-  StyledIonDatetime,
-  Button,
-  StyledTextL,
-} from "../../styles";
+import { IonContainer80, IconContainer, Label, ReloadIcon, StyledInput, StyledIonDatetime, Button, StyledTextL } from "../../styles";
 
 type EditEventFormProps = {
   event: Event;
@@ -46,19 +37,21 @@ export const EditEventForm: FunctionComponent<EditEventFormProps> = ({
       }
 
       // Attempt to update the event ID
-      try {
-        console.log("Updating event ID to ", customEventId, "...");
-        await setCustomEventId(
-          event.id,
-          customEventId,
-          eventName,
-          eventDate.toISOString()
-        );
-        event.id = customEventId;
-      } catch (error) {
-        toast.error("Failed to update event ID. Please check the input.");
-        console.error("Error updating event ID:", error);
-        return;
+      if (customEventId !== event.id) {
+        try {
+          console.log("Updating event ID to ", customEventId, "...");
+          await setCustomEventId(
+            event.id,
+            customEventId,
+            eventName,
+            eventDate.toISOString()
+          );
+          event.id = customEventId;
+        } catch (error) {
+          toast.error("Failed to update event ID. Please check the input.");
+          console.error("Error updating event ID:", error);
+          return;
+        }
       }
 
       // Update name

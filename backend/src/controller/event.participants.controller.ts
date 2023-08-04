@@ -6,7 +6,7 @@ import { Auth } from "../middleware/auth.middleware";
 const router = Router({ mergeParams: true });
 
 // fetch event participants
-router.get("/", async (req, res) => {
+router.get("/", Auth.verifyEventAccess, async (req, res) => {
   const allUsers = await DI.em.find(
     EventUser,
     {
@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
 // kick user out of event
 router.put(
   "/:spotifyUserId",
-  Auth.verifyEventAdminAccess,
+  Auth.verifyEventAndAdminAccess,
   async (
     req: express.Request<{
       eventId: string;
@@ -57,7 +57,7 @@ router.put(
 // change user permissions
 router.put(
   "/:spotifyUserId/:permissions",
-  Auth.verifyEventAdminAccess,
+  Auth.verifyEventAndAdminAccess,
   async (
     req: express.Request<{
       eventId: string;
